@@ -25,10 +25,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+    startdialog_lyovkin_panin.cpp \
+    inputdialog.cpp
 
 HEADERS += \
-        mainwindow.h
+    startdialog_lyovkin_panin.h \
+    inputdialog.h
 
-FORMS += \
-        mainwindow.ui
+FORMS +=
