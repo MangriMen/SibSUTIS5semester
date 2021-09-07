@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2021-09-06T19:13:52
+# Project created by QtCreator 2021-09-07T02:13:37
 #
 #-------------------------------------------------
 
@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = lab3
+TARGET = lab7
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -25,14 +25,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        sdiprogram_lyovkin_panin.cpp \
-    docwindow_lyovkin_panin.cpp
+        mainwindow.cpp
 
 HEADERS += \
-        sdiprogram_lyovkin_panin.h \
-    docwindow_lyovkin_panin.h
+        mainwindow.h
 
-FORMS +=
-
-RESOURCES += \
-    resources.qrc
+FORMS += \
+        mainwindow.ui

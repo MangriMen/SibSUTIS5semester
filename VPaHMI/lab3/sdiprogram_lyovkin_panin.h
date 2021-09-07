@@ -18,6 +18,7 @@ public:
     {
         QMenu* pmnuFile = new QMenu("&File");
         QAction* pmnuHelp = new QAction("&Help");
+        pmnuHelp->setShortcut(QKeySequence("F1"));
         DocWindow_Lyovkin_Panin* pdoc = new DocWindow_Lyovkin_Panin;
 
         pmnuFile->addAction("&Open...",
