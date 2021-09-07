@@ -16,7 +16,7 @@ public:
 
 	void clear() {
 		Node* temp = head;
-		while(temp != nullptr) {
+		while (temp != nullptr) {
 			pop_back();
 		}
 	}
@@ -72,20 +72,21 @@ public:
 	class Node {
 	public:
 		T data;
-		Node *next;
-		Node *prev;
-		Node(T data, Node* next=nullptr, Node* prev=nullptr) {
+		Node* next;
+		Node* prev;
+		Node(T data, Node* next = nullptr, Node* prev = nullptr) {
 			this->data = data;
 			this->next = next;
 			this->prev = prev;
 		}
 	};
 
-	Node *head = nullptr;
-	Node *tail = nullptr;
+	Node* head = nullptr;
+	Node* tail = nullptr;
 };
 
-int main() {
+int main()
+{
 	List<int> list;
 
 	list.push_back(1);
