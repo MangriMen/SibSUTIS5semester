@@ -245,6 +245,34 @@ vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>&
 	return out;
 }
 
+vector<double> convolution(vector<double> a, vector<double> b) {
+	size_t size_ = 0;
+	vector<double> shortArr;
+	vector<double> longArr;
+
+	if (a.size() < b.size()) {
+		shortArr = a;
+		longArr = b;
+	}
+	else {
+		shortArr = b;
+		longArr = a;
+	}
+	size_ = shortArr.size() + longArr.size() - 1;
+
+	vector<double> out(size_, 0);
+
+	for (size_t k = 0; k < shortArr.size(); k++)
+	{
+		for (size_t l = 0; l < longArr.size(); l++)
+		{
+			out[l + k] += shortArr[k] * longArr[l];
+		}
+	}
+
+	return out;
+}
+
 vector<double> convolutionDiscreteFourier(vector<double> a, vector<double> b) {
 	size_t size_ = 0;
 	vector<double> out(size_, 0);
@@ -291,7 +319,8 @@ vector<double> convolutionSemiFastFourier(vector<double> a, vector<double> b) {
 	vector<complex<double>> temp(size_, 0);
 	for (size_t i = 0; i < size_; i++)
 	{
-		temp[i] = (2.0 * static_cast<double>(size_)) * (fourierA[i] * fourierB[i]);
+		complex<double> mult = (fourierA[i] * fourierB[i]);
+		temp[i] = (2.0 * static_cast<double>(size_)) * mult;
 	}
 
 	out = getReverseSemiFastFourierTransform(temp);
@@ -306,13 +335,16 @@ int main()
 	vector<double> dataA;
 	vector<double> dataB;
 
-	dataA = { 9 };
-	dataB = { 9 };
+	dataA = { 1, 2 };
+	dataB = { 3, 4, 5 };
 
+	vector<double> out = convolution(dataA, dataB);
 	vector<double> outDF = convolutionDiscreteFourier(dataA, dataB);
-	vector<double> outSF = convolutionSemiFastFourier(dataA, dataB);
+	//vector<double> outSF = convolutionSemiFastFourier(dataA, dataB);
 
 
-	utils::printArr(outDF);
-	utils::printArr(outSF);
+	utils::printArr(out, "Usually convolution:");
+	cout << endl;
+	utils::printArr(outDF, "Convolution with DFT:");
+	//utils::printArr(outSF);
 }
