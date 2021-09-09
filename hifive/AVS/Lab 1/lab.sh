@@ -1,7 +1,7 @@
 #!/bin/bash
 echo `date`;
-whoami;
-hostname;
+echo `whoami`;
+echo `hostname`;
 echo "Процессор:";
 echo -e -n "\tМодель: - ";
 lscpu | grep "Model name:" | awk '{for ( i = 3; i < NF+2; i++ ) printf("%s ", $i)}';
