@@ -5,7 +5,7 @@
 #include <complex>
 using namespace std;
 
-#define myPI 3.141592
+#define myPI 3.1415926535
 
 template <typename T>
 string getSpacedElement(T element) {
