@@ -7,108 +7,10 @@
 #include <iomanip>
 #include <sstream>
 #include <complex>
+#include <tuple>
+#include "utils.h"
 
 using namespace std;
-
-namespace utils {
-	string ReplaceAll(string str, const string& from, const string& to) {
-		size_t start_pos = 0;
-		while ((start_pos = str.find(from, start_pos)) != string::npos) {
-			str.replace(start_pos, from.length(), to);
-			start_pos += to.length();
-		}
-		return str;
-	}
-
-	string dtos(double number, string delimiter = ".") {
-		return ReplaceAll(to_string(number), ".", delimiter);
-	}
-
-	double func1(double x) {
-		return (x * x * 2.0 - rand() % 1000000 * x);
-	}
-
-	void fillFunc(vector<double>& arr, size_t size) {
-		arr.resize(size, 0);
-		double point = 0;
-		for (size_t i = 0; i < arr.size(); i++, point += 0.1)
-		{
-			arr[i] = func1(point);
-		}
-	}
-
-	template <typename T>
-	void printArr(const vector<T>& arr, string message = "", bool isInline = false) {
-		stringstream out;
-
-		if (message != "") {
-			out << message;
-		}
-
-		if (!isInline) {
-			out << endl;
-		}
-
-		out << setprecision(6) << fixed;
-		for (const auto& i : arr) {
-			out << i << " ";
-		}
-
-		out << endl;
-
-		cout << out.str();
-	}
-
-	void printArr(const vector<complex<double>>& arr, string message = "", bool isInline = false) {
-		stringstream out;
-
-		if (message != "") {
-			out << message;
-		}
-
-		if (!isInline) {
-			out << endl;
-		}
-
-		out << setprecision(6) << fixed;
-		for (const auto& point : arr) {
-			out << "RE:" << (point.real() >= 0 ? " " : "") << point.real() << setw(6) << "IM:" << (point.imag() >= 0 ? " " : "") << point.imag() << endl;
-		}
-
-		cout << out.str();
-	}
-
-	void writeCSV(const vector<double>& arr, string filename) {
-		ofstream out(filename + ".csv");
-
-		if (!out.is_open()) {
-			return;
-		}
-
-		for (const auto& i : arr) {
-			string str = to_string(i) + "\n";
-			str = ReplaceAll(str, ".", ",");
-			out.write(str.c_str(), str.size());
-		}
-
-		out.close();
-	}
-
-	void writeCSV(const vector<complex<double>>& arr, string filename) {
-		ofstream out(filename + ".csv");
-
-		if (!out.is_open()) {
-			return;
-		}
-
-		for (size_t i = 0; i < arr.size(); i++) {
-			string fin = dtos(arr[i].real(), ",") + ";" + dtos(arr[i].imag(), ",");
-			out << fin << endl;
-		}
-
-		out.close();
-	}
-}
 
 vector<complex<double>> getDiscreteFourierTransform(const vector<double>& data) {
 	if (data.size() == 0) {
@@ -161,7 +63,7 @@ vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) 
 	}
 
 	size_t p1, p2;
-	p1 = p2 = static_cast<size_t>(sqrt(data.size()));
+	tie(p1, p2) = utils::getNumberDecompositionBy2(data.size());
 
 	vector<vector<complex<double>>> temp1(p1, vector<complex<double>>(p1));
 	vector<vector<complex<double>>> temp2(p1, vector<complex<double>>(p1));
@@ -192,9 +94,9 @@ vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) 
 	temp1.~vector();
 
 	vector<complex<double>> out(p1 * p2);
-	for (size_t k1 = 0, j = 0; k1 < p1; k1++) {
-		for (size_t k2 = 0; k2 < p2; k2++, j++) {
-			out[j] = temp2[k1][k2];
+	for (size_t k1 = 0, j = 0; k1 < p2; k1++) {
+		for (size_t k2 = 0; k2 < p1; k2++, j++) {
+			out[j] = temp2[k2][k1];
 		}
 	}
 
@@ -207,7 +109,7 @@ vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>&
 	}
 
 	size_t p1, p2;
-	p1 = p2 = static_cast<size_t>(sqrt(data.size()));
+	tie(p1, p2) = utils::getNumberDecompositionBy2(data.size());
 
 	vector<vector<complex<double>>> temp1(p1, vector<complex<double>>(p1));
 	vector<vector<complex<double>>> temp2(p1, vector<complex<double>>(p1));
@@ -236,22 +138,26 @@ vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>&
 	temp1.~vector();
 
 	vector<double> out(p1 * p2);
-	for (size_t k1 = 0, j = 0; k1 < p1; k1++) {
-		for (size_t k2 = 0; k2 < p2; k2++, j++) {
-			out[j] = temp2[k1][k2].real();
+	for (size_t k1 = 0, j = 0; k1 < p2; k1++) {
+		for (size_t k2 = 0; k2 < p1; k2++, j++) {
+			out[j] = temp2[k2][k1].real();
 		}
 	}
 
 	return out;
 }
 
-#define N 64
+#define N 16
 
 int main() {
 	srand(static_cast<unsigned int>(time(NULL)));
 
 	vector<double> data(N, 0);
-	data[1] = 5.0;
+
+	for (size_t i = 0; i < N; i++)
+	{
+		data[i] = i * i;
+	}
 
 	vector<complex<double>> discreteFourier = getDiscreteFourierTransform(data);
 	vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(data);
@@ -260,10 +166,10 @@ int main() {
 
 	utils::printArr(data, "Original");
 	cout << endl;
-	utils::printArr(discreteFourier, "Discrete Fourier Transform:");
-	cout << endl;
-	utils::printArr(semiFastFourier, "SemiFast Fourier Transform:");
-	cout << endl;
+	//utils::printArr(discreteFourier, "Discrete Fourier Transform:");
+	//cout << endl;
+	//utils::printArr(semiFastFourier, "SemiFast Fourier Transform:");
+	//cout << endl;
 	utils::printArr(reverseDiscrete, "Reverse Fourier: ");
 	cout << endl;
 	utils::printArr(reverseSemiFast, "Reverse SemiFast: ");

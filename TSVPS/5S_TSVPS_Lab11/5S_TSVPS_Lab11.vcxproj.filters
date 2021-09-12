@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="5S_TSVPS_Lab11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
