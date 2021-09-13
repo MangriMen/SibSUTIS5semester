@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMap>
+#include <QGraphicsProxyWidget>
 
 namespace Ui {
 class MainWindow;
@@ -15,7 +17,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void on_btnTestPost_clicked();
+
 private:
+    QMap<QString, QGraphicsProxyWidget*> elements;
     Ui::MainWindow *ui;
     void resizeEvent(QResizeEvent *);
 };
