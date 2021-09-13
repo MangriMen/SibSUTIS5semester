@@ -37,15 +37,27 @@ printf "%-26s" "MAC адрес"
 printf "%-21s" "IP адрес"
 printf "%-5s\n" "Скорость соединения"
 
+check() {
+	if (( ${#1} > 0 )); then
+		printf "%-20s" $1
+	else
+		printf "%-20s" "-"
+	fi
+}
+
 count=0
 for interface in $(ifconfig -s -a | awk '{print $1}')
 do
 	if (( $count > 0 )); then
 		printf "%-1d " $(( $count ))
 		printf "%-10s " $interface
-		printf "%-20s " $(ifconfig $interface | grep "ether" | awk '{printf $2}')
-		printf "%-15s " $(ifconfig $interface | grep "inet " | awk '{printf $2}')
-		printf "%-5s\n" $(ifconfig $interface | grep "mtu" | awk '{printf $4}')
+		ether=$(ifconfig $interface | grep "ether" | awk '{printf $2}')
+		inet=$(ifconfig $interface | grep "inet " | awk '{printf $2}')
+		speed=$(sudo ethtool $interface | grep "Speed:" | awk '{printf $2}')
+		check $ether
+		check $inet
+		check $speed
+		printf "\n"
 	fi
 	count=$(($count + 1))
 done
