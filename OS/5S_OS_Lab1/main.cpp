@@ -55,13 +55,19 @@ public:
 		return temp;
 	}
 
-	friend std::ostream &operator<<(std::ostream &out, const Student &student);
+	friend bool operator==(const Student& A, const Student& B);
+
+	friend ostream &operator<<(std::ostream &out, const Student &student);
 };
 
-std::ostream &operator<<(std::ostream &out, const Student &student)
+ostream &operator<<(ostream &out, const Student &student)
 {
 	out << "Name: " << student.name << " Mark: " << student.mark;
 	return out;
+}
+
+bool operator==(const Student& A, const Student& B) {
+	return (A.name == B.name);
 }
 
 template <typename T>
@@ -69,8 +75,11 @@ class List
 {
 public:
 	List() : head(nullptr) {}
+	~List() {
+		clear();
+	}
 
-	void push_front(T data)
+	void push_front(const T& data)
 	{
 		size_++;
 		Node *temp = new Node(data, nullptr, tail);
@@ -85,12 +94,10 @@ public:
 		head = temp;
 	}
 
-	void push_back(T data)
+	void push_back(const T& data)
 	{
 		size_++;
 		Node *temp = new Node(data, nullptr, tail);
-
-		cout << data;
 
 		if (head == nullptr)
 		{
@@ -146,7 +153,6 @@ public:
 
 	void clear()
 	{
-		size_ = 0;
 		while (head != nullptr)
 		{
 			pop_back();
@@ -156,6 +162,58 @@ public:
 	size_t size()
 	{
 		return size_;
+	}
+
+	void insert(const T& data, const size_t index)
+	{
+		size_++;
+
+		Node *temp = head;
+		for (size_t i = 0; (temp->next != nullptr) && (i < index); i++)
+		{
+			temp = temp->next;
+		}
+
+		Node* newElement = new Node(data, temp->next, temp);
+
+		temp->next->prev = newElement;
+		temp->next = newElement;
+	}
+
+	T remove(const size_t index)
+	{
+		Node *temp = head;
+		for (size_t i = 0; (temp->next != nullptr) && (i < index); i++)
+		{
+			temp = temp->next;
+		}
+
+		T tempData = temp->data; 
+
+		if (temp == head) {
+			pop_front();
+		} else if (temp == tail) {
+			pop_back();
+		} else {
+			temp->next->prev = temp->prev;
+			temp->prev->next = temp->next;
+			size_--;
+			delete temp;
+		}
+
+		return tempData;
+	}
+
+	size_t find(const T& data) {
+		Node* temp = head;
+		for (size_t i = 0; temp->next != nullptr; i++) {
+			if (data == temp->data) {
+				return i;
+			}
+			temp = temp->next;
+		}
+
+		return string::npos;
 	}
 
 	T &operator[](const size_t index)
@@ -168,7 +226,7 @@ public:
 		return temp->data;
 	}
 
-	bool saveToFile(string filename)
+	bool saveToFile(const string filename)
 	{
 		ofstream file(filename, ios::out | ios::binary);
 
@@ -182,25 +240,6 @@ public:
 		{
 			temp->data.write(file);
 			temp = temp->next;
-		}
-
-		file.close();
-
-		return true;
-	}
-
-	bool readFromFile(string filename)
-	{
-		ifstream file(filename, ios::in | ios::binary);
-
-		if (!file.is_open())
-		{
-			return false;
-		}
-
-		while (!file.eof())
-		{
-			this->push_back(Student::read(file));
 		}
 
 		file.close();
@@ -282,6 +321,11 @@ int main()
 		 "Geffrington Bezos",
 		 "Jiery Basas"};
 
+	names.resize(10);
+
+	cout << "List size: " << list.size() << endl;
+	cout << endl;
+
 	for (size_t i = 0; i < names.size(); i++)
 	{
 		list.push_back(Student(names[i], rand() % 4 + 2));
@@ -293,31 +337,51 @@ int main()
 	}
 
 	cout << endl;
+	cout << "List size: " << list.size() << endl;
+	cout << endl;
+
+	cout << "Removed element 0: " << list.remove(0) << endl;
+	cout << endl;
+
+	for (size_t i = 0; i < list.size(); i++)
+	{
+		cout << list[i] << endl;
+	}
+	
+	cout << endl;
+	cout << "List size: " << list.size() << endl;
+
+	list.insert(Student("Inserted boy", 10), 3);
+
+	cout << endl;
+	for (size_t i = 0; i < list.size(); i++)
+	{
+		cout << list[i] << endl;
+	}
+	cout << endl;
+	cout << "List size: " << list.size() << endl;
+	cout << endl;
+
+	cout << "Searching for Inserted boy: ";
+	size_t foundIndex = list.find(Student("Inserted boy"));
+	if (foundIndex != string::npos) {
+		cout << "Index: " << foundIndex;
+	}
+	else {
+		cout << "Student not found";
+	}
+	cout << endl;
 
 	if (!list.saveToFile("journal.bin"))
 	{
 		cout << "Failed to write list to file" << endl;
 	}
 
-	for (size_t i = 0; i < names.size() - 1; i++)
-	{
-		list.pop_back();
-	}
-	// list.clear();
-	// list.pop_back();
-	cout << endl
-		 << "List cleaned"
-		 << endl;
+	list.clear();
 
-	if (!list.readFromFile("journal.bin"))
-	{
-		cout << "Failed to write list to file" << endl;
-	}
+	cout << endl << "List cleaned" << endl << endl;
 
-	for (size_t i = 0; i < list.size(); i++)
-	{
-		cout << list[i] << endl;
-	}
+	cout << "List size: " << list.size() << endl;
 
 	return 0;
 }
