@@ -55,7 +55,7 @@ public:
 		return temp;
 	}
 
-	friend bool operator==(const Student& A, const Student& B);
+	friend bool operator==(const Student &A, const Student &B);
 
 	friend ostream &operator<<(std::ostream &out, const Student &student);
 };
@@ -66,7 +66,8 @@ ostream &operator<<(ostream &out, const Student &student)
 	return out;
 }
 
-bool operator==(const Student& A, const Student& B) {
+bool operator==(const Student &A, const Student &B)
+{
 	return (A.name == B.name);
 }
 
@@ -75,11 +76,12 @@ class List
 {
 public:
 	List() : head(nullptr) {}
-	~List() {
+	~List()
+	{
 		clear();
 	}
 
-	void push_front(const T& data)
+	void push_front(const T &data)
 	{
 		size_++;
 		Node *temp = new Node(data, nullptr, tail);
@@ -94,7 +96,7 @@ public:
 		head = temp;
 	}
 
-	void push_back(const T& data)
+	void push_back(const T &data)
 	{
 		size_++;
 		Node *temp = new Node(data, nullptr, tail);
@@ -164,7 +166,7 @@ public:
 		return size_;
 	}
 
-	void insert(const T& data, const size_t index)
+	void insert(const T &data, const size_t index)
 	{
 		size_++;
 
@@ -174,7 +176,7 @@ public:
 			temp = temp->next;
 		}
 
-		Node* newElement = new Node(data, temp->next, temp);
+		Node *newElement = new Node(data, temp->next, temp);
 
 		temp->next->prev = newElement;
 		temp->next = newElement;
@@ -188,13 +190,18 @@ public:
 			temp = temp->next;
 		}
 
-		T tempData = temp->data; 
+		T tempData = temp->data;
 
-		if (temp == head) {
+		if (temp == head)
+		{
 			pop_front();
-		} else if (temp == tail) {
+		}
+		else if (temp == tail)
+		{
 			pop_back();
-		} else {
+		}
+		else
+		{
 			temp->next->prev = temp->prev;
 			temp->prev->next = temp->next;
 			size_--;
@@ -204,10 +211,13 @@ public:
 		return tempData;
 	}
 
-	size_t find(const T& data) {
-		Node* temp = head;
-		for (size_t i = 0; temp->next != nullptr; i++) {
-			if (data == temp->data) {
+	size_t find(const T &data)
+	{
+		Node *temp = head;
+		for (size_t i = 0; temp->next != nullptr; i++)
+		{
+			if (data == temp->data)
+			{
 				return i;
 			}
 			temp = temp->next;
@@ -347,7 +357,7 @@ int main()
 	{
 		cout << list[i] << endl;
 	}
-	
+
 	cout << endl;
 	cout << "List size: " << list.size() << endl;
 
@@ -364,10 +374,12 @@ int main()
 
 	cout << "Searching for Inserted boy: ";
 	size_t foundIndex = list.find(Student("Inserted boy"));
-	if (foundIndex != string::npos) {
+	if (foundIndex != string::npos)
+	{
 		cout << "Index: " << foundIndex;
 	}
-	else {
+	else
+	{
 		cout << "Student not found";
 	}
 	cout << endl;
@@ -379,7 +391,9 @@ int main()
 
 	list.clear();
 
-	cout << endl << "List cleaned" << endl << endl;
+	cout << endl
+		 << "List cleaned" << endl
+		 << endl;
 
 	cout << "List size: " << list.size() << endl;
 
