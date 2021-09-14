@@ -14,23 +14,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QGraphicsScene* scene = new QGraphicsScene;
     ui->graphicsView->setScene(scene);
-    scene->setSceneRect(0, 0, 738, 450);
+    scene->setSceneRect(0, 0, 1280, 720);
 
-    QLabel* test = new QLabel;
-    test->setPixmap(QPixmap::fromImage(QImage(":/AppleTree.png")).scaledToHeight(300));
-
-    QGraphicsProxyWidget* temp = scene->addWidget(test);
-    elements.insert("tree", temp);
-    qDebug() << elements["tree"]->rect();
-    elements["tree"]->setPos(-245, -122);
-//    QPolygon* poly = new QPolygon(QRect(0, 0, 100, 100));
-//    QBrush brush;
-//    brush.setColor(Qt::red);
-//    QPen pen(Qt::green);
-//    scene->addPolygon(*poly);
-
-
-    ui->graphicsView->adjustSize();
+    QGraphicsPixmapItem* tree = new QGraphicsPixmapItem(QPixmap::fromImage(QImage(":/AppleTree.png")).scaledToHeight(300));
+    tree->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+    scene->addItem(tree);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *) {
