@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>756</width>
-    <height>550</height>
+    <width>1302</width>
+    <height>769</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,12 +15,12 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
+    <item row="0" column="0">
      <widget class="QGraphicsView" name="graphicsView">
       <property name="minimumSize">
        <size>
-        <width>1284</width>
-        <height>724</height>
+        <width>1282</width>
+        <height>722</height>
        </size>
       </property>
       <property name="verticalScrollBarPolicy">
@@ -40,18 +40,8 @@
       <property name="renderHints">
        <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
       </property>
-      <property name="dragMode">
-       <enum>QGraphicsView::RubberBandDrag</enum>
-      </property>
       <property name="viewportUpdateMode">
        <enum>QGraphicsView::FullViewportUpdate</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QPushButton" name="btnTestPost">
-      <property name="text">
-       <string>PushButton</string>
       </property>
      </widget>
     </item>
