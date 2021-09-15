@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <bitset>
+
 using namespace std;
 
 string itobs(int number) {
@@ -43,9 +44,8 @@ long long fastMultiply(long first, long second) {
 	const string cNumStr = yBinStr.substr(0, k);
 	const string dNumStr = yBinStr.substr(k, yBinStr.size());
 
-	const bitset<sizeof(long)* CHAR_BIT> aBin(aNumStr);
 	const bitset<sizeof(long)* CHAR_BIT> bBin(bNumStr);
-
+	const bitset<sizeof(long)* CHAR_BIT> aBin(aNumStr);
 	const bitset<sizeof(long)* CHAR_BIT> cBin(cNumStr);
 	const bitset<sizeof(long)* CHAR_BIT> dBin(dNumStr);
 
@@ -119,7 +119,7 @@ int main() {
 	cout << "Regular multiply: " << endl;
 	MultiplyWithPrint(2, 2, regularMultiply);
 	MultiplyWithPrint(75, 82, regularMultiply);
-	MultiplyWithPrint(12315451, 1323235, regularMultiply);
+	MultiplyWithPrint(INT_MAX, INT_MAX, regularMultiply);
 	MultiplyWithPrint(10, -10, regularMultiply);
 	
 	cout << endl;
@@ -127,7 +127,7 @@ int main() {
 	cout << "Fast multiply: " << endl;
 	MultiplyWithPrint(2, 2, fastMultiply);
 	MultiplyWithPrint(75, 82, fastMultiply);
-	MultiplyWithPrint(12315451, 1323235, fastMultiply);
+	MultiplyWithPrint(INT_MAX, INT_MAX, fastMultiply);
 	MultiplyWithPrint(10, -10, fastMultiply);
 
 	return 0;
