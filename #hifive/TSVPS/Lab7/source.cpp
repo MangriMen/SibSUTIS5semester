@@ -7,125 +7,61 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
-
+#include <tuple>
 using namespace std;
 
+
 namespace utils {
-	string ReplaceAll(string str, const string& from, const string& to) {
-		size_t start_pos = 0;
-		while ((start_pos = str.find(from, start_pos)) != string::npos) {
-			str.replace(start_pos, from.length(), to);
-			start_pos += to.length();
+	size_t resizeDoubleTheMax(vector<double>& a, vector<double>& b) {
+		size_t newSize = 0;
+
+		if (a.size() < b.size()) {
+			newSize = b.size();
+			a.resize(newSize, 0.0);
 		}
-		return str;
+		else {
+			newSize = a.size();
+			b.resize(newSize, 0.0);
+		}
+
+		newSize *= 2;
+		a.resize(newSize, 0);
+		b.resize(newSize, 0);
+
+		return newSize;
 	}
 
-	string dtos(double number, string delimiter = ".") {
-		return ReplaceAll(to_string(number), ".", delimiter);
-	}
-
-	double func1(double x) {
-		return (x * x * 2.0 - rand() % 1000000 * x);
-	}
-
-	void fillFunc(vector<double>& arr, size_t size) {
-		arr.resize(size, 0);
-		double point = 0;
-		for (size_t i = 0; i < arr.size(); i++, point += 0.1)
-		{
-			arr[i] = func1(point);
+	tuple<size_t, size_t> getNumberDecompositionBy2(size_t number) {
+		for (int i = sqrt(number); i <= number; ++i) {
+			if (number % i == 0) {
+				return { i, number / i };
+			}
 		}
 	}
 
-	template <typename T>
-	void printArr(const vector<T>& arr, string message = "", bool isInline = false) {
-		stringstream out;
-
-		if (message != "") {
-			out << message;
-		}
-
-		if (!isInline) {
-			out << endl;
-		}
-
-		out << setprecision(6) << fixed;
-		for (const auto& i : arr) {
-			out << i << " ";
-		}
-
-		out << endl;
-
-		cout << out.str();
-	}
-
-	void printArr(const vector<complex<double>>& arr, string message = "", bool isInline = false) {
-		stringstream out;
-
-		if (message != "") {
-			out << message;
-		}
-
-		if (!isInline) {
-			out << endl;
-		}
-
-		out << setprecision(6) << fixed;
-		for (const auto& point : arr) {
-			out << "RE:" << (point.real() >= 0 ? " " : "") << point.real() << setw(6) << "IM:" << (point.imag() >= 0 ? " " : "") << point.imag() << endl;
-		}
-
-		cout << out.str();
-	}
-
-	void writeCSV(const vector<double>& arr, string filename) {
-		ofstream out(filename + ".csv");
-
-		if (!out.is_open()) {
-			return;
-		}
-
-		for (const auto& i : arr) {
-			string str = to_string(i) + "\n";
-			str = ReplaceAll(str, ".", ",");
-			out.write(str.c_str(), str.size());
-		}
-
-		out.close();
-	}
-
-	void writeCSV(const vector<complex<double>>& arr, string filename) {
-		ofstream out(filename + ".csv");
-
-		if (!out.is_open()) {
-			return;
-		}
-
-		for (size_t i = 0; i < arr.size(); i++) {
-			string fin = dtos(arr[i].real(), ",") + ";" + dtos(arr[i].imag(), ",");
-			out << fin << endl;
-		}
-
-		out.close();
-	}
+	enum {
+		DISCRETE,
+		SEMI_FAST,
+	};
 }
 
+size_t counter = 0;
+size_t counterDF = 0;
+size_t counterSF = 0;
+
 vector<complex<double>> getDiscreteFourierTransform(const vector<double>& data) {
-	if (data.size() == 0) {
-		return vector<complex<double>>();
-	}
+	if (data.size() == 0) return vector<complex<double>>();
 
 	vector<complex<double>> out(data.size());
 	complex<double> exp_result;
 	const double reverseN = 1.0 / static_cast<double>(data.size());
 	const double EXPR_PART = -2.0 * M_PI * reverseN;
 
-	for (size_t k = 0; k < data.size(); k++)
-	{
-		for (size_t j = 0; j < data.size(); j++)
-		{
+	for (size_t k = 0; k < data.size(); k++) {
+		for (size_t j = 0; j < data.size(); j++) {
 			exp_result = exp(1i * EXPR_PART * static_cast<double>(k) * static_cast<double>(j));
 			out[k] += data[j] * exp_result;
+			counterDF++;
 		}
 		out[k] *= reverseN;
 	}
@@ -134,21 +70,18 @@ vector<complex<double>> getDiscreteFourierTransform(const vector<double>& data) 
 }
 
 vector<double> getReverseDiscreteFourierTransform(const vector<complex<double>>& data) {
-	if (data.size() == 0) {
-		return vector<double>();
-	}
+	if (data.size() == 0) return vector<double>();
 
 	vector<double> out(data.size());
 	complex<double> exp_result;
 	const double reverseN = 1.0 / static_cast<double>(data.size());
 	const double EXPR_PART = 2.0 * M_PI * reverseN;
 
-	for (size_t k = 0; k < data.size(); k++)
-	{
-		for (size_t j = 0; j < data.size(); j++)
-		{
+	for (size_t k = 0; k < data.size(); k++) {
+		for (size_t j = 0; j < data.size(); j++) {
 			exp_result = exp(1i * EXPR_PART * static_cast<double>(k) * static_cast<double>(j));
 			out[k] += (data[j] * exp_result).real();
+			counterDF++;
 		}
 	}
 
@@ -156,26 +89,25 @@ vector<double> getReverseDiscreteFourierTransform(const vector<complex<double>>&
 }
 
 vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) {
-	if (data.size() == 0) {
-		return vector<complex<double>>();
-	}
+	if (data.size() == 0) return vector<complex<double>>();
 
 	size_t p1, p2;
-	p1 = p2 = static_cast<size_t>(sqrt(data.size()));
+	tie(p1, p2) = utils::getNumberDecompositionBy2(data.size());
 
 	vector<vector<complex<double>>> temp1(p1, vector<complex<double>>(p1));
 	vector<vector<complex<double>>> temp2(p1, vector<complex<double>>(p1));
 
-	double reverseP1 = 1.0 / static_cast<double>(p1);
-	double reverseP2 = 1.0 / static_cast<double>(p2);
-	const double EXPR_PART = -2.0 * M_PI * reverseP1;
+	double REVERSE_P1 = 1.0 / static_cast<double>(p1);
+	double REVERSE_P2 = 1.0 / static_cast<double>(p2);
+	const double EXPR_PART = -2.0 * M_PI * REVERSE_P1;
 
 	for (size_t k1 = 0; k1 < p1; k1++) {
 		for (size_t j2 = 0; j2 < p2; j2++) {
 			for (size_t j1 = 0; j1 < p1; j1++) {
 				temp1[k1][j2] += data[j2 + p2 * j1] * exp(1i * EXPR_PART * (static_cast<double>(j1) * static_cast<double>(k1)));
+				counterSF++;
 			}
-			temp1[k1][j2] *= reverseP1;
+			temp1[k1][j2] *= REVERSE_P1;
 		}
 	}
 
@@ -183,8 +115,9 @@ vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) 
 		for (size_t k2 = 0; k2 < p2; k2++) {
 			for (size_t j2 = 0; j2 < p2; j2++) {
 				temp2[k1][k2] += temp1[k1][j2] * exp(1i * EXPR_PART * (static_cast<double>(j2) * (static_cast<double>(k1) + static_cast<double>(p1) * static_cast<double>(k2)) / static_cast<double>(p2)));
+				counterSF++;
 			}
-			temp2[k1][k2] *= reverseP2;
+			temp2[k1][k2] *= REVERSE_P2;
 		}
 	}
 
@@ -192,34 +125,35 @@ vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) 
 	temp1.~vector();
 
 	vector<complex<double>> out(p1 * p2);
-	for (size_t k1 = 0, j = 0; k1 < p1; k1++) {
-		for (size_t k2 = 0; k2 < p2; k2++, j++) {
-			out[j] = temp2[k1][k2];
+	for (size_t k1 = 0, j = 0; k1 < p2; k1++) {
+		for (size_t k2 = 0; k2 < p1; k2++, j++) {
+			out[j] = temp2[k2][k1];
 		}
 	}
+
+	temp2.clear();
+	temp2.~vector();
 
 	return out;
 }
 
 vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>& data) {
-	if (data.size() == 0) {
-		return vector<double>();
-	}
+	if (data.size() == 0) return vector<double>();
 
 	size_t p1, p2;
-	p1 = p2 = static_cast<size_t>(sqrt(data.size()));
+	tie(p1, p2) = utils::getNumberDecompositionBy2(data.size());
 
 	vector<vector<complex<double>>> temp1(p1, vector<complex<double>>(p1));
-	vector<vector<complex<double>>> temp2(p1, vector<complex<double>>(p1));
+	vector<vector<complex<double>>> temp2(temp1);
 
-	double reverseP1 = 1.0 / static_cast<double>(p1);
-	double reverseP2 = 1.0 / static_cast<double>(p2);
-	const double EXPR_PART = 2.0 * M_PI * reverseP1;
+	const double REVERSE_P1 = 1.0 / static_cast<double>(p1);
+	const double EXPR_PART = 2.0 * M_PI * REVERSE_P1;
 
 	for (size_t k1 = 0; k1 < p1; k1++) {
 		for (size_t j2 = 0; j2 < p2; j2++) {
 			for (size_t j1 = 0; j1 < p1; j1++) {
 				temp1[k1][j2] += data[j2 + p2 * j1] * exp(1i * EXPR_PART * (static_cast<double>(j1) * static_cast<double>(k1)));
+				counterSF++;
 			}
 		}
 	}
@@ -228,6 +162,7 @@ vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>&
 		for (size_t k2 = 0; k2 < p2; k2++) {
 			for (size_t j2 = 0; j2 < p2; j2++) {
 				temp2[k1][k2] += temp1[k1][j2] * exp(1i * EXPR_PART * (static_cast<double>(j2) * (static_cast<double>(k1) + static_cast<double>(p1) * static_cast<double>(k2)) / static_cast<double>(p2)));
+				counterSF++;
 			}
 		}
 	}
@@ -236,115 +171,97 @@ vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>&
 	temp1.~vector();
 
 	vector<double> out(p1 * p2);
-	for (size_t k1 = 0, j = 0; k1 < p1; k1++) {
-		for (size_t k2 = 0; k2 < p2; k2++, j++) {
-			out[j] = temp2[k1][k2].real();
+	for (size_t k1 = 0, j = 0; k1 < p2; k1++) {
+		for (size_t k2 = 0; k2 < p1; k2++, j++) {
+			out[j] = temp2[k2][k1].real();
 		}
 	}
+
+	temp2.clear();
+	temp2.~vector();
 
 	return out;
 }
 
-vector<double> convolution(vector<double> a, vector<double> b) {
-	size_t size_ = 0;
-	vector<double> shortArr;
-	vector<double> longArr;
+vector<double> convolute(const vector<double>& x, const vector<double>& h) {
+	if ((x.size() == 0) && (h.size() == 0)) return vector<double>();
 
-	if (a.size() < b.size()) {
-		shortArr = a;
-		longArr = b;
+	vector<double> a;
+	vector<double> b;
+
+	if (x.size() < h.size()) {
+		a = x;
+		b = h;
 	}
 	else {
-		shortArr = b;
-		longArr = a;
+		a = h;
+		b = x;
 	}
-	size_ = shortArr.size() + longArr.size() - 1;
 
-	vector<double> out(size_, 0);
+	vector<double> result(a.size() + b.size() - 1, 0);
 
-	for (size_t k = 0; k < shortArr.size(); k++)
-	{
-		for (size_t l = 0; l < longArr.size(); l++)
-		{
-			out[l + k] += shortArr[k] * longArr[l];
+	for (size_t k = 0; k < a.size(); k++) {
+		for (size_t l = 0; l < b.size(); l++) {
+			result[l + k] += a[k] * b[l];
+			counter++;
 		}
 	}
 
-	return out;
+	return result;
 }
 
-vector<double> convolutionDiscreteFourier(vector<double> a, vector<double> b) {
-	size_t size_ = 0;
-	vector<double> out(size_, 0);
-
-	if (a.size() < b.size()) {
-		size_ = b.size();
-		a.resize(size_, 0.0);
-	}
-	else {
-		size_ = a.size();
-		b.resize(size_, 0.0);
-	}
+vector<double> forierConvolute(vector<double> a, vector<double> b, int type) {
+	size_t newSize = utils::resizeDoubleTheMax(a, b);
+	vector<double> out(newSize, 0);
+	vector<complex<double>> temp(newSize, 0);
 
 	vector<complex<double>> fourierA = getDiscreteFourierTransform(a);
 	vector<complex<double>> fourierB = getDiscreteFourierTransform(b);
 
-	vector<complex<double>> temp(size_, 0);
-	for (size_t i = 0; i < size_; i++)
-	{
-		temp[i] = (2.0 * static_cast<double>(size_)) * (fourierA[i] * fourierB[i]);
+	for (size_t i = 0; i < newSize; i++) {
+		temp[i] = static_cast<double>(newSize) * fourierA[i] * fourierB[i];
+		counterDF++;
 	}
 
-	out = getReverseDiscreteFourierTransform(temp);
+	if (type == utils::DISCRETE) {
+		out = getReverseDiscreteFourierTransform(temp);
+	}
+	else if (type == utils::SEMI_FAST) {
+		out = getReverseSemiFastFourierTransform(temp);
+	}
 
 	return out;
 }
 
-vector<double> convolutionSemiFastFourier(vector<double> a, vector<double> b) {
-	size_t size_ = 0;
-	vector<double> out(size_, 0);
+int main() {
+	vector<int> sizes = { 16, 64, 128, 512 };
+	cout << "Convolutions:" << endl
+		<< endl << "===================" << endl;
+	for (size_t i = 0; i < sizes.size(); ++i) {
+		cout << "On " << sizes[i] << " elements:" << endl << endl;
 
-	if (a.size() < b.size()) {
-		size_ = b.size();
-		a.resize(size_, 0.0);
+		vector<double> dataA(sizes[i], 0);
+		vector<double> dataB(sizes[i], 0);
+
+		for (size_t j = 0; j < dataA.size(); j++) {
+			dataA[j] = j;
+		}
+
+		for (size_t j = 0; j < dataB.size(); j++) {
+			dataB[j] = j;
+		}
+
+		counter = 0;
+		counterDF = 0;
+		counterSF = 0;
+
+		vector<double> out = convolute(dataA, dataB);
+		vector<double> outDF = forierConvolute(dataA, dataB, utils::DISCRETE);
+		vector<double> outSF = forierConvolute(dataA, dataB, utils::SEMI_FAST);
+
+		cout << "Regular: " << counter << endl;
+		cout << "DFT: " << counterDF << endl;
+		cout << "SFFT: " << counterSF << endl;
+		cout << "===================" << endl;
 	}
-	else {
-		size_ = a.size();
-		b.resize(size_, 0.0);
-	}
-
-	vector<complex<double>> fourierA = getSemiFastFourierTransform(a);
-	vector<complex<double>> fourierB = getSemiFastFourierTransform(b);
-
-	vector<complex<double>> temp(size_, 0);
-	for (size_t i = 0; i < size_; i++)
-	{
-		complex<double> mult = (fourierA[i] * fourierB[i]);
-		temp[i] = (2.0 * static_cast<double>(size_)) * mult;
-	}
-
-	out = getReverseSemiFastFourierTransform(temp);
-
-	return out;
-}
-
-#define N 1
-
-int main()
-{
-	vector<double> dataA;
-	vector<double> dataB;
-
-	dataA = { 1, 2 };
-	dataB = { 3, 4, 5 };
-
-	vector<double> out = convolution(dataA, dataB);
-	vector<double> outDF = convolutionDiscreteFourier(dataA, dataB);
-	//vector<double> outSF = convolutionSemiFastFourier(dataA, dataB);
-
-
-	utils::printArr(out, "Usually convolution:");
-	cout << endl;
-	utils::printArr(outDF, "Convolution with DFT:");
-	//utils::printArr(outSF);
 }
