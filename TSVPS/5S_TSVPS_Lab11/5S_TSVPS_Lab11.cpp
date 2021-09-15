@@ -2,9 +2,8 @@
 #include <string>
 #include <algorithm>
 #include <vector>
-#include <cstddef>
+#include <bitset>
 using namespace std;
-
 
 string itobs(int number) {
 	string binaryNumber = "";
@@ -19,48 +18,87 @@ string itobs(int number) {
 	return binaryNumber;
 }
 
-long long fastMultiply(unsigned char x, unsigned char y) {
-	string a = itobs(x);
-	string b = itobs(y);
+long long fastMultiply(long first, long second) {
+	char negativeMultiplier = 1;
 
-	int n = a.size() > b.size() ? a.size() : b.size();
+	if (first < 0 || second < 0) {
+		negativeMultiplier = -1;
+		first = abs(first);
+		second = abs(second);
+	}
 
-	cout << a << "   " << a.size();
+	string xBinStr = itobs(first);
+	string yBinStr = itobs(second);
 
-	long long result(0);
+	long n = max(xBinStr.size(), yBinStr.size());
+	n = (n & 1) ? n + 1 : n;
+	
+	const long k = n >> 1;
 
-	//// x = 2
-	//// a = 1 b = 0
-	//// 0 10
+	xBinStr.insert(0, string(n - xBinStr.size(), '0'));
+	yBinStr.insert(0, string(n - yBinStr.size(), '0'));
 
-	//cout << endl;
-	return result;
+	const string aNumStr = xBinStr.substr(0, k);
+	const string bNumStr = xBinStr.substr(k, xBinStr.size());
+	const string cNumStr = yBinStr.substr(0, k);
+	const string dNumStr = yBinStr.substr(k, yBinStr.size());
+
+	const bitset<sizeof(long)* CHAR_BIT> aBin(aNumStr);
+	const bitset<sizeof(long)* CHAR_BIT> bBin(bNumStr);
+
+	const bitset<sizeof(long)* CHAR_BIT> cBin(cNumStr);
+	const bitset<sizeof(long)* CHAR_BIT> dBin(dNumStr);
+
+	const long a = static_cast<long>(aBin.to_ulong());
+	const long b = static_cast<long>(bBin.to_ulong());
+	const long c = static_cast<long>(cBin.to_ulong());
+	const long d = static_cast<long>(dBin.to_ulong());
+
+	const long u = (a + b) * (c + d);
+	const long v = a * c;
+	const long w = b * d;
+
+	const long long xy = v * pow(2, 2 * k)
+		+ (static_cast<long long>(u)
+			- static_cast<long long>(v)
+			- static_cast<long long>(w)) * pow(2, k)
+		+ w;
+
+	return xy * negativeMultiplier;
 }
 
-long long regularMultiply(long firstNumber, long secondNumber) {
-	vector<long long> firstNumberVec;
-	vector<long long> secondNumberVec;
+long long regularMultiply(long first, long second) {
+	char negativeMultiplier = 1;
 
-	for (size_t i = firstNumber; i > 0; i /= 10) {
-		firstNumberVec.push_back(i % 10);
+	if (first < 0 || second < 0) {
+		negativeMultiplier = -1;
+		first = abs(first);
+		second = abs(second);
 	}
 
-	for (size_t i = secondNumber; i > 0; i /= 10) {
-		secondNumberVec.push_back(i % 10);
+	vector<long long> firstVec;
+	vector<long long> secondVec;
+
+	for (size_t i = first; i > 0; i /= 10) {
+		firstVec.push_back(i % 10);
 	}
 
-	vector<long long> calculatedMult(firstNumberVec.size() + secondNumberVec.size(), 0);
+	for (size_t i = second; i > 0; i /= 10) {
+		secondVec.push_back(i % 10);
+	}
 
-	for (size_t i = 0; i < secondNumberVec.size(); ++i) {
-		int carry = 0;
+	vector<long long> calculatedMult(firstVec.size() + secondVec.size(), 0);
 
-		for (size_t j = 0; j < firstNumberVec.size(); j++) {
-			calculatedMult[i + j] += carry + firstNumberVec[i] * secondNumberVec[j];
+	for (size_t i = 0; i < firstVec.size(); ++i) {
+		long carry = 0;
+
+		for (size_t j = 0; j < secondVec.size(); j++) {
+			calculatedMult[i + j] += carry + firstVec[i] * secondVec[j];
 			carry = calculatedMult[i + j] / 10;
 			calculatedMult[i + j] %= 10;
 		}
 
-		calculatedMult[i + secondNumberVec.size()] += carry;
+		calculatedMult[i + secondVec.size()] += carry;
 	}
 
 	reverse(calculatedMult.begin(), calculatedMult.end());
@@ -70,25 +108,27 @@ long long regularMultiply(long firstNumber, long secondNumber) {
 		result += to_string(i);
 	}
 
-	return stoll(result);
+	return stoll(result) * negativeMultiplier;
+}
+
+void MultiplyWithPrint(long long a, long long b, long long (*function)(long, long)) {
+	cout << a << " * " << b << " = " << function(a, b) << endl;
 }
 
 int main() {
 	cout << "Regular multiply: " << endl;
-
-	cout << "34, 17: " << regularMultiply(34, 17) << endl;
-	cout << "3, 3: " << regularMultiply(3, 3) << endl;
-	cout << "20, 20: " << regularMultiply(20, 20) << endl;
-	cout << "36, 21: " << regularMultiply(21, 36) << endl;
+	MultiplyWithPrint(2, 2, regularMultiply);
+	MultiplyWithPrint(75, 82, regularMultiply);
+	MultiplyWithPrint(12315451, 1323235, regularMultiply);
+	MultiplyWithPrint(10, -10, regularMultiply);
+	
+	cout << endl;
 
 	cout << "Fast multiply: " << endl;
-
-	/*cout << "34, 17: " << fastMultiply(34, 17) << endl;
-	cout << "36, 21: " << fastMultiply(21, 36) << endl;
-	cout << "20, 20: " << fastMultiply(20, 20) << endl;*/
-	//cout << "3, 3: " << fastMultiply(255, 3) << endl;
-	
-	fastMultiply(8, 3);
+	MultiplyWithPrint(2, 2, fastMultiply);
+	MultiplyWithPrint(75, 82, fastMultiply);
+	MultiplyWithPrint(12315451, 1323235, fastMultiply);
+	MultiplyWithPrint(10, -10, fastMultiply);
 
 	return 0;
 }
