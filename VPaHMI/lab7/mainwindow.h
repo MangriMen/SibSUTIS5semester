@@ -14,11 +14,16 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    QGraphicsPixmapItem* tree;
+    QGraphicsItemGroup* bird;
+    QList<QGraphicsRectItem*>* borders;
+    QPoint* dXY;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-private slots:
-    void on_btnTestPost_clicked();
+public slots:
+    void moveAndCheck();
+    void resizeTrigger();
 
 private:
     QMap<QString, QGraphicsProxyWidget*> elements;
