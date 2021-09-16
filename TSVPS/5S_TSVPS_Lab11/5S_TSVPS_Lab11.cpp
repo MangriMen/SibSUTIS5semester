@@ -3,8 +3,17 @@
 #include <algorithm>
 #include <vector>
 #include <bitset>
+#include <complex>
 
 using namespace std;
+
+int ctoi(const char& num) {
+	return num - '0';
+}
+
+char itoc(const int& num) {
+	return num + '0';
+}
 
 string itobs(int number) {
 	string binaryNumber = "";
@@ -19,22 +28,46 @@ string itobs(int number) {
 	return binaryNumber;
 }
 
-long long fastMultiply(long first, long second) {
-	char negativeMultiplier = 1;
+string div2(const string& number) {
+	string binaryNumber(number.size(), 0);
+	short p = 0;
+	short a = 0;
 
-	if (first < 0 || second < 0) {
-		negativeMultiplier = -1;
-		first = abs(first);
-		second = abs(second);
+	for (size_t i = 0; i < number.size(); i++)
+	{
+		a = ctoi(number[i]) + p * 10;
+		binaryNumber[i] = itoc(a >> 1);
+		p = a % 2;
 	}
 
-	string xBinStr = itobs(first);
-	string yBinStr = itobs(second);
+	return binaryNumber;
+}
 
-	long n = max(xBinStr.size(), yBinStr.size());
+
+bool isZero(const string& number) {
+	return number.find_first_not_of("0") == string::npos;
+}
+
+string stobs(const string& number) {
+	string out("");
+	string number_(number);
+	do {
+		out += itoc(ctoi(number_[number_.size() - 1]) % 2);
+		number_ = div2(number_);
+	} while (!isZero(number_));
+
+	reverse(out.begin(), out.end());
+	return out;
+}
+
+string fastMultiply(const string& first, const string& second) {
+	string xBinStr = stobs(first);
+	string yBinStr = stobs(second);
+
+	size_t n = max(xBinStr.size(), yBinStr.size());
 	n = (n & 1) ? n + 1 : n;
-	
-	const long k = n >> 1;
+
+	const size_t k = n >> 1;
 
 	xBinStr.insert(0, string(n - xBinStr.size(), '0'));
 	yBinStr.insert(0, string(n - yBinStr.size(), '0'));
@@ -44,91 +77,92 @@ long long fastMultiply(long first, long second) {
 	const string cNumStr = yBinStr.substr(0, k);
 	const string dNumStr = yBinStr.substr(k, yBinStr.size());
 
-	const bitset<sizeof(long)* CHAR_BIT> bBin(bNumStr);
-	const bitset<sizeof(long)* CHAR_BIT> aBin(aNumStr);
-	const bitset<sizeof(long)* CHAR_BIT> cBin(cNumStr);
-	const bitset<sizeof(long)* CHAR_BIT> dBin(dNumStr);
+	cout << endl << endl;
+	cout << "UM " <<  ULLONG_MAX << endl;
 
-	const long a = static_cast<long>(aBin.to_ulong());
-	const long b = static_cast<long>(bBin.to_ulong());
-	const long c = static_cast<long>(cBin.to_ulong());
-	const long d = static_cast<long>(dBin.to_ulong());
+	cout << endl << endl;
 
-	const long u = (a + b) * (c + d);
-	const long v = a * c;
-	const long w = b * d;
+	cout << "a: " << aNumStr << endl;
+	cout << "b: " << bNumStr << endl;
+	cout << "c: " << cNumStr << endl;
+	cout << "d: " << dNumStr << endl;
 
-	const long long xy = v * pow(2, 2 * k)
-		+ (static_cast<long long>(u)
-			- static_cast<long long>(v)
-			- static_cast<long long>(w)) * pow(2, k)
+	const bitset<sizeof(size_t)* CHAR_BIT> bBin(bNumStr);
+	const bitset<sizeof(size_t)* CHAR_BIT> aBin(aNumStr);
+	const bitset<sizeof(size_t)* CHAR_BIT> cBin(cNumStr);
+	const bitset<sizeof(size_t)* CHAR_BIT> dBin(dNumStr);
+
+	const size_t a = aBin.to_ullong();
+	const size_t b = bBin.to_ullong();
+	const size_t c = cBin.to_ullong();
+	const size_t d = dBin.to_ullong();
+
+	cout << endl;
+	cout << "a: " << a << endl;
+	cout << "b: " << b << endl;
+	cout << "c: " << c << endl;
+	cout << "d: " << d << endl;
+
+	const size_t u = (a + b) * (c + d);
+	const size_t v = a * c;
+	const size_t w = b * d;
+
+	cout << endl;
+	cout << "u: " << u << endl;
+	cout << "v: " << v << endl;
+	cout << "w: " << w << endl;
+
+	const size_t xy = v * static_cast<size_t>(pow(2, 2 * k))
+		+ (u - v - w) * static_cast<size_t>(pow(2, k))
 		+ w;
 
-	return xy * negativeMultiplier;
+	cout << endl;
+
+	return to_string(xy);
 }
 
-long long regularMultiply(long first, long second) {
-	char negativeMultiplier = 1;
+string regularMultiply(const string& first, const string& second) {
+	vector<short> calculatedMult(first.size() + second.size(), 0);
 
-	if (first < 0 || second < 0) {
-		negativeMultiplier = -1;
-		first = abs(first);
-		second = abs(second);
-	}
+	string first_(first);
+	string second_(second);
 
-	vector<long long> firstVec;
-	vector<long long> secondVec;
+	reverse(first_.begin(), first_.end());
+	reverse(second_.begin(), second_.end());
 
-	for (size_t i = first; i > 0; i /= 10) {
-		firstVec.push_back(i % 10);
-	}
+	for (size_t i = 0; i < first_.size(); ++i) {
+		short carry = 0;
 
-	for (size_t i = second; i > 0; i /= 10) {
-		secondVec.push_back(i % 10);
-	}
-
-	vector<long long> calculatedMult(firstVec.size() + secondVec.size(), 0);
-
-	for (size_t i = 0; i < firstVec.size(); ++i) {
-		long carry = 0;
-
-		for (size_t j = 0; j < secondVec.size(); j++) {
-			calculatedMult[i + j] += carry + firstVec[i] * secondVec[j];
+		for (size_t j = 0; j < second_.size(); j++) {
+			calculatedMult[i + j] += carry + ctoi(first_[i]) * ctoi(second_[j]);
 			carry = calculatedMult[i + j] / 10;
 			calculatedMult[i + j] %= 10;
 		}
 
-		calculatedMult[i + secondVec.size()] += carry;
+		calculatedMult[i + second_.size()] += carry;
 	}
 
 	reverse(calculatedMult.begin(), calculatedMult.end());
 
-	string result = "";
-	for (const auto& i : calculatedMult) {
+	string result("");
+	for (const short& i : calculatedMult) {
 		result += to_string(i);
 	}
+	result.erase(0, result[0] == '0');
 
-	return stoll(result) * negativeMultiplier;
+	return result;
 }
 
-void MultiplyWithPrint(long long a, long long b, long long (*function)(long, long)) {
+void MultiplyWithPrint(string a, string b, string(*function)(const string&, const string&)) {
 	cout << a << " * " << b << " = " << function(a, b) << endl;
 }
 
 int main() {
-	cout << "Regular multiply: " << endl;
-	MultiplyWithPrint(2, 2, regularMultiply);
-	MultiplyWithPrint(75, 82, regularMultiply);
-	MultiplyWithPrint(INT_MAX, INT_MAX, regularMultiply);
-	MultiplyWithPrint(10, -10, regularMultiply);
-	
-	cout << endl;
-
-	cout << "Fast multiply: " << endl;
-	MultiplyWithPrint(2, 2, fastMultiply);
-	MultiplyWithPrint(75, 82, fastMultiply);
-	MultiplyWithPrint(INT_MAX, INT_MAX, fastMultiply);
-	MultiplyWithPrint(10, -10, fastMultiply);
+	//cout << "Regular multiply: " << endl;
+	//MultiplyWithPrint("99999999999999999999", "99999999999999999999", regularMultiply);
+	//cout << "Fast multiply: " << endl;
+	//MultiplyWithPrint("2", "2", fastMultiply);
+	MultiplyWithPrint("99999999999999999999", "99999999999999999999", fastMultiply);
 
 	return 0;
 }
