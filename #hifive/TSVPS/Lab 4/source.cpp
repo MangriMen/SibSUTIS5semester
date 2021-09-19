@@ -8,6 +8,8 @@ using namespace std;
 
 #define myPI 3.1415926535
 
+size_t counter = 0;
+
 namespace utils {
 	template <typename T>
 	string getSpacedElement(T element) {
@@ -124,6 +126,7 @@ vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) 
 		for (size_t j2 = 0; j2 < p2; j2++) {
 			for (size_t j1 = 0; j1 < p1; j1++) {
 				temp1[k1][j2] += data[j2 + p2 * j1] * exp(1i * EXPR_PART * (static_cast<double>(j1) * static_cast<double>(k1)));
+				counter++;
 			}
 			temp1[k1][j2] *= REVERSE_P1;
 		}
@@ -133,6 +136,7 @@ vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) 
 		for (size_t k2 = 0; k2 < p2; k2++) {
 			for (size_t j2 = 0; j2 < p2; j2++) {
 				temp2[k1][k2] += temp1[k1][j2] * exp(1i * EXPR_PART * (static_cast<double>(j2) * (static_cast<double>(k1) + static_cast<double>(p1) * static_cast<double>(k2)) / static_cast<double>(p2)));
+				counter++;
 			}
 			temp2[k1][k2] *= REVERSE_P2;
 		}
@@ -202,22 +206,32 @@ int main() {
 	srand(time(NULL));
 
 	const int VECTOR_SIZE = 16;
-	vector<double> startArray(VECTOR_SIZE, 0);
+	vector<size_t> sizes {5*5, 10*10, 20*20};
+
+	for (int j = 0; j < sizes.size(); ++j) {
+		counter = 0;
+		vector<double> startArray(sizes[j], 0);
 	
-	for (int i = 0; i < VECTOR_SIZE; i += 1) {
-		startArray[i] = i*i;
+		for (int i = 0; i < sizes[j]; i += 1) {
+			startArray[i] = i*i;
+		}
+
+		vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
+		//vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
+
+		cout << "Size: " << sizes[j] << endl;
+		cout << "Counter: " << counter << endl << endl;
 	}
+	//vector<complex<double>> discreteFourier = getDiscreteFourierTransform(startArray);
+	//vector<double> reverseDiscreteFourier = getReverseDiscreteFourierTransform(discreteFourier);
+	//vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
+	//vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
 
-	vector<complex<double>> discreteFourier = getDiscreteFourierTransform(startArray);
-	vector<double> reverseDiscreteFourier = getReverseDiscreteFourierTransform(discreteFourier);
-	vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
-	vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
-
-	arrayTweaks::printArrayLog(startArray, "Original array:");
-	arrayTweaks::printArrayLog(discreteFourier, "Array aquired by DF:");
-	arrayTweaks::printArrayLog(reverseDiscreteFourier, "Array aquired by RDF:");
-	arrayTweaks::printArrayLog(semiFastFourier, "Array aquired by SFF:");
-	arrayTweaks::printArrayLog(reverseSemiFastFourier, "Array aquired by RSFF:");
+	//arrayTweaks::printArrayLog(startArray, "Original array:");
+	//arrayTweaks::printArrayLog(discreteFourier, "Array aquired by DF:");
+	//arrayTweaks::printArrayLog(reverseDiscreteFourier, "Array aquired by RDF:");
+	//arrayTweaks::printArrayLog(semiFastFourier, "Array aquired by SFF:");
+	//arrayTweaks::printArrayLog(reverseSemiFastFourier, "Array aquired by RSFF:");
 
 	return 0;
 }

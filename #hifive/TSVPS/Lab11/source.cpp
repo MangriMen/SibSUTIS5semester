@@ -21,29 +21,22 @@ string itobs(int number) {
 	return binaryNumber;
 }
 
-long long fastMultiply(long first, long second) {
-	char negativeMultiplier = 1;
+int ctoi(const char& number) {
+	return (number - '0');
+}
 
-	if (first < 0 || second < 0) {
-		negativeMultiplier = -1;
-		first = abs(first);
-		second = abs(second);
-	}
-
-	string xBinStr = itobs(first);
-	string yBinStr = itobs(second);
-
-	long n = max(xBinStr.size(), yBinStr.size());
+string fastMultiply(string first, string second) {
+	long n = max(first.size(), second.size());
 	n = (n & 1) ? n + 1 : n;
 	const long k = n >> 1;
 
-	xBinStr.insert(0, string(n - xBinStr.size(), '0'));
-	yBinStr.insert(0, string(n - yBinStr.size(), '0'));
+	first.insert(0, string(n - first.size(), '0'));
+	second.insert(0, string(n - second.size(), '0'));
 
-	const string aNumStr = xBinStr.substr(0, k);
-	const string bNumStr = xBinStr.substr(k, xBinStr.size());
-	const string cNumStr = yBinStr.substr(0, k);
-	const string dNumStr = yBinStr.substr(k, yBinStr.size());
+	const string aNumStr = first.substr(0, k);
+	const string bNumStr = first.substr(k, first.size());
+	const string cNumStr = second.substr(0, k);
+	const string dNumStr = second.substr(k, second.size());
 
 	bitset<sizeof(long)* CHAR_BIT> aBin(aNumStr);
 	bitset<sizeof(long)* CHAR_BIT> bBin(bNumStr);
@@ -63,41 +56,25 @@ long long fastMultiply(long first, long second) {
 		+ (static_cast<ll>(u) - static_cast<ll>(v) - static_cast<ll>(w)) * pow(2, k)
 		+ w;
 
-	return xy * negativeMultiplier;
+	return to_string(xy);
 }
 
-ll regularMultiply(long first, long second) {
-	char negativeMultiplier = 1;
+string regularMultiply(string first, string second) {
+	vector<int> calculatedMult(first.size() + second.size(), 0);
 
-	if (first < 0 || second < 0) {
-		negativeMultiplier = -1;
-		first = abs(first);
-		second = abs(second);
-	}
+	reverse(first.begin(), first.end());
+	reverse(second.begin(), second.end());
 
-	vector<ll> firstVec;
-	vector<ll> secondVec;
+	for (size_t i = 0; i < first.size(); ++i) {
+		int carry = 0;
 
-	for (size_t i = first; i > 0; i /= 10) {
-		firstVec.push_back(i % 10);
-	}
-
-	for (size_t i = second; i > 0; i /= 10) {
-		secondVec.push_back(i % 10);
-	}
-
-	vector<unsigned ll> calculatedMult(firstVec.size() + secondVec.size(), 0);
-
-	for (size_t i = 0; i < firstVec.size(); ++i) {
-		long carry = 0;
-
-		for (size_t j = 0; j < secondVec.size(); j++) {
-			calculatedMult[i + j] += carry + firstVec[i] * secondVec[j];
+		for (size_t j = 0; j < second.size(); j++) {
+			calculatedMult[i + j] += carry + ctoi(first[i]) * ctoi(second[j]);
 			carry = calculatedMult[i + j] / 10;
 			calculatedMult[i + j] %= 10;
 		}
 
-		calculatedMult[i + secondVec.size()] += carry;
+		calculatedMult[i + second.size()] += carry;
 	}
 
 	reverse(calculatedMult.begin(), calculatedMult.end());
@@ -107,27 +84,25 @@ ll regularMultiply(long first, long second) {
 		result += to_string(i);
 	}
 
-	return stoll(result);
+	return (result[0] == '0') ? result.erase(0, 1) : result;
 }
 
-void callAndLogMultiply(ll a, ll b, ll (*function)(long, long)) {
+void callAndLogMultiply(string a, string b, string (*function)(string, string)) {
 	cout << a << ", " << b << ": " << function(a, b) << endl;
 }
 
 int main() {
 	cout << "Regular multiply: " << endl;
-	callAndLogMultiply(123155, 23151552, regularMultiply);
-	callAndLogMultiply(3, 3, regularMultiply);
-	callAndLogMultiply(6463, 21315, regularMultiply);
-	callAndLogMultiply(18, 23, regularMultiply);
-	callAndLogMultiply(625, 625, regularMultiply);
+	callAndLogMultiply("12345", "2", regularMultiply);
+	callAndLogMultiply("3", "3", regularMultiply);
+	callAndLogMultiply("6463", "21315", regularMultiply);
+	callAndLogMultiply("18", "23", regularMultiply);
+	callAndLogMultiply("625", "625", regularMultiply);
+	callAndLogMultiply("455689967848757865764", "87578121242346457455689967", regularMultiply);
 
 	cout << endl << "Fast multiply: " << endl;
-	callAndLogMultiply(123155, 23151552, fastMultiply);
-	callAndLogMultiply(3, 3, fastMultiply);
-	callAndLogMultiply(6463, 21315, fastMultiply);
-	callAndLogMultiply(18, 23, fastMultiply);
-	callAndLogMultiply(625, 625, fastMultiply);
+	callAndLogMultiply("3", "3", fastMultiply);
+	callAndLogMultiply("18", "23", fastMultiply);
 
 	return 0;
 }

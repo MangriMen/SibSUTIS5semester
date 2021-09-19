@@ -235,6 +235,7 @@ vector<double> forierConvolute(vector<double> a, vector<double> b, int type) {
 
 int main() {
 	vector<int> sizes = { 16, 64, 128, 512 };
+	//vector<int> sizes = { 5*5, 10*10, 20*20 };
 	cout << "Convolutions:" << endl
 		<< endl << "===================" << endl;
 	for (size_t i = 0; i < sizes.size(); ++i) {
