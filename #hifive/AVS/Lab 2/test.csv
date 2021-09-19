@@ -1,0 +1,40 @@
+Intel(R) Core(TM) i5-7400 CPU
+
+
+Task:;factorial
+OpType:;int64_t (long long)
+Opt:;None
+InsCount:;1000
+Timer:;now(), lib chrono
+Time:;0,00000300
+LNum:;1
+AvTime:;0,00000417
+AbsError:;0,00000417
+RelError:;0,99993345%
+TaskPerf:;99,00006655
+
+
+Task:;powf
+OpType:;int64_t (long long)
+Opt:;None
+InsCount:;1000
+Timer:;now(), lib chrono
+Time:;0,00000000
+LNum:;1
+AvTime:;0,00000191
+AbsError:;0,00000191
+RelError:;0,99985464%
+TaskPerf:;99,00014536
+
+
+Task:;log
+OpType:;int64_t (long long)
+Opt:;None
+InsCount:;1000
+Timer:;now(), lib chrono
+Time:;0,00000100
+LNum:;1
+AvTime:;0,00000208
+AbsError:;0,00000208
+RelError:;0,99986626%
+TaskPerf:;99,00013374
