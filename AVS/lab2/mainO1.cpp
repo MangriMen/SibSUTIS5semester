@@ -135,23 +135,8 @@ int main(int argc, char *argv[])
     double relErrorInt = 0;
     double relErrorDouble = 0;
 
-    if ((testCount / (MHz * 1000 * 1000000) > allInt / testCount))
-    {
-        relErrorInt = ((testCount / (MHz * 1000 * 1000000)) / (allInt / testCount));
-    }
-    else
-    {
-        relErrorInt = ((allInt / testCount) / (testCount / (MHz * 1000 * 1000000)));
-    }
-
-    if ((testCount / (MHz * 1000 * 1000000) > allDouble / testCount))
-    {
-        relErrorDouble = ((testCount / (MHz * 1000 * 1000000)) / (allDouble / testCount));
-    }
-    else
-    {
-        relErrorDouble = ((allDouble / testCount) / (testCount / (MHz * 1000 * 1000000)));
-    }
+    relErrorInt = absErrorInt / (allInt / testCount);
+    relErrorDouble = absErrorDouble / (allDouble / testCount);
 
     cout.imbue(std::locale(std::locale::classic(), new Comma));
     cout.precision(8);
