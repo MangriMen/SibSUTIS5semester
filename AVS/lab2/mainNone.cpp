@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     relErrorInt = absErrorInt / (allInt / testCount);
     relErrorFloat = absErrorFloat / (allFloat / testCount);
     relErrorDouble = absErrorDouble / (allDouble / testCount);
-    string opt = "O3";
+    string opt = "None";
 
     printHeader(testCount);
     printTask("dgemv", "int", opt, testCount, intPoints, avgInt, absErrorInt, relErrorInt);

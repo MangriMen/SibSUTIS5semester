@@ -83,6 +83,73 @@ double test_double(size_t n, size_t m)
     return chrono::duration<double>(end - start).count();
 }
 
+double test_float(size_t n, size_t m)
+{
+    vector<vector<double>> matrix(n, vector<double>(m, 0));
+    vector<double> vec(m, 0);
+    vector<double> out;
+
+    for (size_t i = 0; i < n; i++)
+    {
+        for (size_t j = 0; j < m; j++)
+        {
+            matrix[i][j] = (double)(rand()) / RAND_MAX * (n * m);
+        }
+    }
+
+    for (size_t i = 0; i < m; i++)
+    {
+        vec[i] = (double)(rand()) / RAND_MAX * (n * n);
+    }
+
+    clock_::time_point start = clock_::now();
+
+    out = matrix_vector_multiply(matrix, vec);
+
+    clock_::time_point end = clock_::now();
+
+    return chrono::duration<double>(end - start).count();
+}
+
+void printHeader(size_t testCount)
+{
+    cout.precision(8);
+    cout.imbue(std::locale(std::locale::classic(), new Comma));
+    cout << fixed;
+
+    cout << "Task;";
+    cout << "OpType;";
+    cout << "Opt;";
+    cout << "InsCount;";
+    cout << "Timer;";
+    for (size_t i = 0; i < testCount; i++)
+    {
+        cout << i << ";";
+    }
+    cout << "AvTime;";
+    cout << "AbsError;";
+    cout << "RelError;";
+    cout << "TaskPerf;" << endl;
+}
+
+template <typename T>
+void printTask(string taskName, string opType, string opt, size_t testCount, vector<T> points, double avg, double absError, double relError)
+{
+    cout << taskName << ";";
+    cout << opType << ";";
+    cout << opt << ";";
+    cout << testCount << ";";
+    cout << "chrono;";
+    for (size_t i = 0; i < testCount; i++)
+    {
+        cout << points[i] << ";";
+    }
+    cout << avg << ";";
+    cout << absError << ";";
+    cout << relError << "%" << ";";
+    cout << 100.0 - relError  << ";" << endl;
+}
+
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
@@ -92,21 +159,26 @@ int main(int argc, char *argv[])
         testCount = atoi(argv[1]);
     }
 
-    size_t n = 10000;
+    size_t n = 1000;
     size_t m = n;
 
     vector<double> intPoints(testCount, 0);
+    vector<double> floatPoints(testCount, 0);
     vector<double> doublePoints(testCount, 0);
     for (size_t i = 0; i < testCount; i++)
     {
         intPoints[i] = test_int(n, m);
+        floatPoints[i] = test_float(n, m);
         doublePoints[i] = test_double(n, m);
     }
 
     double avgInt = 0;
+    double avgFloat = 0;
     double avgDouble = 0;
     double matInt = 0;
     double matIntSquare = 0;
+    double matFloat = 0;
+    double matFloatSquare = 0;
     double matDouble = 0;
     double matDoubleSquare = 0;
     for (size_t i = 0; i < testCount; i++)
@@ -114,13 +186,18 @@ int main(int argc, char *argv[])
         avgInt += intPoints[i];
         matInt += i * intPoints[i];
         matIntSquare += (i * i) * intPoints[i];
+        avgFloat += floatPoints[i];
+        matFloat += i * floatPoints[i];
+        matFloatSquare += (i * i) * floatPoints[i];
         avgDouble += doublePoints[i];
         matDouble += i * doublePoints[i];
         matDoubleSquare += (i * i) * doublePoints[i];
     }
     double allInt = avgInt;
+    double allFloat = avgFloat;
     double allDouble = avgDouble;
     avgInt /= testCount;
+    avgFloat /= testCount;
     avgDouble /= testCount;
 
     // double dispInt = matIntSquare - (matInt * matInt);
@@ -130,45 +207,22 @@ int main(int argc, char *argv[])
     // double sDevDouble = sqrt(dispDouble);
 
     double absErrorInt = abs(testCount / (MHz * 1000 * 100000) - allInt / testCount);
+    double absErrorFloat = abs(testCount / (MHz * 1000 * 100000) - allFloat / testCount);
     double absErrorDouble = abs(testCount / (MHz * 1000 * 100000) - allDouble / testCount);
 
     double relErrorInt = 0;
+    double relErrorFloat = 0;
     double relErrorDouble = 0;
 
     relErrorInt = absErrorInt / (allInt / testCount);
+    relErrorFloat = absErrorFloat / (allFloat / testCount);
     relErrorDouble = absErrorDouble / (allDouble / testCount);
+    string opt = "O1";
 
-    cout.imbue(std::locale(std::locale::classic(), new Comma));
-    cout.precision(8);
-    cout << "Task;dgemv int" << endl;
-    cout << "OpType;int" << endl;
-    cout << "Opt;O1" << endl;
-    cout << "InsCount;" << testCount << endl;
-    cout << "Timer;chrono" << endl;
-    for (size_t i = 0; i < testCount; i++)
-    {
-        cout << "Time;" << intPoints[i] << endl;
-        cout << "LNum;" << i << endl;
-    }
-    cout << "AvTime;" << avgInt << endl;
-    cout << "AbsError;" << absErrorInt << endl;
-    cout << "RelError;" << relErrorInt << "%" << endl;
-    cout << "TaskPerf;" << 100.0 - relErrorInt << endl;
-
-    cout << "Task;dgemv double" << endl;
-    cout << "OpType;double" << endl;
-    cout << "Opt;none" << endl;
-    cout << "InsCount;" << testCount << endl;
-    cout << "Timer;chrono" << endl;
-    for (size_t i = 0; i < testCount; i++)
-    {
-        cout << "Time;" << doublePoints[i] << endl;
-        cout << "LNum;" << i << endl;
-    }
-    cout << "AvTime;" << avgDouble << endl;
-    cout << "AbsError;" << absErrorDouble << endl;
-    cout << "RelError;" << relErrorDouble << "%" << endl;
-    cout << "TaskPerf;" << 100.0 - relErrorDouble << endl;
+    printHeader(testCount);
+    printTask("dgemv", "int", opt, testCount, intPoints, avgInt, absErrorInt, relErrorInt);
+    printTask("dgemv", "float", opt, testCount, floatPoints, avgFloat, absErrorFloat, relErrorFloat);
+    printTask("dgemv", "double", opt, testCount, doublePoints, avgDouble, absErrorDouble, relErrorDouble);
 
     return EXIT_SUCCESS;
 }
