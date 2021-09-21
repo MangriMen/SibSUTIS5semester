@@ -111,7 +111,7 @@ double test_float(size_t n, size_t m)
     return chrono::duration<double>(end - start).count();
 }
 
-void printHeader(size_t testCount)
+void printHeader()
 {
     cout.precision(8);
     cout.imbue(std::locale(std::locale::classic(), new Comma));
@@ -122,10 +122,6 @@ void printHeader(size_t testCount)
     cout << "Opt;";
     cout << "InsCount;";
     cout << "Timer;";
-    for (size_t i = 0; i < testCount; i++)
-    {
-        cout << i << ";";
-    }
     cout << "AvTime;";
     cout << "AbsError;";
     cout << "RelError;";
@@ -140,14 +136,16 @@ void printTask(string taskName, string opType, string opt, size_t testCount, vec
     cout << opt << ";";
     cout << testCount << ";";
     cout << "chrono;";
-    for (size_t i = 0; i < testCount; i++)
-    {
-        cout << points[i] << ";";
-    }
     cout << avg << ";";
     cout << absError << ";";
-    cout << relError << "%" << ";";
-    cout << 100.0 - relError  << ";" << endl;
+    cout << relError << "%"
+         << ";";
+    cout << 100.0 - relError << ";" << endl;
+    cout << "Time;LNum;" << endl;
+    for (size_t i = 0; i < testCount; i++)
+    {
+        cout << points[i] << ";" << i << endl;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -200,11 +198,11 @@ int main(int argc, char *argv[])
     avgFloat /= testCount;
     avgDouble /= testCount;
 
-    // double dispInt = matIntSquare - (matInt * matInt);
-    // double dispDouble = matDoubleSquare - (matDouble * matDouble);
+    double dispInt = matIntSquare - (matInt * matInt);
+    double dispDouble = matDoubleSquare - (matDouble * matDouble);
 
-    // double sDevInt = sqrt(dispInt);
-    // double sDevDouble = sqrt(dispDouble);
+    double sDevInt = sqrt(dispInt);
+    double sDevDouble = sqrt(dispDouble);
 
     double absErrorInt = abs(testCount / (MHz * 1000 * 100000) - allInt / testCount);
     double absErrorFloat = abs(testCount / (MHz * 1000 * 100000) - allFloat / testCount);
@@ -219,7 +217,7 @@ int main(int argc, char *argv[])
     relErrorDouble = absErrorDouble / (allDouble / testCount);
     string opt = "O2";
 
-    printHeader(testCount);
+    printHeader();
     printTask("dgemv", "int", opt, testCount, intPoints, avgInt, absErrorInt, relErrorInt);
     printTask("dgemv", "float", opt, testCount, floatPoints, avgFloat, absErrorFloat, relErrorFloat);
     printTask("dgemv", "double", opt, testCount, doublePoints, avgDouble, absErrorDouble, relErrorDouble);
