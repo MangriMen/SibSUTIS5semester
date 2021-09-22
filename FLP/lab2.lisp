@@ -1,37 +1,38 @@
 ;5 group
 
-; 5
-(defun popN(l n)
- (
-  if (> n 0) (popN (cdr l) (- n 1)) l
+;5
+(defun deleteFrontN(l n)
+ (cond
+   ((= n 0) l)
+   (t (deleteFrontN (cdr l) (- n 1)))
  )
 )
 
-(popN '(1 2 3 4 5 6) 3)
+(deleteFrontN '(2 6 1 7 0) 3)
 
-; 15
-(defun cycleLeftN(l n)
- (
-  if (> n 0) (cycleLeftN (append (cdr l) (cons (car l) nil)) (- n 1)) l
+;15
+(defun shiftLeftN(l n)
+ (cond
+  ((= n 0) l)
+  (t (shiftLeftN (append (cdr l) (cons (car l) nil)) (- n 1)))
  )
 )
 
-(cycleLeftN '(a b c d f) 3)
+(shiftLeftN '(a s d f g) 3)
 
-; 25
-(defun letterCount(l letter &optional (counter 0))
- (
-  cond
-	((null l) (list letter counter))
-    ((equal (car l) letter) (letterCount (cdr l) letter (+ counter 1)))
-    (t (letterCount (cdr l) letter counter))
+;25
+(defun countElement(l element &optional (counter 0))
+ (cond 
+  ((null l) (list element counter))
+  (t (countElement (cdr l) element (cond ((equal (car l) element) (+ counter 1)) (t counter))))
  )
 )
 
-(defun listLettersEntryCount(l &optional (out nil))
- (
-  if (null l) out (listLettersEntryCount (remove (car l) l) (append out (cons (letterCount l (car l)) nil)))
+(defun countElementList(l &optional (out nil))
+ (cond
+   ((null l) out)
+   (t (countElementList (remove (car l) l) (append out (list (countElement l (car l))))))
  )
 )
 
-(listLettersEntryCount '(a b a a b b b c b))
+(countElementList '(a b a a c b))
