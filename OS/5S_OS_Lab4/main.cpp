@@ -60,15 +60,7 @@ int main()
                 continue;
             }
             else if (com_ == "hostname") {
-                system("whoami > temp");
-                ifstream fileIn("temp", ios::in);
-                string tmpStr("");
-                if (fileIn.is_open()) {
-                    fileIn >> tmpStr;
-                }
-                vector<string> output = split(tmpStr, "\\");
-                cout << output[0] << endl;
-                continue;
+                execCommand = in;
             }
             else if (com_ == "exit")
             {
