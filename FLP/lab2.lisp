@@ -3,7 +3,7 @@
 ;5
 (defun deleteFrontN(l n)
  (cond
-   ((= n 0) l)
+   ((<= n 0) l)
    (t (deleteFrontN (cdr l) (- n 1)))
  )
 )
@@ -13,7 +13,7 @@
 ;15
 (defun shiftLeftN(l n)
  (cond
-  ((= n 0) l)
+  ((<= n 0) l)
   (t (shiftLeftN (append (cdr l) (cons (car l) nil)) (- n 1)))
  )
 )
