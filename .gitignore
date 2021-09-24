@@ -351,3 +351,7 @@ MigrationBackup/
 
 # Visual Studio Code
 .vscode/
+
+# Compiled files
+*.out
+*.exe
