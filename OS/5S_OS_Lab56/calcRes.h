@@ -1,0 +1,26 @@
+#define IDD_DLGTEST 101
+#define IDC_INPUT_NUM 1000
+#define IDC_SECOND_NUM 1001
+#define IDC_NUM 1002
+
+#define IDC_EQ 2001
+#define IDC_DIVIDE 2002
+#define IDC_MULTIPLY 2003
+#define IDC_PLUS 2004
+#define IDC_MINUS 2005
+
+#define IDC_NULL 3000
+#define IDC_ONE 3001
+#define IDC_TWO 3002
+#define IDC_THREE 3003
+#define IDC_FOUR 3004
+#define IDC_FIVE 3005
+#define IDC_SIX 3006
+#define IDC_SEVEN 3007
+#define IDC_EIGHT 3008
+#define IDC_NINE 3009
+
+#define HK_DIVIDE 4002
+#define HK_MULTIPLY 4003
+#define HK_PLUS 4004
+#define HK_MINUS 4005
