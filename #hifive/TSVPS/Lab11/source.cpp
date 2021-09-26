@@ -25,28 +25,47 @@ int ctoi(const char& number) {
 	return (number - '0');
 }
 
-string fastMultiply(string first, string second) {
-	long n = max(first.size(), second.size());
+long long fastMultiply(ll first, ll second) {
+	string xBinStr = itobs(first);
+	string yBinStr = itobs(second);
+
+	long n = max(xBinStr.size(), yBinStr.size());
 	n = (n & 1) ? n + 1 : n;
 	const long k = n >> 1;
 
-	first.insert(0, string(n - first.size(), '0'));
-	second.insert(0, string(n - second.size(), '0'));
+	xBinStr.insert(0, string(n - xBinStr.size(), '0'));
+	yBinStr.insert(0, string(n - yBinStr.size(), '0'));
 
-	const string aNumStr = first.substr(0, k);
-	const string bNumStr = first.substr(k, first.size());
-	const string cNumStr = second.substr(0, k);
-	const string dNumStr = second.substr(k, second.size());
+	const string aNumStr = xBinStr.substr(0, k);
+	const string bNumStr = xBinStr.substr(k, xBinStr.size());
+	const string cNumStr = yBinStr.substr(0, k);
+	const string dNumStr = yBinStr.substr(k, yBinStr.size());
 
-	bitset<sizeof(long)* CHAR_BIT> aBin(aNumStr);
-	bitset<sizeof(long)* CHAR_BIT> bBin(bNumStr);
-	bitset<sizeof(long)* CHAR_BIT> cBin(cNumStr);
-	bitset<sizeof(long)* CHAR_BIT> dBin(dNumStr);
+	bitset<sizeof(string)* CHAR_BIT> aBin(aNumStr);
+	bitset<sizeof(string)* CHAR_BIT> bBin(bNumStr);
+	bitset<sizeof(string)* CHAR_BIT> cBin(cNumStr);
+	bitset<sizeof(string)* CHAR_BIT> dBin(dNumStr);
 
 	const long a = static_cast<long>(aBin.to_ulong());
 	const long b = static_cast<long>(bBin.to_ulong());
 	const long c = static_cast<long>(cBin.to_ulong());
 	const long d = static_cast<long>(dBin.to_ulong());
+
+	//const string a1 = aBin.to_string();
+	//const string b1 = bBin.to_string();
+	//const string c1 = cBin.to_string();
+	//const string d1 = dBin.to_string();
+
+	//cout << endl << endl << endl;
+	//cout << "a: " << a << " " << a1 << endl;
+	//cout << "a: " << b << " " << b1 << endl;
+	//cout << "a: " << c << " " << c1 << endl;
+	//cout << "a: " << d << " " << d1 << endl;
+	//cout << endl << endl << endl;
+
+	//const long u = (stol(a) + stol(b)) * (stol(c) + stol(d));
+	//const long v = stol(a) * stol(c);
+	//const long w = stol(b) * stol(d);
 
 	const long u = (a + b) * (c + d);
 	const long v = a * c;
@@ -56,7 +75,7 @@ string fastMultiply(string first, string second) {
 		+ (static_cast<ll>(u) - static_cast<ll>(v) - static_cast<ll>(w)) * pow(2, k)
 		+ w;
 
-	return to_string(xy);
+	return xy;
 }
 
 string regularMultiply(string first, string second) {
@@ -87,22 +106,26 @@ string regularMultiply(string first, string second) {
 	return (result[0] == '0') ? result.erase(0, 1) : result;
 }
 
-void callAndLogMultiply(string a, string b, string (*function)(string, string)) {
+//void callAndLogMultiply(string a, string b, string (*function)(string, string)) {
+//	cout << a << ", " << b << ": " << function(a, b) << endl;
+//}
+void callAndLogMultiply(ll a, ll b, ll (*function)(ll, ll)) {
 	cout << a << ", " << b << ": " << function(a, b) << endl;
 }
 
 int main() {
-	cout << "Regular multiply: " << endl;
+	/*cout << "Regular multiply: " << endl;
 	callAndLogMultiply("12345", "2", regularMultiply);
 	callAndLogMultiply("3", "3", regularMultiply);
 	callAndLogMultiply("6463", "21315", regularMultiply);
 	callAndLogMultiply("18", "23", regularMultiply);
 	callAndLogMultiply("625", "625", regularMultiply);
-	callAndLogMultiply("455689967848757865764", "87578121242346457455689967", regularMultiply);
+	callAndLogMultiply("455689967848757865764", "87578121242346457455689967", regularMultiply);*/
 
 	cout << endl << "Fast multiply: " << endl;
-	callAndLogMultiply("3", "3", fastMultiply);
-	callAndLogMultiply("18", "23", fastMultiply);
+	//callAndLogMultiply("3", "3", fastMultiply);
+	//callAndLogMultiply("18", "23", fastMultiply);
+	callAndLogMultiply(18, 23, fastMultiply);
 
 	return 0;
 }
