@@ -26,10 +26,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
     wc.lpszMenuName = 0;                           //идентификатор ресурса меню
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1); //цвет
     //закраски окна
-    // wc.style = CS_HREDRAW | CS_VREDRAW; //стиль окна
-    wc.cbClsExtra = 0;       //рудимент, инициализируется нулём
-    wc.cbWndExtra = 0;       //рудимент, инициализируется нулём
-    if (!RegisterClass(&wc)) //Регистрация класса окна
+    wc.style = CS_HREDRAW | CS_VREDRAW; //стиль окна
+    wc.cbClsExtra = 0;                  //рудимент, инициализируется нулём
+    wc.cbWndExtra = 0;                  //рудимент, инициализируется нулём
+    if (!RegisterClass(&wc))            //Регистрация класса окна
         return 0;
     hWnd = CreateWindow(lpszAppName,         //Имя класса окна
                         lpszAppName,         //Имя окна

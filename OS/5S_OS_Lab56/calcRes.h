@@ -2,12 +2,16 @@
 #define IDC_INPUT_NUM 1000
 #define IDC_SECOND_NUM 1001
 #define IDC_NUM 1002
+#define IDC_BEFORE_NUM 1003
 
 #define IDC_EQ 2001
 #define IDC_DIVIDE 2002
 #define IDC_MULTIPLY 2003
 #define IDC_PLUS 2004
 #define IDC_MINUS 2005
+
+#define IDC_CLEAR 2006
+#define IDC_CLEAR_LAST 2007
 
 #define IDC_NULL 3000
 #define IDC_ONE 3001
