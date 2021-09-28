@@ -36,10 +36,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
     MSG msg;
     DialogBox(hInstance, (LPCTSTR)IDD_DLGTEST, NULL,
               (DLGPROC)DlgProc);
-    RegisterHotKey(NULL, HK_PLUS, NULL, VK_F10);
-    // RegisterHotKey(NULL, HK_MINUS, NULL, VK_OEM_MINUS);
-    // RegisterHotKey(NULL, HK_MULTIPLY, NULL, '*');
-    // RegisterHotKey(NULL, HK_DIVIDE, NULL, '/');
     while (GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);
@@ -64,16 +60,6 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
                    _T("Hotkey pressed"),
                    _T("Windows Desktop Guided Tour"),
                    NULL);
-        // switch (HIWORD(lParam))
-        // {
-        // case VK_F10:
-        //     GetDlgItemText(hDlg, IDC_NUM, beforeNum, 100);
-        //     SetDlgItemText(hDlg, IDC_NUM, TEXT(""));
-        //     lastOperation = PLUS;
-        //     return TRUE;
-        // default:
-        //     return TRUE;
-        // }
         break;
     case WM_COMMAND:
         switch (LOWORD(wParam))

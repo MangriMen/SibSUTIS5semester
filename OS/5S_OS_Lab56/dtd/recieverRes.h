@@ -1,0 +1,2 @@
+#define IDD_DLGTEST 101
+#define IDC_MESSAGE 1001
