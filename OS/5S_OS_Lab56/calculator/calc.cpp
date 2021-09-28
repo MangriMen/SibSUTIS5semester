@@ -55,12 +55,6 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
     {
     case WM_INITDIALOG:
         return TRUE;
-    case WM_HOTKEY:
-        MessageBox(NULL,
-                   _T("Hotkey pressed"),
-                   _T("Windows Desktop Guided Tour"),
-                   NULL);
-        break;
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
@@ -167,6 +161,12 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
 
 void addNumberToTextEdit(HWND hDlg, int id, int num)
 {
+    if (lastOperation == NOTHING)
+    {
+        _stprintf(beforeNum, TEXT("%s"), TEXT(""));
+        SetDlgItemText(hDlg, IDC_BEFORE_NUM, TEXT(""));
+        SetDlgItemText(hDlg, IDC_NUM, TEXT(""));
+    }
     TCHAR tempBuf[100];
     GetDlgItemText(hDlg, id, tempBuf, sizeof(tempBuf) * sizeof(tempBuf[0]));
     int len = _tcslen(tempBuf);
@@ -219,8 +219,10 @@ void addActionToTextEdit(HWND hDlg, int id)
 
 void rememberOperation(HWND hDlg, Operation newOperation, int edittextMainId, int edittextBufferId, TCHAR *buffer)
 {
+    bool needEq = false;
     if (lastOperation == NOTHING)
     {
+        needEq = true;
         shiftNumberToBuffer(hDlg, edittextMainId, edittextBufferId, buffer);
     }
     lastOperation = newOperation;
