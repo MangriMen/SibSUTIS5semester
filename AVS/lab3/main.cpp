@@ -12,11 +12,38 @@ using namespace std;
 constexpr long double RAM_TIME = 13.75 / NANO;
 constexpr long double SSD_TIME = 150 / 10e7;
 constexpr long double HDD_TIME = 520 / 10e8;
+constexpr long double FLASH_TIME = 9 / 10e6;
+
+constexpr size_t KB_ = 1024;
+constexpr size_t MB_ = 1024 * 1024;
+constexpr size_t GB_ = 1024 * 1024 * 1024;
 
 struct Comma final : std::numpunct<char>
 {
     char do_decimal_point() const override { return ','; }
 };
+
+vector<string> split(string s, string delimiter)
+{
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    string token;
+    vector<string> res;
+
+    while ((pos_end = s.find(delimiter, pos_start)) != string::npos)
+    {
+        token = s.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back(token);
+    }
+
+    res.push_back(s.substr(pos_start));
+    return res;
+}
+
+bool memoryTypeIsRam(const string &memoryType)
+{
+    return memoryType == "RAM";
+}
 
 template <typename T>
 long double testWrite(const string memoryType, const size_t dataBlockSize, vector<T> &vec, string filename = "")
@@ -26,7 +53,7 @@ long double testWrite(const string memoryType, const size_t dataBlockSize, vecto
     auto localStart = chrono::high_resolution_clock::now();
     auto localStop = chrono::high_resolution_clock::now();
 
-    if (memoryType == "HDD" || memoryType == "SSD")
+    if (!memoryTypeIsRam(memoryType))
     {
         fileOut.open(filename, ios::out | ios::binary);
 
@@ -38,15 +65,15 @@ long double testWrite(const string memoryType, const size_t dataBlockSize, vecto
 
     for (size_t i = 0; i < dataBlockSize; i++)
     {
-        T tempElement = rand() % (dataBlockSize * 2) - dataBlockSize;
+        const T tempElement = rand() % (dataBlockSize * 2) - dataBlockSize;
 
-        if (memoryType == "RAM")
+        if (memoryTypeIsRam(memoryType))
         {
             localStart = chrono::high_resolution_clock::now();
             vec[i] = tempElement;
             localStop = chrono::high_resolution_clock::now();
         }
-        else if (memoryType == "HDD" || memoryType == "SSD")
+        else
         {
             localStart = chrono::high_resolution_clock::now();
             fileOut << tempElement;
@@ -56,15 +83,15 @@ long double testWrite(const string memoryType, const size_t dataBlockSize, vecto
         timePoints.push_back(chrono::duration<long double>(localStop - localStart).count());
     }
 
-    if (memoryType == "HDD" || memoryType == "SSD")
+    if (!memoryTypeIsRam(memoryType))
     {
         fileOut.close();
     }
 
     long double totalTime = 0;
-    for (const auto &i : timePoints)
+    for (const auto &point : timePoints)
     {
-        totalTime += i;
+        totalTime += point;
     }
 
     return totalTime;
@@ -78,7 +105,7 @@ long double testRead(const string memoryType, const size_t dataBlockSize, vector
     auto localStart = chrono::high_resolution_clock::now();
     auto localStop = chrono::high_resolution_clock::now();
 
-    if (memoryType == "HDD" || memoryType == "SSD")
+    if (!memoryTypeIsRam(memoryType))
     {
         fileIn.open(filename, ios::in | ios::binary);
 
@@ -90,13 +117,13 @@ long double testRead(const string memoryType, const size_t dataBlockSize, vector
 
     for (size_t i = 0; i < dataBlockSize; i++)
     {
-        if (memoryType == "RAM")
+        if (memoryTypeIsRam(memoryType))
         {
             localStart = chrono::high_resolution_clock::now();
-            vec[i];
+            const T &_ [[maybe_unused]] = vec[i];
             localStop = chrono::high_resolution_clock::now();
         }
-        else if (memoryType == "HDD" || memoryType == "SSD")
+        else
         {
             T tempElement = {};
 
@@ -108,34 +135,56 @@ long double testRead(const string memoryType, const size_t dataBlockSize, vector
         timePoints.push_back(chrono::duration<long double>(localStop - localStart).count());
     }
 
-    if (memoryType == "HDD" || memoryType == "SSD")
+    if (!memoryTypeIsRam(memoryType))
     {
         fileIn.close();
     }
 
     long double totalTime = 0;
-    for (const auto &i : timePoints)
+    for (const auto &point : timePoints)
     {
-        totalTime += i;
+        totalTime += point;
     }
 
     return totalTime;
 }
 
-template <typename T>
-void fillRand(vector<T> arr)
+long double getAvgTimeFromVec(vector<long double> timePoints)
 {
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    vector<T> temp;
-    for (size_t i = 0; i < arr.size(); i++)
+    long double avgTime = 0;
+    for (const auto &point : timePoints)
     {
-        temp.push_back(i);
+        avgTime += point;
     }
-    shuffle(temp.begin(), temp.end(), std::default_random_engine(seed));
-    for (size_t i = 0; i < arr.size(); i++)
+    avgTime /= timePoints.size();
+    return avgTime;
+}
+
+size_t parseBlockSize(string blockSize)
+{
+    size_t prefixPos = blockSize.find_first_not_of("123456789");
+    size_t blockSizeNum = atoll(blockSize.c_str());
+
+    if (prefixPos != string::npos)
     {
-        arr[i] = temp[i];
+        string prefixStr = blockSize.substr(prefixPos, 2);
+        std::transform(prefixStr.begin(), prefixStr.end(), prefixStr.begin(), ::toupper);
+
+        if (prefixStr == "KB")
+        {
+            blockSizeNum *= KB_;
+        }
+        else if (prefixStr == "MB")
+        {
+            blockSizeNum *= MB_;
+        }
+        else if (prefixStr == "GB")
+        {
+            blockSizeNum *= GB_;
+        }
     }
+
+    return blockSizeNum;
 }
 
 void printHeader()
@@ -161,14 +210,8 @@ void printHeader()
 
 void printInfo(string memoryType, size_t blockSize, string elementType, size_t bufferSize, size_t launchNum, string timerType, long double writeTime, long double avgWriteTime, long double absErrorWrite, long double relErrorWrite, long double readTime, long double avgReadTime, long double absErrorRead, long double relErrorRead)
 {
-    long double writeBandwidth = (blockSize / avgWriteTime) / 1024 / 8 * 10;
-    long double readBandwidth = (blockSize / avgReadTime) / 1024 / 8 * 10;
-
-    if (memoryType == "SSD" || memoryType == "HDD")
-    {
-        writeBandwidth /= 10e2;
-        readBandwidth /= 10e2;
-    }
+    long double writeBandwidth = (blockSize / avgWriteTime) / MB_;
+    long double readBandwidth = (blockSize / avgReadTime) / MB_;
 
     cout << memoryType << ";"
          << blockSize << ";"
@@ -189,77 +232,51 @@ void printInfo(string memoryType, size_t blockSize, string elementType, size_t b
          << endl;
 }
 
-long double getAvgTimeFromVec(vector<long double> timePoints)
+void doTest(const string timerType, const string memoryType, const size_t blockSize, const size_t launchCount, const string tempFilename = "")
 {
-    long double avgTime = 0;
-    for (const auto &i : timePoints)
-    {
-        avgTime += i;
-    }
-    avgTime /= timePoints.size();
-    return avgTime;
-}
+    const size_t dataBlockSize = blockSize / sizeof(blockSize);
+    const size_t bufferSize = sizeof(int);
+    const string elementType = "int";
 
-long double getTotalTimeFromVec(vector<long double> timePoints)
-{
-    long double totalTime = 0;
-    for (const auto &i : timePoints)
-    {
-        totalTime += i;
-    }
-    return totalTime;
-}
-
-void doTest(const string timerType, const string memoryType, const size_t blockSize, const size_t launchCount)
-{
-    size_t dataBlockSize = blockSize / sizeof(blockSize);
+    long double elementTime = 0;
     vector<long double> timePointsWrite;
     vector<long double> timePointsRead;
-    const string elementType = "int";
-    const size_t bufferSize = sizeof(int);
-    long double elementTime = 0;
 
-    if (memoryType == "RAM")
+    vector<int> dataBlock;
+    string filename = "";
+
+    if (memoryTypeIsRam(memoryType))
     {
-        vector<int> dataBlock(blockSize, 0);
-
-        for (size_t i = 0; i < launchCount; i++)
-        {
-            timePointsWrite.push_back(testWrite(memoryType, dataBlockSize, dataBlock));
-            timePointsRead.push_back(testRead(memoryType, dataBlockSize, dataBlock));
-        }
-
+        dataBlock.resize(blockSize, 0);
         elementTime = RAM_TIME;
     }
-    else if (memoryType == "SSD")
+    else
     {
-        const string filename = "/tmp/memorytest.bin";
-        vector<int> dataBlock;
-
-        for (size_t i = 0; i < launchCount; i++)
+        if (memoryType == "SSD")
         {
-            timePointsWrite.push_back(testWrite(memoryType, dataBlockSize, dataBlock, filename));
-            timePointsRead.push_back(testRead(memoryType, dataBlockSize, dataBlock, filename));
+            filename = (tempFilename == "" ? "/tmp/memorytest.bin" : tempFilename);
+            elementTime = SSD_TIME;
         }
-
-        remove(filename.c_str());
-
-        elementTime = SSD_TIME;
+        else if (memoryType == "HDD")
+        {
+            filename = (tempFilename == "" ? "memorytest.bin" : tempFilename);
+            elementTime = HDD_TIME;
+        }
+        else if (memoryType == "FLASH")
+        {
+            filename = (tempFilename == "" ? "memorytest.bin" : tempFilename);
+            elementTime = FLASH_TIME;
+        }
     }
-    else if (memoryType == "HDD")
+
+    for (size_t i = 0; i < launchCount; i++)
     {
-        const string filename = "memorytest.bin";
-        vector<int> dataBlock;
-
-        for (size_t i = 0; i < launchCount; i++)
+        timePointsWrite.push_back(testWrite(memoryType, dataBlockSize, dataBlock, filename));
+        timePointsRead.push_back(testRead(memoryType, dataBlockSize, dataBlock, filename));
+        if (filename != "")
         {
-            timePointsWrite.push_back(testWrite(memoryType, dataBlockSize, dataBlock, filename));
-            timePointsRead.push_back(testRead(memoryType, dataBlockSize, dataBlock, filename));
+            remove(filename.c_str());
         }
-
-        remove(filename.c_str());
-
-        elementTime = HDD_TIME;
     }
 
     const long double avgWriteTime = getAvgTimeFromVec(timePointsWrite);
@@ -268,8 +285,6 @@ void doTest(const string timerType, const string memoryType, const size_t blockS
     const long double absErrorRead = abs((elementTime * bufferSize * launchCount) - avgReadTime);
     const long double relErrorWrite = absErrorWrite / avgWriteTime * 100;
     const long double relErrorRead = absErrorRead / avgReadTime * 100;
-
-    printHeader();
 
     for (size_t i = 0; i < launchCount; i++)
     {
@@ -298,36 +313,80 @@ int main(int argc, char *argv[])
     cout.imbue(std::locale(std::locale::classic(), new Comma));
 
     const string timerType = "chrono::high_resolution_clock";
-    string memoryType("RAM");
-    size_t blockSize(1024);
-    size_t launchCount(10);
+    string tempFilename = "";
+    string memoryType = "RAM";
+    vector<size_t> blockSizeCollection{1024};
+    size_t launchCount = 10;
+    bool isWriteToCsv = false;
 
     for (size_t i = 0; i < static_cast<size_t>(argc); i++)
     {
-        if (!strcmp(argv[i], "-m") || !strcmp(argv[i], "--memory-type"))
-        {
-            memoryType = argv[i + 1];
-        }
         if (!strcmp(argv[i], "-b") || !strcmp(argv[i], "--block-size"))
         {
-            blockSize = atoll(argv[i + 1]);
+            blockSizeCollection.clear();
+            for (const auto &blockSize : split(argv[i + 1], ","))
+            {
+                blockSizeCollection.push_back(parseBlockSize(blockSize));
+            }
+        }
+        if (!strcmp(argv[i], "-f") || !strcmp(argv[i], "--file-out"))
+        {
+            isWriteToCsv = true;
+        }
+        if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))
+        {
+            cout
+                << "-b SIZE, --block-size SIZE     Data block size in bytes. Default 1024. Use \",\" no spaces for enumeration, for example 1024,2048." << endl
+                << "-f, --file-out                 Outputting data to a csv file. Filename is \"memory type\".csv." << endl
+                << "-h, --help                     Help." << endl
+                << "-l COUNT, --launch-count COUNT Number of tests performed. Default 10." << endl
+                << "-m TYPE, --memory-type TYPE    The type of device for testing. May be RAM, SSD, HDD. Default RAM." << endl
+                << "-t FILE, --temp-file FILE      Path to a temporary file that will be created at runtime for testing (excluding RAM memory type)." << endl;
+            return EXIT_SUCCESS;
         }
         if (!strcmp(argv[i], "-l") || !strcmp(argv[i], "--launch-count"))
         {
             launchCount = atoll(argv[i + 1]);
         }
+        if (!strcmp(argv[i], "-m") || !strcmp(argv[i], "--memory-type"))
+        {
+            memoryType = argv[i + 1];
+        }
+        if (!strcmp(argv[i], "-t") || !strcmp(argv[i], "--temp-file"))
+        {
+            tempFilename = argv[i + 1];
+        }
     }
 
-    ofstream out(memoryType + ".csv");
-    std::cout.rdbuf(out.rdbuf());
-
-    if (memoryType == "RAM" || memoryType == "SSD" || memoryType == "HDD")
+    if (memoryType == "RAM" || memoryType == "SSD" || memoryType == "HDD" || memoryType == "FLASH")
     {
-        doTest(timerType, memoryType, blockSize, launchCount);
+        ofstream out;
+        if (isWriteToCsv)
+        {
+            out.open(memoryType + ".csv", ios::out);
+            if (!out.is_open())
+            {
+                cerr << "Unable to create output file." << endl;
+                return EXIT_FAILURE;
+            }
+            std::cout.rdbuf(out.rdbuf());
+        }
+
+        printHeader();
+
+        for (const auto &blockSize : blockSizeCollection)
+        {
+            doTest(timerType, memoryType, blockSize, launchCount, tempFilename);
+        }
+
+        if (out.is_open())
+        {
+            out.close();
+        }
     }
     else
     {
-        cerr << "Invalid input" << endl;
+        cerr << "Invalid input." << endl;
         return EXIT_FAILURE;
     }
 
