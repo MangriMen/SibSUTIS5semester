@@ -311,6 +311,7 @@ int main(int argc, char *argv[])
     srand(static_cast<unsigned int>(time(NULL)));
 
     cout.imbue(std::locale(std::locale::classic(), new Comma));
+    cout << fixed;
 
     const string timerType = "chrono::high_resolution_clock";
     string tempFilename = "";
