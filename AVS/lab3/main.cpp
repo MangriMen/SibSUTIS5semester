@@ -204,7 +204,7 @@ void printHeader()
          << "AverageReadTime(s);"
          << "ReadBandwidth(Mb/s);"
          << "AbsError(read)(s);"
-         << "RelError(read)(%);"
+         << "RelError(read)(%)"
          << endl;
 }
 
@@ -228,7 +228,7 @@ void printInfo(string memoryType, size_t blockSize, string elementType, size_t b
          << avgReadTime << ";"
          << readBandwidth << ";"
          << absErrorRead << ";"
-         << relErrorRead << "%;"
+         << relErrorRead << "%"
          << endl;
 }
 
