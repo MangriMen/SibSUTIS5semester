@@ -59,9 +59,6 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
         CenterWindowOnDesktop(hDlg);
         EnableWindow(GetDlgItem(hDlg, IDC_BEFORE_NUM), false);
         return TRUE;
-    case WM_HOTKEY:
-        MessageBox(hDlg, TEXT("Hello"), TEXT("Title"), 0);
-        return TRUE;
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
@@ -156,7 +153,7 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
         return FALSE;
     }
 
-    return DefDlgProc(hDlg, message, wParam, lParam);
+    return FALSE;
 }
 
 void addNumberToTextEdit(HWND hDlg, int id, int num)
