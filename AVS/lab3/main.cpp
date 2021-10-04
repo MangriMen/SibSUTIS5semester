@@ -162,7 +162,7 @@ long double getAvgTimeFromVec(vector<long double> timePoints)
 
 size_t parseBlockSize(string blockSize)
 {
-    size_t prefixPos = blockSize.find_first_not_of("123456789");
+    size_t prefixPos = blockSize.find_first_not_of("0123456789");
     size_t blockSizeNum = atoll(blockSize.c_str());
 
     if (prefixPos != string::npos)
@@ -210,8 +210,14 @@ void printHeader()
 
 void printInfo(string memoryType, size_t blockSize, string elementType, size_t bufferSize, size_t launchNum, string timerType, long double writeTime, long double avgWriteTime, long double absErrorWrite, long double relErrorWrite, long double readTime, long double avgReadTime, long double absErrorRead, long double relErrorRead)
 {
-    long double writeBandwidth = (blockSize / avgWriteTime) / MB_;
-    long double readBandwidth = (blockSize / avgReadTime) / MB_;
+    long double writeBandwidth = (blockSize / avgWriteTime) / 1024 / 8;
+    long double readBandwidth = (blockSize / avgReadTime) / 1024 / 8;
+
+    if (!memoryTypeIsRam(memoryType))
+    {
+        writeBandwidth /= 10e2;
+        readBandwidth /= 10e2;
+    }
 
     cout << memoryType << ";"
          << blockSize << ";"
