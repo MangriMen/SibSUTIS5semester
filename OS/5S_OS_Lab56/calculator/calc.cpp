@@ -16,9 +16,16 @@ enum Operation
     EQUAL
 };
 
-Operation lastOperation = EQUAL;
+enum ClearState
+{
+    NOTHING,
+    LAST,
+    ALL
+};
+
 TCHAR beforeNum[100];
-bool isClear = false;
+Operation lastOperation = EQUAL;
+ClearState isClear = NOTHING;
 
 LRESULT CALLBACK
 DlgProc(HWND hDlg, UINT message, WPARAM wParam,
@@ -35,15 +42,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow)
 {
-    MSG msg;
     DialogBox(hInstance, (LPCTSTR)IDD_DLGTEST, NULL,
               (DLGPROC)DlgProc);
-    while (GetMessage(&msg, NULL, 0, 0))
-    {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-    return msg.wParam;
 }
 
 LRESULT CALLBACK
@@ -57,6 +57,10 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
     {
     case WM_INITDIALOG:
         CenterWindowOnDesktop(hDlg);
+        EnableWindow(GetDlgItem(hDlg, IDC_BEFORE_NUM), false);
+        return TRUE;
+    case WM_HOTKEY:
+        MessageBox(hDlg, TEXT("Hello"), TEXT("Title"), 0);
         return TRUE;
     case WM_COMMAND:
         switch (LOWORD(wParam))
@@ -75,7 +79,7 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
             return TRUE;
         case IDC_EQ:
             a = _tstoll(beforeNum);
-            GetDlgItemText(hDlg, IDC_NUM, beforeNum, 100);
+            GetDlgItemText(hDlg, IDC_NUM, beforeNum, sizeof(beforeNum) / sizeof(beforeNum[0]));
             b = _tstoll(beforeNum);
             switch (lastOperation)
             {
@@ -106,20 +110,12 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
             SetDlgItemText(hDlg, IDC_NUM, beforeNum);
             SetDlgItemText(hDlg, IDC_BEFORE_NUM, beforeNum);
             lastOperation = EQUAL;
-            isClear = true;
+            isClear = ALL;
             return TRUE;
         case IDC_CLEAR:
             _stprintf(beforeNum, TEXT("%s"), TEXT(""));
             SetDlgItemText(hDlg, IDC_BEFORE_NUM, TEXT(""));
             SetDlgItemText(hDlg, IDC_NUM, TEXT(""));
-            return TRUE;
-        case IDC_CLEAR_LAST:
-            SetDlgItemText(hDlg, IDC_NUM, TEXT(""));
-            if (lastOperation == EQUAL)
-            {
-                _stprintf(beforeNum, TEXT("%s"), TEXT(""));
-                SetDlgItemText(hDlg, IDC_BEFORE_NUM, TEXT(""));
-            }
             return TRUE;
         case IDC_NULL:
             addNumberToTextEdit(hDlg, IDC_NUM, 0);
@@ -155,25 +151,32 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
             PostQuitMessage(0);
             return TRUE;
         }
-        break;
+        return TRUE;
     default:
         return FALSE;
     }
 
-    return FALSE;
+    return DefDlgProc(hDlg, message, wParam, lParam);
 }
 
 void addNumberToTextEdit(HWND hDlg, int id, int num)
 {
-    if (isClear)
+    switch (isClear)
     {
+    case LAST:
+        SetDlgItemText(hDlg, IDC_NUM, TEXT(""));
+        break;
+    case ALL:
         _stprintf(beforeNum, TEXT("%s"), TEXT(""));
         SetDlgItemText(hDlg, IDC_BEFORE_NUM, TEXT(""));
         SetDlgItemText(hDlg, IDC_NUM, TEXT(""));
-        isClear = false;
+        break;
+    default:
+        break;
     }
+    isClear = NOTHING;
     TCHAR tempBuf[100];
-    GetDlgItemText(hDlg, id, tempBuf, sizeof(tempBuf) * sizeof(tempBuf[0]));
+    GetDlgItemText(hDlg, id, tempBuf, sizeof(tempBuf) / sizeof(tempBuf[0]));
     int len = _tcslen(tempBuf);
     if (len >= 16)
     {
@@ -185,15 +188,17 @@ void addNumberToTextEdit(HWND hDlg, int id, int num)
 
 void shiftNumberToBuffer(HWND hDlg, int edittextMainId, int edittextBufferId, TCHAR *buffer)
 {
-    GetDlgItemText(hDlg, edittextMainId, buffer, sizeof(buffer) * sizeof(buffer[0]));
-    SetDlgItemText(hDlg, edittextMainId, TEXT(""));
+    GetDlgItemText(hDlg, edittextMainId, buffer, sizeof(buffer) / sizeof(buffer[0]));
     SetDlgItemText(hDlg, edittextBufferId, buffer);
+    isClear = LAST;
 }
 
 void addActionToTextEdit(HWND hDlg, int id)
 {
-    TCHAR tempBuf[100];
-    GetDlgItemText(hDlg, id, tempBuf, sizeof(tempBuf) * sizeof(tempBuf[0]));
+    HWND hWnd = GetDlgItem(hDlg, id);
+    int textLength = GetWindowTextLength(hWnd) + 1;
+    PTCHAR tempBuf = new TCHAR[textLength];
+    GetDlgItemText(hDlg, id, tempBuf, textLength);
     int len = _tcslen(tempBuf);
     int pos = len;
     if (!_istdigit(tempBuf[len - 1]))
@@ -224,12 +229,15 @@ void addActionToTextEdit(HWND hDlg, int id)
 
 void rememberOperation(HWND hDlg, Operation newOperation, int edittextMainId, int edittextBufferId, TCHAR *buffer)
 {
-    isClear = false;
-    bool needEq = false;
+    isClear = NOTHING;
     if (lastOperation == EQUAL)
     {
-        needEq = true;
         shiftNumberToBuffer(hDlg, edittextMainId, edittextBufferId, buffer);
+    }
+    else if (lastOperation == newOperation)
+    {
+        SendMessage(hDlg, WM_COMMAND, IDC_EQ, 0);
+        isClear = LAST;
     }
     lastOperation = newOperation;
     addActionToTextEdit(hDlg, edittextBufferId);

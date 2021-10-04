@@ -11,7 +11,6 @@
 #define IDC_MINUS 2005
 
 #define IDC_CLEAR 2006
-#define IDC_CLEAR_LAST 2007
 
 #define IDC_NULL 3000
 #define IDC_ONE 3001
