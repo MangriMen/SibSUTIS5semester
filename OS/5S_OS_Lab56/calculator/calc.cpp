@@ -13,11 +13,12 @@ enum Operation
     MINUS,
     DIVIDE,
     MULTIPLY,
-    NOTHING
+    EQUAL
 };
 
-Operation lastOperation = NOTHING;
+Operation lastOperation = EQUAL;
 TCHAR beforeNum[100];
+bool isClear = false;
 
 LRESULT CALLBACK
 DlgProc(HWND hDlg, UINT message, WPARAM wParam,
@@ -27,6 +28,7 @@ void addNumberToTextEdit(HWND hDlg, int id, int num);
 void shiftNumberToBuffer(HWND hDlg, int edittextMainId, int edittextBufferId, TCHAR *buffer);
 void addActionToTextEdit(HWND hDlg, int id);
 void rememberOperation(HWND hDlg, Operation newOperation, int edittextMainId, int edittextBufferId, TCHAR *buffer);
+BOOL CenterWindowOnDesktop(HWND hwndWindow);
 
 int WINAPI WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,
@@ -54,6 +56,7 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
     switch (message)
     {
     case WM_INITDIALOG:
+        CenterWindowOnDesktop(hDlg);
         return TRUE;
     case WM_COMMAND:
         switch (LOWORD(wParam))
@@ -88,7 +91,7 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
                     _stprintf(beforeNum, TEXT("%s"), TEXT("Indefinite"));
                     SetDlgItemText(hDlg, IDC_NUM, beforeNum);
                     SetDlgItemText(hDlg, IDC_BEFORE_NUM, beforeNum);
-                    lastOperation = NOTHING;
+                    lastOperation = EQUAL;
                     return TRUE;
                 }
                 c = a / b;
@@ -102,7 +105,8 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
             _stprintf(beforeNum, TEXT("%lld"), c);
             SetDlgItemText(hDlg, IDC_NUM, beforeNum);
             SetDlgItemText(hDlg, IDC_BEFORE_NUM, beforeNum);
-            lastOperation = NOTHING;
+            lastOperation = EQUAL;
+            isClear = true;
             return TRUE;
         case IDC_CLEAR:
             _stprintf(beforeNum, TEXT("%s"), TEXT(""));
@@ -111,7 +115,7 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
             return TRUE;
         case IDC_CLEAR_LAST:
             SetDlgItemText(hDlg, IDC_NUM, TEXT(""));
-            if (lastOperation == NOTHING)
+            if (lastOperation == EQUAL)
             {
                 _stprintf(beforeNum, TEXT("%s"), TEXT(""));
                 SetDlgItemText(hDlg, IDC_BEFORE_NUM, TEXT(""));
@@ -161,11 +165,12 @@ DlgProc(HWND hDlg, UINT message, WPARAM wParam,
 
 void addNumberToTextEdit(HWND hDlg, int id, int num)
 {
-    if (lastOperation == NOTHING)
+    if (isClear)
     {
         _stprintf(beforeNum, TEXT("%s"), TEXT(""));
         SetDlgItemText(hDlg, IDC_BEFORE_NUM, TEXT(""));
         SetDlgItemText(hDlg, IDC_NUM, TEXT(""));
+        isClear = false;
     }
     TCHAR tempBuf[100];
     GetDlgItemText(hDlg, id, tempBuf, sizeof(tempBuf) * sizeof(tempBuf[0]));
@@ -219,12 +224,35 @@ void addActionToTextEdit(HWND hDlg, int id)
 
 void rememberOperation(HWND hDlg, Operation newOperation, int edittextMainId, int edittextBufferId, TCHAR *buffer)
 {
+    isClear = false;
     bool needEq = false;
-    if (lastOperation == NOTHING)
+    if (lastOperation == EQUAL)
     {
         needEq = true;
         shiftNumberToBuffer(hDlg, edittextMainId, edittextBufferId, buffer);
     }
     lastOperation = newOperation;
     addActionToTextEdit(hDlg, edittextBufferId);
+}
+
+BOOL CenterWindowOnDesktop(HWND hwndWindow)
+{
+    int screenwidth, screenheight;
+    int dlgwidth, dlgheight, x, y;
+    RECT rect;
+
+    screenwidth = GetSystemMetrics(SM_CXSCREEN);
+    screenheight = GetSystemMetrics(SM_CYSCREEN);
+
+    GetWindowRect(hwndWindow, &rect);
+
+    dlgwidth = rect.right - rect.left;
+    dlgheight = rect.bottom - rect.top;
+
+    x = (screenwidth - dlgwidth) / 2;
+    y = (screenheight - dlgheight) / 2;
+
+    SetWindowPos(hwndWindow, NULL, x, y, 0, 0, SWP_NOSIZE);
+
+    return TRUE;
 }

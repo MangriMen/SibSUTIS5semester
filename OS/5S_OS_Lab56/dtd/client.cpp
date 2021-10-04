@@ -90,22 +90,17 @@ BOOL CenterWindowOnDesktop(HWND hwndWindow)
     int dlgwidth, dlgheight, x, y;
     RECT rect;
 
-    /* Get Screen width and height */
     screenwidth = GetSystemMetrics(SM_CXSCREEN);
     screenheight = GetSystemMetrics(SM_CYSCREEN);
 
-    /* Get Window rect top, left, right, bottom */
     GetWindowRect(hwndWindow, &rect);
 
-    /* Calculate Window width and height */
     dlgwidth = rect.right - rect.left;
     dlgheight = rect.bottom - rect.top;
 
-    /* Calculate Window left, top (x,y) */
     x = (screenwidth - dlgwidth) / 2;
     y = (screenheight - dlgheight) / 2;
 
-    /* Reposition Window left, top (x,y) */
     SetWindowPos(hwndWindow, NULL, x, y, 0, 0, SWP_NOSIZE);
 
     return TRUE;
