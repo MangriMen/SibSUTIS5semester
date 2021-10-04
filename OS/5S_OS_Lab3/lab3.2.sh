@@ -14,4 +14,4 @@ echo "Killing child process (pid $(($pid+1)))..."
 kill $(($pid+1))
 echo "---"
 pstree $USER -a -p
-kill lab3.2.out
+pkill lab3.2.out

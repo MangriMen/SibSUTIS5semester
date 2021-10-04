@@ -4,3 +4,4 @@ read pid
 echo -n "Children: "
 cat "/proc/$pid/task/$pid/children"
 echo
+pkill lab3.3.out

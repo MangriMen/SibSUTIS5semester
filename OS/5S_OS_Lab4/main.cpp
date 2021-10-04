@@ -30,46 +30,66 @@ int main()
 
         vector<string> args = split(in, " ");
 
-        if (args.size() > 0 && args[0] != "") {
+        if (args.size() > 0 && args[0] != "")
+        {
             string com_ = args[0];
             string execCommand("");
-            if (com_ == "touch") {
+            if (com_ == "touch")
+            {
                 execCommand = "type NUL > " + args[1];
             }
-            else if (com_ == "cat") {
+            else if (com_ == "cat")
+            {
                 execCommand = "type " + args[1];
             }
-            else if (com_ == "mkdir") {
+            else if (com_ == "mkdir")
+            {
                 execCommand = in;
             }
-            else if (com_ == "kill") {
-                execCommand = "taskkill /IM " + args[1];
+            else if (com_ == "kill")
+            {
+                for (size_t i = 1; i < args.size(); i++)
+                {
+                    execCommand = "taskkill /PID " + args[i];
+                }
             }
-            else if (com_ == "clear") {
+            else if (com_ == "pkill")
+            {
+                for (size_t i = 1; i < args.size(); i++)
+                {
+                    execCommand = "taskkill /IM " + args[i] + " ";
+                }
+            }
+            else if (com_ == "clear")
+            {
                 execCommand = "cls";
             }
-            else if (com_ == "whoami") {
+            else if (com_ == "whoami")
+            {
                 system("whoami > temp");
                 ifstream fileIn("temp", ios::in);
                 string tmpStr("");
-                if (fileIn.is_open()) {
+                if (fileIn.is_open())
+                {
                     fileIn >> tmpStr;
                 }
                 vector<string> output = split(tmpStr, "\\");
                 cout << output[1] << endl;
                 continue;
             }
-            else if (com_ == "hostname") {
+            else if (com_ == "hostname")
+            {
                 execCommand = in;
             }
             else if (com_ == "exit")
             {
                 exit(EXIT_SUCCESS);
             }
-            else {
+            else
+            {
                 execCommand = in;
             }
-
+            cout << execCommand;
             system(execCommand.c_str());
         }
     }

@@ -1,3 +1,5 @@
 #define IDD_DLGTEST 101
 #define ID_SEND 1000
 #define IDC_MESSAGE 1001
+#define IDC_HISTORY 1002
+#define IDC_NAME 1003
