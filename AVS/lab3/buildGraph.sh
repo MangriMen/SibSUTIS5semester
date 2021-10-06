@@ -134,3 +134,47 @@ gnuplot << eor
     files=system('ls -1B *.dat')
     plot for [i=1:words(files)] word(files, i) u 1:2 ls i title word(files, i)
 eor
+rm *.dat
+for file in ${files[*]}
+do
+    cat "$file.csv" | awk -F ";" '{print $4 " " $9}' | awk '{gsub(/,/,".")}1'  > "$file.dat"
+done
+gnuplot << eor
+    set terminal pngcairo size 1200, 600
+    set output '4.1.png'
+    set style data linespoints
+    set xlabel "BufferSize"
+    set ylabel "WriteBandwidth(Mb/s)"
+    set format x "%.0f"
+    set format y "%g"
+    set logscale y
+    set ytics 2
+    set style line 1 lt 2 pt 7 lc rgb "red" lw 2
+    set style line 2 lt 2 pt 7 lc rgb "blue" lw 2
+    set style line 3 lt 2 pt 7 lc rgb "green" lw 2
+    set style line 4 lt 2 pt 7 lc rgb "magenta" lw 2
+    files=system('ls -1B *.dat')
+    plot for [i=1:words(files)] word(files, i) u 1:2 ls i title word(files, i)
+eor
+rm *.dat
+for file in ${files[*]}
+do
+    cat "$file.csv" | awk -F ";" '{print $4 " " $14}' | awk '{gsub(/,/,".")}1'  > "$file.dat"
+done
+gnuplot << eor
+    set terminal pngcairo size 1200, 600
+    set output '4.2.png'
+    set style data linespoints
+    set xlabel "BufferSize"
+    set ylabel "ReadBandwidth(Mb/s)"
+    set format x "%.0f"
+    set format y "%g"
+    set logscale y
+    set ytics 2
+    set style line 1 lt 2 pt 7 lc rgb "red" lw 2
+    set style line 2 lt 2 pt 7 lc rgb "blue" lw 2
+    set style line 3 lt 2 pt 7 lc rgb "green" lw 2
+    set style line 4 lt 2 pt 7 lc rgb "magenta" lw 2
+    files=system('ls -1B *.dat')
+    plot for [i=1:words(files)] word(files, i) u 1:2 ls i title word(files, i)
+eor
