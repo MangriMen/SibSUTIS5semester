@@ -299,7 +299,7 @@ void doTest(const string timerType, const string memoryType, const size_t blockS
             blockSize,
             elementType,
             bufferSize,
-            i,
+            i + 1,
             timerType,
             timePointsWrite[i],
             avgWriteTime,
