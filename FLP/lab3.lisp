@@ -1,17 +1,18 @@
 ;5 group
 
 ;1
-;(3 5 (7) (4 1))
-(defun isListEq(l1 l2)
+(defun equalS(s1 s2)
  (cond
-  ((and (null l1) (null l2)) t) 
-  ((equal (car l1) (car l2)) (isListEq (cdr l1) (cdr l2)))
+  ((and (null s1) (null s2)) t)
+  ((null s1) nil)
+  ((null s2) nil)
+  ((member (car s1) s2) (equalS (cdr s1) (remove (car s1) s2)))
   (t nil)
  )
 )
 
-(isListEq '(3 5 (7 (1) (4 1))) '(3 5 (7 (1)) (4 1)))
-
+(equalS '(1 2 3) '(3 1 2))
+(equalS '(1 2 3) '(3 1 2 4))
 ;8
 (defun mkStrFromFirst(m)
  (cond
