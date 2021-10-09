@@ -1,3 +1,3 @@
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-cl /EHsc /MT deadlockOriginal.c %*
-deadlockOriginal.exe
+cl /EHsc /MT deadlock.c %*
+deadlock.exe
