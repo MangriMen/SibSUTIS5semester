@@ -25,7 +25,7 @@ void Thread(void *pg)
     ((fun)pg)("thread_is_over!", &q);
 }
 
-int main(void)
+int main()
 {
     _beginthread(Thread, 0, (void *)g);
     while (q)
