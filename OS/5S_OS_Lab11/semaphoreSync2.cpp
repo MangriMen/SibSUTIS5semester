@@ -25,9 +25,12 @@ int main()
             _stprintf(outStr, TEXT("Thread Boy 2\n"));
         }
         ReleaseSemaphore(hEvent1, 1, NULL);
-        Sleep(100);
         counter++;
+        Sleep(100);
     }
+
+    CloseHandle(hEvent1);
+    CloseHandle(hEvent2);
 
     return EXIT_SUCCESS;
 }

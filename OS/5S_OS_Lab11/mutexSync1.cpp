@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <windows.h>
+#include <atlstr.h>
 
 #pragma comment(lib, "libSync")
 HANDLE hEvent1, hEvent2;
@@ -11,11 +12,12 @@ int main()
     hEvent1 = CreateMutex(NULL, FALSE, TEXT("ThreadEvent1"));
     hEvent2 = CreateMutex(NULL, FALSE, TEXT("ThreadEvent2"));
 
+    int counter = 0;
     while (true)
     {
         WaitForSingleObject(hEvent1, INFINITE);
         std::cout << outStr;
-        ReleaseMutex(hEvent2);
+        ReleaseMutex(hEvent1);
     }
 
     CloseHandle(hEvent1);
