@@ -1,0 +1,35 @@
+0X20701AF0000 - Base Address
+
+Export region:
+No export data
+
+Import region:
+0X2F840 - RVA
+0X20701B1F840 - VA
+Name of PEF: GDI32.dll
+Imported data:
+SetMapMode
+SetViewportExtEx
+SetWindowExtEx
+LPtoDP
+SetBkMode
+GetTextMetricsW
+TextOutW
+AbortDoc
+EndDoc
+SetAbortProc
+StartDocW
+StartPage
+CreateDCW
+EnumFontsW
+GetTextFaceW
+GetDeviceCaps
+DeleteDC
+DeleteObject
+SetBkColor
+CreateSolidBrush
+GetTextExtentPoint32W
+SelectObject
+CreateCompatibleDC
+EndPage
+CreateFontIndirectW
