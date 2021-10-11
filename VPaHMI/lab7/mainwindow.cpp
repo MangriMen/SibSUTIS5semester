@@ -65,6 +65,8 @@ MainWindow::MainWindow(QWidget *parent) :
     bird->setPos(scene->width()/2, scene->height()/2);
     bird->setFlag(QGraphicsItem::ItemIsMovable);
 
+    this->setGeometry(100,100,960,540);
+
     QTimer* mainTimer = new QTimer();
     mainTimer->setInterval(16);
     mainTimer->setSingleShot(false);

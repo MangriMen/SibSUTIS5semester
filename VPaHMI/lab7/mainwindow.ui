@@ -19,8 +19,8 @@
      <widget class="QGraphicsView" name="graphicsView">
       <property name="minimumSize">
        <size>
-        <width>1282</width>
-        <height>722</height>
+        <width>962</width>
+        <height>542</height>
        </size>
       </property>
       <property name="verticalScrollBarPolicy">
