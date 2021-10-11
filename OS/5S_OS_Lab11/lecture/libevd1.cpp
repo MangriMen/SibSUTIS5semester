@@ -1,0 +1,10 @@
+#include <windows.h>
+#pragma data_seg(".M_SH")
+extern __declspec(dllexport) char sh[6] = {'\0'}; //инициализация обязательна
+#pragma data_seg()
+#pragma comment(linker, "/SECTION:.M_SH,RWS")
+
+int main()
+{
+    return EXIT_SUCCESS;
+}
