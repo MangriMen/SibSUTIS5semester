@@ -18,6 +18,11 @@ private slots:
     {
         InputDialog* pInputDialog = new InputDialog;
         if (pInputDialog->exec() == QDialog::Accepted) {
+            if (
+                (pInputDialog->firstName().toLower() == "игорь" && pInputDialog->lastName().toLower() == "лёвкин")
+                ||
+                (pInputDialog->firstName().toLower() == "никита" && pInputDialog->lastName().toLower() == "панин")
+               ) {
             QMessageBox::information(
                         0,
                         "Ваша информация",
@@ -26,6 +31,7 @@ private slots:
                         + "\nФамилия: "
                         + pInputDialog->lastName()
                         );
+            }
         }
         delete pInputDialog;
     }

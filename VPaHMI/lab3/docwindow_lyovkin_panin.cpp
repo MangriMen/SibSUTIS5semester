@@ -2,6 +2,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QColorDialog>
+#include <QDebug>
 
 DocWindow_Lyovkin_Panin::DocWindow_Lyovkin_Panin(QWidget* pwgt): QTextEdit(pwgt)
 {
@@ -15,15 +16,24 @@ void DocWindow_Lyovkin_Panin::slotLoad()
         return;
     }
 
+    QColor oldColor = textColor();
+    qDebug() << oldColor.name();
+    setTextColor(QColor(Qt::black));
+
     QFile file(str);
     if (file.open(QIODevice::ReadOnly)) {
+
         QTextStream stream(&file);
         setPlainText(stream.readAll());
         file.close();
 
+
         m_strFileName = str;
         emit changeWindowTitle(m_strFileName);
     }
+
+    setTextColor(oldColor);
+    qDebug() << textColor().name();
 }
 
 void DocWindow_Lyovkin_Panin::slotSaveAs()
