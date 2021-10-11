@@ -20,10 +20,10 @@ int main(void)
     {
         WaitForSingleObject(hMutex1, INFINITE); //захват
         printf("%g\n", sh1);
-       // WaitForSingleObject(hMutex2, INFINITE); //захват
+        ReleaseMutex(hMutex1);                  //освобождение
+        WaitForSingleObject(hMutex2, INFINITE); //захват
         printf("%d\n", sh2);
         ReleaseMutex(hMutex2); //освобождение
-        ReleaseMutex(hMutex1); //освобождение
     }
     return 0;
 }
@@ -34,9 +34,9 @@ void Thread(void *pParams)
     {
         WaitForSingleObject(hMutex2, INFINITE); //захват мьютекса
         sh2++;
-      //  WaitForSingleObject(hMutex1, INFINITE); //захват мьютекса
+        ReleaseMutex(hMutex2);                  //освобождение мьютекса
+        WaitForSingleObject(hMutex1, INFINITE); //захват мьютекса
         sh1 += 0.1;
         ReleaseMutex(hMutex1); //освобождение мьютекса
-        ReleaseMutex(hMutex2); //освобождение мьютекса
     }
 }
