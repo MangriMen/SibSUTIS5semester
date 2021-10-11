@@ -11,16 +11,17 @@ void incVar(int repeatCount)
     for (size_t i = 0; i < repeatCount; i++)
     {
         globalVar++;
-        printf_s("Thread #%" PRIu32 " incremented, globalVar = %d\n", (*(uint32_t *)&std::this_thread::get_id()), globalVar);
+        // printf_s("Thread #%" PRIu32 " incremented, globalVar = %d\n", (*(uint32_t *)&std::this_thread::get_id()), globalVar);
     }
 }
 
 int main(void)
 {
     globalVar = 0;
-    std::thread testThread1(incVar, 10);
-    std::thread testThread2(incVar, 10);
-    std::thread testThread3(incVar, 10);
+    int count = 100000;
+    std::thread testThread1(incVar, 100000);
+    std::thread testThread2(incVar, 100000);
+    std::thread testThread3(incVar, 100000);
 
     printf("Thread #1 id:%" PRIu32 "\n       #2 id:%" PRIu32 "\n       #3 id:%" PRIu32 "\n",
            (*(uint32_t *)&testThread1.get_id()),
@@ -31,7 +32,7 @@ int main(void)
     testThread2.join();
     testThread3.join();
 
-    std::cout << "Expected value: " << 10 * 3 << "\n";
+    std::cout << "Expected value: " << count * 3 << "\n";
     std::cout << "Resulting value: " << globalVar << "\n";
 
     return EXIT_SUCCESS;
