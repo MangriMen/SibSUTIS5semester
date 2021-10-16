@@ -1,0 +1,1 @@
+cl /nologo /EHsc /std:c++20 /Fe:memory_test main.cpp
