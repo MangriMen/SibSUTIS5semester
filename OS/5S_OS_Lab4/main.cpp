@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <process.h>
 
 using namespace std;
 
@@ -26,43 +27,62 @@ int main()
     string in;
     while (true)
     {
-        getline(cin, in);
+        getline(cin, in, '\n');
 
         vector<string> args = split(in, " ");
+        size_t argc_ = args.size() + 3;
 
+        char **argsCh = new char *[argc_];
+        argsCh[0] = new char[4];
+        argsCh[1] = new char[3];
+        sprintf(argsCh[0], "cmd");
+        sprintf(argsCh[1], "/C");
+        for (size_t i = 2; i < argc_; i++)
+        {
+            argsCh[i] = new char[args[i].size() + 1];
+            sprintf(argsCh[i], "%s", args[i].c_str());
+        }
+        argsCh[argc_ - 1] = NULL;
+
+        for (size_t i = 0; i < argc_; i++)
+        {
+            cout << argsCh[i];
+        }
+
+        cout << endl;
         if (args.size() > 0 && args[0] != "")
         {
             string com_ = args[0];
-            string execCommand("");
             if (com_ == "touch")
             {
-                execCommand = "type NUL > " + args[1];
+                argsCh[0] = "type NUL >\0";
+                _spawnvp(P_WAIT, "cmd", argsCh);
             }
             else if (com_ == "cat")
             {
-                execCommand = "type " + args[1];
+                _spawnvp(P_WAIT, "cmd /C", argsCh);
             }
             else if (com_ == "mkdir")
             {
-                execCommand = in;
+                _spawnvp(P_WAIT, argsCh[0], argsCh);
             }
             else if (com_ == "kill")
             {
                 for (size_t i = 1; i < args.size(); i++)
                 {
-                    execCommand = "taskkill /PID " + args[i];
+                    // execCommand = "taskkill /PID " + args[i];
                 }
             }
             else if (com_ == "pkill")
             {
                 for (size_t i = 1; i < args.size(); i++)
                 {
-                    execCommand = "taskkill /IM " + args[i] + " ";
+                    // execCommand = "taskkill /IM " + args[i] + " ";
                 }
             }
             else if (com_ == "clear")
             {
-                execCommand = "cls";
+                // execCommand = "cls";
             }
             else if (com_ == "whoami")
             {
@@ -79,18 +99,13 @@ int main()
             }
             else if (com_ == "hostname")
             {
-                execCommand = in;
+                char *test[] = {"cmd", "/C", "hostname", NULL};
+                _spawnvp(P_WAIT, argsCh[0], argsCh);
             }
             else if (com_ == "exit")
             {
                 exit(EXIT_SUCCESS);
             }
-            else
-            {
-                execCommand = in;
-            }
-            cout << execCommand;
-            system(execCommand.c_str());
         }
     }
     return EXIT_SUCCESS;
