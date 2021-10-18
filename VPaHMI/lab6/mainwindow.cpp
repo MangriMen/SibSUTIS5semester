@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,7 +33,7 @@ void MainWindow::generateAndSendData()
         || ui->leFullName->text() == ""
         || ui->lePost->text() == ""
         || ui->leCitizenShip->text() == ""
-        || ui->deDateOfBirth->text() == ""
+        || ui->deDateOfBirth->date().toString() == QDate(1800, 1, 1).toString()
         || (!ui->rbMale->isChecked() && !ui->rbFemale->isChecked())) {
         QMessageBox::warning(0, "Незаполненные поля", "Для продолжения все поля должны быть заполнены!");
         return;

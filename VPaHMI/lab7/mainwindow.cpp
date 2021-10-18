@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QColor>
 #include <QTimer>
+#include <QRandomGenerator>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -64,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     bird =  scene->createItemGroup(wings);
     bird->setPos(scene->width()/2, scene->height()/2);
     bird->setFlag(QGraphicsItem::ItemIsMovable);
+    speed = 1;
 
     this->setGeometry(100,100,960,540);
 
@@ -85,14 +87,17 @@ void MainWindow::resizeTrigger() {
 }
 
 void MainWindow::moveAndCheck() {
-    bird->moveBy(dXY->x(), dXY->y());
+    bird->moveBy(dXY->x() * speed, dXY->y() * speed);
+    qsrand(time(NULL));
 
     if (bird->collidesWithItem(borders->at(0)) || bird->collidesWithItem(borders->at(3))) {
         dXY->setY(dXY->y() * -1);
+        speed = (qrand() % 20 + 1) / 1e1;
     }
 
     if (bird->collidesWithItem(borders->at(1)) || bird->collidesWithItem(borders->at(2))) {
         dXY->setX(dXY->x() * -1);
+        speed = (qrand() % 20 + 1) / 1e1;
     }
 
     if (bird->collidesWithItem(tree)) {

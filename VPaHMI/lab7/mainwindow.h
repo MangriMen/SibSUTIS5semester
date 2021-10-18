@@ -18,6 +18,7 @@ public:
     QGraphicsItemGroup* bird;
     QList<QGraphicsRectItem*>* borders;
     QPoint* dXY;
+    double speed;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
