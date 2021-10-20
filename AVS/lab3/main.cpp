@@ -11,6 +11,8 @@
 #include <tuple>
 #include <variant>
 #include <climits>
+#include <windows.h>
+#include <io.h>
 #if defined(__GNUC__) || defined(__MINGW32__) || defined(__MINGW64__)
 #include <cxxabi.h>
 #endif
@@ -61,12 +63,36 @@ long double testWriteRead(string memoryType, size_t dataBlockSize, const ios_bas
     mt19937_64 randEngine(rd());
     uniform_int_distribution<unsigned long long> distr(0, static_cast<unsigned long long>(pow(2, sizeof(T) * CHAR_BIT)));
 
-    fstream file;
+    HANDLE file_handle = CreateFile(
+        (LPCSTR)filename.c_str(), GENERIC_READ | GENERIC_WRITE,
+        0, NULL, OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_NO_BUFFERING | FILE_FLAG_WRITE_THROUGH, NULL);
+
+    if (file_handle == INVALID_HANDLE_VALUE)
+    {
+        exit(EXIT_FAILURE);
+    }
+    int file_descriptor = _open_osfhandle((intptr_t)file_handle, 0);
+
+    if (file_descriptor == -1)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    string pfileMode = mode == ios::in ? "rb" : "wb";
+    FILE *pfile = _fdopen(file_descriptor, pfileMode.c_str());
+
+    if (pfile == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    fstream file(pfile);
     file.rdbuf()->pubsetbuf(0, 0);
-    ios_base::openmode flags = mode | ios::binary;
+    // ios_base::openmode flags = mode | ios::binary;
     if (!(memoryType == "RAM"))
     {
-        file.open(filename, flags);
+        // file.open(filename, flags);
         if (!file.is_open())
         {
             return -EXIT_FAILURE;
@@ -118,6 +144,10 @@ long double testWriteRead(string memoryType, size_t dataBlockSize, const ios_bas
 
         allElapsedTime = chrono::duration<long double>(localStop - localStart).count();
         file.close();
+
+        pfile = NULL;
+        file_descriptor = -1;
+        file_handle = INVALID_HANDLE_VALUE;
     }
 
     delete[] tempData;

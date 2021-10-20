@@ -1,0 +1,1 @@
+MemoryType;BlockSize;ElementType;BufferSize;LaunchNum;Timer;WriteTime(s);AverageWriteTime(s);WriteBandwidth(Mb/s);AbsError(write)(s);RelError(write)(%);ReadTime(s);AverageReadTime(s);ReadBandwidth(Mb/s);AbsError(read)(s);RelError(read)(%)
