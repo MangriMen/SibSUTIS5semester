@@ -1,0 +1,1 @@
+cll /Zi /DEBUG:FULL /EHsc main.cpp
