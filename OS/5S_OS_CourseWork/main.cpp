@@ -1,3 +1,4 @@
+#define WIN32_LEAN_AND_MEAN
 #include <iostream>
 #include <Windows.h>
 #include <Psapi.h>
@@ -6,11 +7,9 @@
 #include <vector>
 #include <algorithm>
 #include "TokenInformation.h"
+#include "CPUusage.h"
 
 using namespace std;
-
-static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
-static int numProcessors = 12;
 
 typedef struct process_t
 {
@@ -23,41 +22,37 @@ typedef struct process_t
 
 void printProcessData(const PROCESS_DATA &proc)
 {
-    _tprintf(TEXT("%-34s%-20d%-20ws%3d%%\n"), proc.name, proc.PID, proc.ownerUsername, static_cast<int>(proc.CPU));
-    // _tprintf(TEXT("%-74s%-10IuKb|%-10IuKb|%-10IuKb|%-10IuKb\n"), TEXT(""), proc.memoryUsage.PagefileUsage / 1024, proc.memoryUsage.PrivateUsage / 1024, proc.memoryUsage.QuotaNonPagedPoolUsage / 1024, proc.memoryUsage.WorkingSetSize / 1024);
+    _tprintf(TEXT("%-42s%-20d%-20ws%.2f%%%20Iu K\n"), proc.name, proc.PID, proc.ownerUsername, proc.CPU, proc.memoryUsage.WorkingSetSize / 1024);
 }
 
-bool processDataCompName(const PROCESS_DATA &a, const PROCESS_DATA &b)
+bool processDataNameComp(const PROCESS_DATA &a, const PROCESS_DATA &b)
 {
     return _tcscmp(a.name, b.name) < 0;
 }
 
-bool processDataCPU(const PROCESS_DATA &a, const PROCESS_DATA &b)
+bool processDataNameCompI(const PROCESS_DATA &a, const PROCESS_DATA &b)
+{
+    return _tcscmp(a.name, b.name) < 0;
+}
+
+bool processDataCPUComp(const PROCESS_DATA &a, const PROCESS_DATA &b)
 {
     return a.CPU < b.CPU;
 }
 
-double getCurrentValue(HANDLE hProcess)
+bool processDataCPUCompI(const PROCESS_DATA &a, const PROCESS_DATA &b)
 {
-    FILETIME ftime, fsys, fuser;
-    ULARGE_INTEGER now, sys, user;
-    double percent;
+    return a.CPU < b.CPU;
+}
 
-    GetSystemTimeAsFileTime(&ftime);
-    memcpy(&now, &ftime, sizeof(FILETIME));
+bool processDataMemoryComp(const PROCESS_DATA &a, const PROCESS_DATA &b)
+{
+    return a.memoryUsage.WorkingSetSize < b.memoryUsage.WorkingSetSize;
+}
 
-    GetProcessTimes(hProcess, &ftime, &ftime, &fsys, &fuser);
-    memcpy(&sys, &fsys, sizeof(FILETIME));
-    memcpy(&user, &fuser, sizeof(FILETIME));
-    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
-              (user.QuadPart - lastUserCPU.QuadPart);
-    percent /= (now.QuadPart - lastCPU.QuadPart);
-    percent /= numProcessors;
-    lastCPU = now;
-    lastUserCPU = user;
-    lastSysCPU = sys;
-
-    return percent * 100;
+bool processDataMemoryCompI(const PROCESS_DATA &a, const PROCESS_DATA &b)
+{
+    return a.memoryUsage.WorkingSetSize > b.memoryUsage.WorkingSetSize;
 }
 
 int main()
@@ -68,19 +63,6 @@ int main()
     PROCESS_MEMORY_COUNTERS_EX memCounter;
     vector<PROCESS_DATA> processList;
 
-    SYSTEM_INFO sysInfo;
-    GetSystemInfo(&sysInfo);
-    numProcessors = sysInfo.dwNumberOfProcessors;
-
-    FILETIME ftime;
-    GetSystemTimeAsFileTime(&ftime);
-    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
-
-    FILETIME fsys, fuser;
-    GetProcessTimes(GetCurrentProcess(), &ftime, &ftime, &fsys, &fuser);
-    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
-    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
-
     if (!EnumProcesses(allPidS, cbAlloc, &cbReturned))
     {
         cerr << "Could not call EnumProcesses" << endl;
@@ -89,12 +71,14 @@ int main()
 
     bool isDebug = false;
 
+    CPUusage cpuUsg(GetCurrentProcessId());
+
     while (true)
     {
         system("cls");
         processList.clear();
         processList.shrink_to_fit();
-        _tprintf(TEXT("%-34s%-20s%-20s%-20s\n"), TEXT("Name"), TEXT("PID"), TEXT("Username"), TEXT("Memory"));
+        _tprintf(TEXT("%-42s%-20s%-20s%-4s%20s\n"), TEXT("Name"), TEXT("PID"), TEXT("Username"), TEXT("CPU"), TEXT("Memory"));
 
         TCHAR procName[MAX_PATH] = {'\0'};
         for (DWORD i = 0, id = 0; i < cbReturned / sizeof(DWORD); i++)
@@ -125,7 +109,12 @@ int main()
                     temp.ownerUsername = strUser.GetBSTR();
                     temp.memoryUsage = memCounter;
 
-                    temp.CPU = getCurrentValue(hProcess);
+                    cpuUsg.setpid(dwProcessId);
+                    for (size_t i = 0; i < 2; i++)
+                    {
+                        temp.CPU = (double)cpuUsg.get_cpu_usage();
+                        Sleep(15);
+                    }
 
                     processList.push_back(temp);
                 }
@@ -141,7 +130,7 @@ int main()
             }
         }
 
-        sort(processList.begin(), processList.end(), processDataCompName);
+        sort(processList.begin(), processList.end(), processDataCPUCompI);
 
         for (const auto &process : processList)
         {
@@ -151,7 +140,7 @@ int main()
             // }
         }
 
-        Sleep(1000);
+        Sleep(1500);
     }
 
     return EXIT_SUCCESS;
