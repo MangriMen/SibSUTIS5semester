@@ -8,6 +8,7 @@
 #include <sstream>
 #include <complex>
 #include <tuple>
+#include <algorithm>
 #include "utils.h"
 
 using namespace std;
@@ -147,22 +148,123 @@ vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>&
 	return out;
 }
 
+int rev(int num, int lg_n) {
+	int res = 0;
+
+	for (int i = 0; i < lg_n; ++i) {
+		if (num & (1 << i)) {
+			res |= 1 << (lg_n - 1 - i);
+		}
+	}
+
+	return res;
+}
+
+vector<complex<double>> getFastFourierTransform(const vector<double>& data) {
+	if (data.size() == 0) {
+		return vector<complex<double>>();
+	}
+
+	vector<complex<double>> out;
+	transform(data.begin(), data.end(), std::back_inserter(out), [](const double& e) { return complex<double>(e); });
+
+	int lg_n = 0;
+	while ((static_cast<unsigned long long>(1) << lg_n) < data.size()) {
+		++lg_n;
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (i < rev(i, lg_n)) {
+			swap(out[i], out[rev(i, lg_n)]);
+		}
+	}
+
+	for (int len = 2; len <= data.size(); len <<= 1) {
+		double ang = 2 * M_PI / len;
+
+		complex<double> wlen(cos(ang), sin(ang));
+		
+		for (int i = 0; i < data.size(); i += len) {
+			complex<double> w(1);
+			for (int j = 0; j < len / 2; ++j) {
+				complex<double> u = out[i + j];
+				complex<double> v = out[i + j + len / 2] * w;
+				out[i + j] = u + v;
+				out[i + j + len / 2] = u - v;
+				w *= wlen;
+			}
+		}
+	}
+
+	return out;
+}
+
+vector<double> getReverseFastFourierTransform(const vector<complex<double>>& data) {
+	if (data.size() == 0) {
+		return vector<double>();
+	}
+
+	vector<complex<double>> outComplex(data);
+
+	int lg_n = 0;
+	while ((static_cast<unsigned long long>(1) << lg_n) < data.size()) {
+		++lg_n;
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (i < rev(i, lg_n)) {
+			swap(outComplex[i], outComplex[rev(i, lg_n)]);
+		}
+	}
+
+	for (int len = 2; len <= data.size(); len <<= 1) {
+		double ang = -2 * M_PI / len;
+
+		complex<double> wlen(cos(ang), sin(ang));
+		
+		for (int i = 0; i < data.size(); i += len) {
+			complex<double> w(1);
+			for (int j = 0; j < len / 2; ++j) {
+				complex<double> u = outComplex[i + j];
+				complex<double> v = outComplex[i + j + len / 2] * w;
+				outComplex[i + j] = u + v;
+				outComplex[i + j + len / 2] = u - v;
+				w *= wlen;
+			}
+		}
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		outComplex[i] /= data.size();
+	}
+
+	vector<double> out;
+	transform(outComplex.begin(), outComplex.end(), std::back_inserter(out), [](const complex<double>& e) { return e.real(); });
+
+	return out;
+}
+
 #define N 16
 
 int main() {
 	srand(static_cast<unsigned int>(time(NULL)));
 
 	vector<double> data(N, 0);
+	vector<complex<double>> dataComplex(N, 0);
 
 	for (size_t i = 0; i < N; i++)
 	{
 		data[i] = i * i;
+		dataComplex[i] = data[i];
 	}
 
 	vector<complex<double>> discreteFourier = getDiscreteFourierTransform(data);
 	vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(data);
+	vector<complex<double>> fastFourier = getFastFourierTransform(data);
+
 	vector<double> reverseDiscrete = getReverseDiscreteFourierTransform(discreteFourier);
 	vector<double> reverseSemiFast = getReverseSemiFastFourierTransform(semiFastFourier);
+	vector<double> reverseFast = getReverseFastFourierTransform(fastFourier);
 
 	utils::printArr(data, "Original");
 	cout << endl;
@@ -173,6 +275,8 @@ int main() {
 	utils::printArr(reverseDiscrete, "Reverse Fourier: ");
 	cout << endl;
 	utils::printArr(reverseSemiFast, "Reverse SemiFast: ");
+	cout << endl;
+	utils::printArr(reverseFast, "Reverse Fast: ");
 	cout << endl;
 
 	utils::writeCSV(data, "data");

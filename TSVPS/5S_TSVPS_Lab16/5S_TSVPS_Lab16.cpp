@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -7,6 +8,18 @@ enum MethodType
 {
 	ExhausiveSearchRec,
 	BranchAndBound
+};
+
+class Item
+{
+public:
+	double weight, cost;
+
+	Item(double weight = 1, double cost = 1)
+	{
+		weight = weight;
+		cost = cost;
+	}
 };
 
 class AbstractBackpack
@@ -62,9 +75,22 @@ public:
 	}
 };
 
-class BranchAndBoundBackpack : AbstractBackpack
+class BranchAndBoundBackpack : public AbstractBackpack
 {
 public:
+	class OrderedItem : public Item
+	{
+	public:
+		int number;
+		
+		OrderedItem() {}
+
+		OrderedItem(double w, double c, int i) : Item(w, c)
+		{
+			this->number = i;
+		}
+	};
+
 	vector<bool> result;
 	vector<Item> items;
 	vector<unsigned> resultUnl;
@@ -83,8 +109,20 @@ public:
 	vector<unsigned> SolveUnlimited(vector<Item>& items)
 	{
 		auto defaultOrder = GetDefaultOrder(items);
-		auto ordered = defaultOrder.OrderByDescending<OrderedItem, double>((i) = > i.cost / i.weight).ToArray();
-		this->items = ordered;
+		auto ordered(defaultOrder);
+		auto kekF = [](OrderedItem const& s1, OrderedItem const& s2) -> bool
+		{
+			return static_cast<bool>(s1.cost / s1.weight);
+		};
+		sort(ordered.begin(), ordered.end(), kekF);
+		//auto ordered = defaultOrder.OrderByDescending<OrderedItem, double>
+		//	((i) = > i.cost / i.weight)
+		//	.ToArray();
+		for (size_t i = 0; i < this->items.size(); i++)
+		{
+			this->items[i] = ordered[i];
+		}
+		//this->items = ordered;
 		maxCost = 0;
 		resultUnl = vector<unsigned>(items.size());
 		auto testVector = vector<unsigned>(items.size());
@@ -99,10 +137,10 @@ public:
 	/// <returns>Возвращает массив упорядоченных элементов.</returns>
 	vector<OrderedItem> GetDefaultOrder(vector<Item>& items)
 	{
-		auto temp = new OrderedItem[items.size()];
+		vector<OrderedItem> temp(items.size());
 		for (int i = 0; i < items.size(); i++)
 		{
-			temp[i] = new OrderedItem(items[i].weight, items[i].cost, i);
+			temp[i] = OrderedItem(items[i].weight, items[i].cost, i);
 		}
 		return temp;
 	}
@@ -113,10 +151,10 @@ public:
 	/// <returns>Возвращает решене задачи.</returns>
 	vector<bool> RestoreSolution(vector<OrderedItem>& items)
 	{
-		vector<bool>& res = new bool[items.size()];
+		vector<bool> res(items.size());
 		for (int i = 0; i < items.size(); i++)
 		{
-			res[items[i].Number] = result[i];
+			res[items[i].number] = result[i];
 		}
 		return res;
 	}
@@ -127,10 +165,10 @@ public:
 	/// <returns>Возвращает решене задачи.</returns>
 	vector<unsigned> RestoreUnlimitedSolution(vector<OrderedItem>& items)
 	{
-		vector<unsigned>& res = new unsigned[items.size()];
+		vector<unsigned> res(items.size());
 		for (int i = 0; i < items.size(); i++)
 		{
-			res[items[i].Number] = resultUnl[i];
+			res[items[i].number] = resultUnl[i];
 		}
 		return res;
 	}
@@ -142,7 +180,7 @@ public:
 	/// <param name="i">Номер проверяемого элемента решения.</param>
 	/// <param name="c">Общая стоимость решения к текущему моменту.</param>
 	/// <param name="w">Общий вес решения к текущему моменту.</param>
-	private void SolveUnlimitedRec(vector<unsigned>& vec, int i = 0, double c = 0, double w = 0)
+	void SolveUnlimitedRec(vector<unsigned>& vec, int i = 0, double c = 0, double w = 0)
 	{
 		if (i == vec.size()) //надо принять решение
 		{
@@ -161,7 +199,7 @@ public:
 			double oneMoreW = w + items[i].weight;
 			if (oneMoreW <= maxWeight) //не перебираем по весу
 			{
-				vector[i]++;
+				vec[i]++;
 				//если оценка сверху больше масимальной стоимости
 				if (CalculateUpperBound(oneMoreC, oneMoreW, i - 1) > maxCost)
 					SolveUnlimitedRec(vec, i, oneMoreC, oneMoreW);
@@ -180,29 +218,6 @@ public:
 			(items[i + 1].cost / items[i + 1].weight) : 0);
 		return ub;
 	}
-
-	class OrderedItem : Item
-	{
-	public:
-		int number;
-
-		OrderedItem(double w, double c, int i) : Item(w, c)
-		{
-			this->number = i;
-		}
-	};
-};
-
-class Item
-{
-public:
-	double weight, cost;
-
-	Item(double weight = 1, double cost = 1)
-	{
-		weight = weight;
-		cost = cost;
-	}
 };
 
 int main()
@@ -216,6 +231,6 @@ int main()
 	items[3] = Item(7, 8);
 	items[4] = Item(6, 14);
 
-	AbstractBackpack b = BranchAndBoundBackpack(backpackSize);
-	usigned[] result = b.SolveUnlimited(task.Item1);
+	AbstractBackpack* b = new BranchAndBoundBackpack(backpackSize);
+	vector<unsigned> result = b->SolveUnlimited(items);
 }

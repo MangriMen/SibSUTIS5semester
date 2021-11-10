@@ -111,10 +111,12 @@ namespace utils {
 	}
 
 	tuple<size_t, size_t> getNumberDecompositionBy2(size_t number) {
-		for (int i = sqrt(number); i <= number; ++i) {
+		for (int i = static_cast<int>(sqrt(number)); i <= number; ++i) {
 			if (number % i == 0) {
 				return { i, number / i };
 			}
 		}
+
+		return { 0, 0 };
 	}
 }

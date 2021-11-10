@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iomanip>
 #include <tuple>
+#include <algorithm>
 #include "../5S_TSVPS_Lab4_7/utils.h"
 
 using namespace std;
@@ -15,6 +16,7 @@ using namespace std;
 size_t counter = 0;
 size_t counterDF = 0;
 size_t counterSF = 0;
+size_t counterFF = 0;
 
 vector<complex<double>> getDiscreteFourierTransform(const vector<double>& data) {
 	if (data.size() == 0) {
@@ -157,6 +159,105 @@ vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>&
 	return out;
 }
 
+int rev(int num, int lg_n) {
+	int res = 0;
+
+	for (int i = 0; i < lg_n; ++i) {
+		if (num & (1 << i)) {
+			res |= 1 << (lg_n - 1 - i);
+		}
+	}
+
+	return res;
+}
+
+vector<complex<double>> getFastFourierTransform(const vector<double>& data) {
+	if (data.size() == 0) {
+		return vector<complex<double>>();
+	}
+
+	vector<complex<double>> out;
+	transform(data.begin(), data.end(), std::back_inserter(out), [](const double& e) { return complex<double>(e); });
+
+	int lg_n = 0;
+	while ((static_cast<unsigned long long>(1) << lg_n) < data.size()) {
+		++lg_n;
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (i < rev(i, lg_n)) {
+			swap(out[i], out[rev(i, lg_n)]);
+		}
+	}
+
+	for (int len = 2; len <= data.size(); len <<= 1) {
+		double ang = 2 * M_PI / len;
+
+		complex<double> wlen(cos(ang), sin(ang));
+
+		for (int i = 0; i < data.size(); i += len) {
+			complex<double> w(1);
+			for (int j = 0; j < len / 2; ++j) {
+				complex<double> u = out[i + j];
+				complex<double> v = out[i + j + len / 2] * w;
+				out[i + j] = u + v;
+				out[i + j + len / 2] = u - v;
+				w *= wlen;
+				counterFF+=2;
+			}
+		}
+	}
+
+	return out;
+}
+
+vector<double> getReverseFastFourierTransform(const vector<complex<double>>& data) {
+	if (data.size() == 0) {
+		return vector<double>();
+	}
+
+	vector<complex<double>> outComplex(data);
+
+	int lg_n = 0;
+	while ((static_cast<unsigned long long>(1) << lg_n) < data.size()) {
+		++lg_n;
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (i < rev(i, lg_n)) {
+			swap(outComplex[i], outComplex[rev(i, lg_n)]);
+		}
+	}
+
+	for (int len = 2; len <= data.size(); len <<= 1) {
+		double ang = -2 * M_PI / len;
+
+		complex<double> wlen(cos(ang), sin(ang));
+
+		for (int i = 0; i < data.size(); i += len) {
+			complex<double> w(1);
+			for (int j = 0; j < len / 2; ++j) {
+				complex<double> u = outComplex[i + j];
+				complex<double> v = outComplex[i + j + len / 2] * w;
+				outComplex[i + j] = u + v;
+				outComplex[i + j + len / 2] = u - v;
+				w *= wlen;
+				counterFF+=2;
+			}
+		}
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		outComplex[i] /= data.size();
+	}
+
+	vector<double> out;
+	transform(outComplex.begin(), outComplex.end(), std::back_inserter(out), [](const complex<double>& e) { return e.real(); });
+
+	return out;
+}
+
+
 vector<double> convolution(const vector<double>& x, const vector<double>& h) {
 	if ((x.size() == 0) && (h.size() == 0)) {
 		return vector<double>();
@@ -241,6 +342,25 @@ vector<double> convolutionSemiFastFourier(vector<double> a, vector<double> b) {
 	return out;
 }
 
+vector<double> convolutionFastFourier(vector<double> a, vector<double> b) {
+	size_t size_ = prepareArraysToConvolution(a, b);
+	vector<double> out(size_, 0);
+	vector<complex<double>> temp(size_, 0);
+
+	vector<complex<double>> fourierA = getFastFourierTransform(a);
+	vector<complex<double>> fourierB = getFastFourierTransform(b);
+
+	for (size_t i = 0; i < size_; i++)
+	{
+		temp[i] = static_cast<double>(size_) * fourierA[i] * fourierB[i];
+		counterFF++;
+	}
+
+	out = getReverseFastFourierTransform(temp);
+
+	return out;
+}
+
 #define N 8
 
 int main()
@@ -256,6 +376,7 @@ int main()
 		vector<double> out;
 		vector<double> outDF;
 		vector<double> outSF;
+		vector<double> outFF;
 
 		for (size_t i = 0; i < dataA.size(); i++)
 		{
@@ -270,6 +391,7 @@ int main()
 		out = convolution(dataA, dataB);
 		outDF = convolutionDiscreteFourier(dataA, dataB);
 		outSF = convolutionSemiFastFourier(dataA, dataB);
+		outFF = convolutionFastFourier(dataA, dataB);
 
 		//utils::printArr(out, "Usually convolution:");
 		//cout << endl;
@@ -280,6 +402,7 @@ int main()
 		cout << "Convolution: " << counter << endl;
 		cout << "Convolution DFT: " << counterDF << endl;
 		cout << "Convolution SFFT: " << counterSF << endl;
+		cout << "Convolution FFT: " << counterFF << endl;
 		cout << endl;
 	}
 }
