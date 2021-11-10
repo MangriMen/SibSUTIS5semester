@@ -8,8 +8,6 @@ using namespace std;
 
 #define myPI 3.1415926535
 
-size_t counter = 0;
-
 namespace utils {
 	template <typename T>
 	string getSpacedElement(T element) {
@@ -207,31 +205,37 @@ int main() {
 
 	const int VECTOR_SIZE = 16;
 	vector<size_t> sizes {5*5, 10*10, 20*20};
+	vector<double> startArray(VECTOR_SIZE, 0);
 
-	for (int j = 0; j < sizes.size(); ++j) {
-		counter = 0;
-		vector<double> startArray(sizes[j], 0);
-	
-		for (int i = 0; i < sizes[j]; i += 1) {
-			startArray[i] = i*i;
-		}
-
-		vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
-		//vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
-
-		cout << "Size: " << sizes[j] << endl;
-		cout << "Counter: " << counter << endl << endl;
+	for (int i = 0; i < VECTOR_SIZE; i += 1) {
+		startArray[i] = i*i;
 	}
-	//vector<complex<double>> discreteFourier = getDiscreteFourierTransform(startArray);
-	//vector<double> reverseDiscreteFourier = getReverseDiscreteFourierTransform(discreteFourier);
-	//vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
-	//vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
 
-	//arrayTweaks::printArrayLog(startArray, "Original array:");
-	//arrayTweaks::printArrayLog(discreteFourier, "Array aquired by DF:");
-	//arrayTweaks::printArrayLog(reverseDiscreteFourier, "Array aquired by RDF:");
-	//arrayTweaks::printArrayLog(semiFastFourier, "Array aquired by SFF:");
-	//arrayTweaks::printArrayLog(reverseSemiFastFourier, "Array aquired by RSFF:");
+	//for (int j = 0; j < sizes.size(); ++j) {
+	//	counter = 0;
+	//	vector<double> startArray(sizes[j], 0);
+	//
+	//	for (int i = 0; i < sizes[j]; i += 1) {
+	//		startArray[i] = i*i;
+	//	}
+
+	//	vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
+	//	//vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
+
+	//	cout << "Size: " << sizes[j] << endl;
+	//	cout << "Counter: " << counter << endl << endl;
+	//}
+
+	vector<complex<double>> discreteFourier = getDiscreteFourierTransform(startArray);
+	vector<double> reverseDiscreteFourier = getReverseDiscreteFourierTransform(discreteFourier);
+	vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
+	vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
+
+	arrayTweaks::printArrayLog(startArray, "Original array:");
+	arrayTweaks::printArrayLog(discreteFourier, "Array aquired by DF:");
+	arrayTweaks::printArrayLog(reverseDiscreteFourier, "Array aquired by RDF:");
+	arrayTweaks::printArrayLog(semiFastFourier, "Array aquired by SFF:");
+	arrayTweaks::printArrayLog(reverseSemiFastFourier, "Array aquired by RSFF:");
 
 	return 0;
 }
