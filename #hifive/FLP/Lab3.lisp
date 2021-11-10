@@ -1,41 +1,56 @@
-;lab3
-;First
-(defun isEqual(l1 l2)
-    (cond
-        ((null l1) t)
-        ((equal (car l1) (car l2)) (isEqual (cdr l1) (cdr l2)))
-        (t nil)
-		)
+;5 group
+
+;1
+;(3 5 (7) (4 1))
+(defun isListEq(l1 l2)
+ (cond
+  ((and (null l1) (null l2)) t)
+  ((equal (car l1) (car l2)) (isListEq (cdr l1) (cdr l2)))
+  (t nil)
+ )
 )
 
-(isEqual '(1 2) '(1 2))
+(isListEq '(3 5 (7 (1) (4 1))) '(3 5 (7 (1) (4 1))))
+(isListEq '(3 5 (7 (1) (4 1))) '(3 5))
 
-;Second
-(defun ccar (lst)
-     (cond ((null lst) nil)
-           (t (cons (caar lst) (ccar (cdr lst)))))
+;8
+(defun mkStrFromFirst(m)
+ (cond
+  ((null m) nil)
+  (t (cons (caar m) (mkStrFromFirst (cdr m))))
+ )
 )
 
-(defun ccdr (lst)
-     (cond ((null lst) nil)
-           (t (cons (cdar lst) (ccdr (cdr lst)))))
+;(mkStrFromFirst '((1 2 3 4) (5 6 7 8) (9 10 11 12)))
+
+(defun mkStrFromLast(m)
+ (cond
+  ((null m) nil)
+  (t (cons (cdar m) (mkStrFromLast (cdr m))))
+ )
 )
 
-(defun transpose (matr)
-  (cond ((null (car matr)) Nil)
-        (t (cons (ccar matr) (transpose (ccdr matr)))))
+;(mkStrFromLast '((1 2 3 4) (5 6 7 8) (9 10 11 12)))
+
+(defun matrixT(m)
+ (cond
+  ((null (car m)) nil)
+  (t (cons (mkStrFromFirst m) (matrixT (mkStrFromLast m))))
+ )
 )
 
-(transpose '((1 2 3)(4 5 6)(7 8 9)))
+(matrixT '((1 2 3 4) (5 6 7 8) (9 10 11 12)))
 
-;Third
-(defun func (p lst)
-  (cond ((null lst) nil)
-        ((funcall p (car lst)) t)
-        (t (func p (cdr lst))))
+;13
+(defun alo(fun l)
+ (cond 
+  ((null l) nil)
+  ((funcall fun (car l)) t)
+  (t (alo fun (cdr l)))
+ )
 )
 
-(func (lambda (x) (cond((< x 0) t))) '(1 2 -3 4))
-(func (lambda (x) (cond((< x 0) t))) '(1 2 3 4))
-(func 'symbolp '(a 1 2 3))
-(func 'symbolp '(1 1 2 3))
+(alo (lambda (x) (cond ((< x 0) t))) '(3 5 7 -3 0 2))
+(alo (lambda (x) (cond ((< x 0) t))) '(5 6 8))
+(alo 'symbolp '(3 5 7 * 0 2))
+(alo 'symbolp '(5 6 8))
