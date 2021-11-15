@@ -10,7 +10,7 @@ int setDistance(int graph[SIZE][SIZE], int i, int j, int distance) {
     return 0;
 }
 
-int main()
+int kek()
 {
     // Init
     int graph[SIZE][SIZE] = { 0 }; // матрица связей
@@ -26,10 +26,10 @@ int main()
     setDistance(graph, 0, 3, 7);
     setDistance(graph, 0, 4, 2);
     setDistance(graph, 1, 2, 6);
-    setDistance(graph, 1, 3, 0);
-    setDistance(graph, 1, 4, 0);
+    setDistance(graph, 1, 3, INT_MAX);
+    setDistance(graph, 1, 4, INT_MAX);
     setDistance(graph, 2, 3, 4);
-    setDistance(graph, 2, 4, 0);
+    setDistance(graph, 2, 4, INT_MAX);
     setDistance(graph, 3, 4, 3);
 
     // Algorithm

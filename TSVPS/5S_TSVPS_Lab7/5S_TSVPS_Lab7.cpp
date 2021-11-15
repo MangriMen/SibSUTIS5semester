@@ -352,7 +352,7 @@ vector<double> convolutionFastFourier(vector<double> a, vector<double> b) {
 
 	for (size_t i = 0; i < size_; i++)
 	{
-		temp[i] = static_cast<double>(size_) * fourierA[i] * fourierB[i];
+		temp[i] = fourierA[i] * fourierB[i];
 		counterFF++;
 	}
 
@@ -393,11 +393,13 @@ int main()
 		outSF = convolutionSemiFastFourier(dataA, dataB);
 		outFF = convolutionFastFourier(dataA, dataB);
 
-		//utils::printArr(out, "Usually convolution:");
-		//cout << endl;
-		//utils::printArr(outDF, "Convolution with DFT:");
-		//cout << endl;
-		//utils::printArr(outSF, "Convolution with SFFT:");
+		utils::printArr(out, "Usually convolution:");
+		cout << endl;
+		utils::printArr(outDF, "Convolution with DFT:");
+		cout << endl;
+		utils::printArr(outSF, "Convolution with SFFT:");
+		cout << endl;
+		utils::printArr(outFF, "Convolution with FFT:");
 
 		cout << "Convolution: " << counter << endl;
 		cout << "Convolution DFT: " << counterDF << endl;
