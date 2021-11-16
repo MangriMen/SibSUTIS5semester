@@ -11,16 +11,39 @@ using System.Threading.Tasks;
 
 namespace _5S_OS_C
 {
-    public class ProcessWrapper : INotifyPropertyChanged
+    public class ProcessData : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string Name { get; set; }
+        public string PID { get; set; }
+        public string UserName { get; set; }
+        public string CPU { get; set; }
+        public string Memory { get; set; }
+
+        public bool IsRunning()
+        {
+            return true;
+        }
+
+        public void Update()
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PID)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserName)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CPU)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Memory)));
+        }
+    }
+
+    public class ProcessWrapper : ProcessData
     {
         Process process_;
         PerformanceCounter ram_;
         PerformanceCounter cpu_;
-        public bool isRunning;
+        bool isRunning;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public string Name
+        public new string Name
         {
             get
             {
@@ -34,7 +57,7 @@ namespace _5S_OS_C
                 }
             }
         }
-        public string PID
+        public new string PID
         {
             get
             {
@@ -48,7 +71,7 @@ namespace _5S_OS_C
                 }
             }
         }
-        public string UserName
+        public new string UserName
         {
             get
             {
@@ -62,7 +85,7 @@ namespace _5S_OS_C
                 }
             }
         }
-        public string CPU
+        public new string CPU
         {
             get
             {
@@ -76,7 +99,7 @@ namespace _5S_OS_C
                 }
             }
         }
-        public string Memory
+        public new string Memory
         {
             get
             {
@@ -93,8 +116,8 @@ namespace _5S_OS_C
 
         public ProcessWrapper(Process process)
         {
-            this.process_ = process;
-            this.process_.Exited += Process__Exited;
+            process_ = process;
+            process_.Exited += Process__Exited;
             ram_ = new PerformanceCounter("Process", "Working Set - Private", process_.ProcessName, true);
             cpu_ = new PerformanceCounter("Process", "% Processor Time", process_.ProcessName, true);
             isRunning = true;
@@ -105,13 +128,15 @@ namespace _5S_OS_C
             isRunning = false;
         }
 
-        public void Refresh()
+        public new void Update()
         {
-            this.process_?.Refresh();
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PID)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CPU)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Memory)));
+            process_?.Refresh();
+            base.Update();
+        }
+
+        public new bool IsRunning()
+        {
+            return isRunning;
         }
     }
 

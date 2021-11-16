@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -67,6 +68,8 @@ namespace _5S_OS_C
 
     public class MyViewModel : INotifyPropertyChanged
     {
+
+        public string Data { get; set; }
         short port_ = 0;
         public Int32 Port
         {
@@ -109,7 +112,7 @@ namespace _5S_OS_C
         Thread clientThread;
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public ObservableCollection<ProcessWrapper> Processes { get; set; } = new ObservableCollection<ProcessWrapper>();
+        public ObservableCollection<ProcessData> Processes { get; set; } = new ObservableCollection<ProcessData>();
 
         public void ConnectToServer()
         {
@@ -117,19 +120,39 @@ namespace _5S_OS_C
             clientThread.Start();
         }
 
+        public void DisconnectFromServer()
+        {
+            if (clientThread != null)
+            {
+                ;
+            }
+            client.Dispose();
+        }
+
         public void WhileConnected()
         {
-            NetworkStream stream = client.GetStream();
+            try
+            {
+                NetworkStream stream = client.GetStream();
 
-            byte[] buffer = new byte[4096];
-            int bytes = stream.Read(buffer, 0, buffer.Length);
+                byte[] buffer = new byte[64000];
+                int bytes = stream.Read(buffer, 0, buffer.Length);
 
-            var stringObj = Encoding.UTF8.GetString(buffer);
+                var stringObj = Encoding.UTF8.GetString(buffer);
 
-            // proper way to Deserialize object
-            Processes = System.Text.Json.JsonSerializer.Deserialize<ObservableCollection<ProcessWrapper>>(stringObj);
+                // proper way to Deserialize object
+                ProcessData[] temp = JsonConvert.DeserializeObject<ProcessData[]>(stringObj);
+                foreach (var pw in temp)
+                {
+                    _ = Processes.Append(pw);
+                }
 
-            stream.Close();
+                stream.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("EXCEPTION:" + ex.ToString()); 
+            }
         }
 
         public void StartListener()
@@ -154,7 +177,8 @@ namespace _5S_OS_C
 
             NetworkStream stream = client.GetStream();
 
-            var objToString = System.Text.Json.JsonSerializer.Serialize(Processes);
+            //var objToString = System.Text.Json.JsonSerializer.Serialize(Processes.ToArray());
+            string objToString = JsonConvert.SerializeObject(Processes, Formatting.None);
             byte[] data = Encoding.UTF8.GetBytes(objToString);
             stream.Write(data, 0, data.Length);
 
@@ -174,7 +198,7 @@ namespace _5S_OS_C
         public void UpdateProcessList()
         {
             var allProcesses = Process.GetProcesses();
-            var temp = new ObservableCollection<ProcessWrapper>();
+            var temp = new ObservableCollection<ProcessData>();
             foreach (var process in allProcesses)
             {
                 temp.Add(new ProcessWrapper(process));
@@ -188,8 +212,8 @@ namespace _5S_OS_C
 
             foreach (var process in Processes)
             {
-                process.Refresh();
-                if (!process.isRunning)
+                process.Update();
+                if (!process.IsRunning())
                 {
                     Processes.Remove(process);
                 }
@@ -199,20 +223,20 @@ namespace _5S_OS_C
         public void Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
         {
             var dg = (DataGrid)sender;
-            ObservableCollection<ProcessWrapper> temp = Processes;
+            ObservableCollection<ProcessData> temp = Processes;
 
             if (e.Column.Header.ToString() == "Name")
             {
                 if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
                 {
-                    temp = new ObservableCollection<ProcessWrapper>(from item in Processes
+                    temp = new ObservableCollection<ProcessData>(from item in Processes
                                                                     orderby item.Name ascending
                                                                     select item);
                     e.Column.SortDirection = DataGridSortDirection.Ascending;
                 }
                 else
                 {
-                    temp = new ObservableCollection<ProcessWrapper>(from item in Processes
+                    temp = new ObservableCollection<ProcessData>(from item in Processes
                                                                     orderby item.Name descending
                                                                     select item);
                     e.Column.SortDirection = DataGridSortDirection.Descending;
@@ -222,14 +246,14 @@ namespace _5S_OS_C
             {
                 if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
                 {
-                    temp = new ObservableCollection<ProcessWrapper>(from item in Processes
+                    temp = new ObservableCollection<ProcessData>(from item in Processes
                                                                     orderby item.PID ascending
                                                                     select item);
                     e.Column.SortDirection = DataGridSortDirection.Ascending;
                 }
                 else
                 {
-                    temp = new ObservableCollection<ProcessWrapper>(from item in Processes
+                    temp = new ObservableCollection<ProcessData>(from item in Processes
                                                                     orderby item.PID descending
                                                                     select item);
                     e.Column.SortDirection = DataGridSortDirection.Descending;
@@ -239,14 +263,14 @@ namespace _5S_OS_C
             {
                 if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
                 {
-                    temp = new ObservableCollection<ProcessWrapper>(from item in Processes
+                    temp = new ObservableCollection<ProcessData>(from item in Processes
                                                                     orderby item.CPU ascending
                                                                     select item);
                     e.Column.SortDirection = DataGridSortDirection.Ascending;
                 }
                 else
                 {
-                    temp = new ObservableCollection<ProcessWrapper>(from item in Processes
+                    temp = new ObservableCollection<ProcessData>(from item in Processes
                                                                     orderby item.CPU descending
                                                                     select item);
                     e.Column.SortDirection = DataGridSortDirection.Descending;
@@ -256,14 +280,14 @@ namespace _5S_OS_C
             {
                 if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
                 {
-                    temp = new ObservableCollection<ProcessWrapper>(from item in Processes
+                    temp = new ObservableCollection<ProcessData>(from item in Processes
                                                                     orderby item.Memory ascending
                                                                     select item);
                     e.Column.SortDirection = DataGridSortDirection.Ascending;
                 }
                 else
                 {
-                    temp = new ObservableCollection<ProcessWrapper>(from item in Processes
+                    temp = new ObservableCollection<ProcessData>(from item in Processes
                                                                     orderby item.Memory descending
                                                                     select item);
                     e.Column.SortDirection = DataGridSortDirection.Descending;
