@@ -36,10 +36,5 @@ namespace TestCS
                 Console.WriteLine(ex.Message);
             }
         }
-
-        public static void TestCallback(Tuple<string, IPEndPoint> package)
-        {
-
-        }
     }
 }

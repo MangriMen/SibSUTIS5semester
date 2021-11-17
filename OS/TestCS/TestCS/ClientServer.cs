@@ -28,6 +28,8 @@ namespace TestCS
         private CancellationTokenSource cancellationToken = new();
         private Task listener_;
         private Action<Tuple<string, IPEndPoint>> callback_;
+        private EndPoint lastRecievePoint;
+        private EndPoint lastSendPoint;
 
         public int Timeout { get; set; }
 
@@ -39,6 +41,12 @@ namespace TestCS
             }
         }
         public void Open(string IP, string port, int timeout, bool isHost, Action<Tuple<string, IPEndPoint>> callback)
+        {
+            clients.Clear();
+            OpenWithoutClearClient(IP, port, timeout, isHost, callback);
+        }
+
+        private void OpenWithoutClearClient(string IP, string port, int timeout, bool isHost, Action<Tuple<string, IPEndPoint>> callback)
         {
             Timeout = timeout;
 
@@ -56,51 +64,34 @@ namespace TestCS
             StartListener();
         }
 
-        public void SetListener(Action<Tuple<string, IPEndPoint>> callback)
+        public void ReOpen()
         {
-            if (listener_ != null && listener_.Status != TaskStatus.Created)
+            OpenWithoutClearClient(ip_, receivePort_.ToString(), Timeout, isHost_, callback_);
+        }
+
+        private void Close()
+        {
+            if (socket_ != null)
             {
-                cancellationToken.Cancel();
+                try
+                {
+                    socket_.Shutdown(SocketShutdown.Both);
+                    socket_.Close();
+                    socket_ = null;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
-            while (listener_ != null && !listener_.IsCanceled) ;
-            listener_?.Dispose();
-            listener_ = null;
-            callback_ = callback;
-            listener_ = new Task(() => Listen(callback_));
-        }
-
-        public void StartListener()
-        {
-            listener_.Start();
-        }
-
-        public void StopListener()
-        {
-            SetListener(callback_);
-        }
-
-        public void SetDestinationAddress(string IP, string port)
-        {
-            ip_ = IP;
-            sendPort_ = int.Parse(port);
-        }
-
-        public void SetListenPort(string port)
-        {
-            socket_.Bind(new IPEndPoint(IPAddress.Any, isHost_ ? int.Parse(port) : 0));
-            receivePort_ = (socket_.LocalEndPoint as IPEndPoint).Port;
-        }
-
-        public void SetHost(bool isHost)
-        {
-            Close();
-            Open(ip_, sendPort_.ToString(), Timeout, isHost, callback_);
         }
 
         private void RecreateSocket()
         {
             Close();
+            const int SIO_UDP_CONNRESET = -1744830452;
             socket_ = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            //socket_.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
 
         private void CheckConnection()
@@ -143,6 +134,43 @@ namespace TestCS
             }
         }
 
+        public void SetListener(Action<Tuple<string, IPEndPoint>> callback)
+        {
+            //if (listener_ != null && listener_.Status != TaskStatus.Created)
+            //{
+            //}
+            callback_ = callback;
+            listener_ = new Task(() => Listen(callback_));
+        }
+
+        public void StartListener()
+        {
+            listener_.Start();
+        }
+
+        public void StopListener()
+        {
+            SetListener(callback_);
+        }
+
+        public void SetDestinationAddress(string IP, string port)
+        {
+            ip_ = IP;
+            sendPort_ = int.Parse(port);
+        }
+
+        public void SetListenPort(string port)
+        {
+            socket_.Bind(new IPEndPoint(IPAddress.Any, isHost_ ? int.Parse(port) : 0));
+            receivePort_ = (socket_.LocalEndPoint as IPEndPoint).Port;
+        }
+
+        public void SetHost(bool isHost)
+        {
+            Close();
+            Open(ip_, sendPort_.ToString(), Timeout, isHost, callback_);
+        }
+
         public void SendMessage(object msg, string ip = null, int? port = null)
         {
             if (socket_ == null)
@@ -165,20 +193,31 @@ namespace TestCS
                 {
                     foreach (var client in clients)
                     {
-                        socket_.SendTo(data, new IPEndPoint(IPAddress.Parse(client.Item1), client.Item2));
+                        try
+                        {
+                            lastSendPoint = new IPEndPoint(IPAddress.Parse(client.Item1), client.Item2);
+                            socket_.SendTo(data, lastSendPoint);
+                        }
+                        catch (SocketException)
+                        {
+                            clients.Remove(client);
+                        }
                     }
                 }
                 else
                 {
-                    socket_.SendTo(data, new IPEndPoint(IPAddress.Parse(ip ?? ip_), port ?? sendPort_));
+                    lastSendPoint = new IPEndPoint(IPAddress.Parse(ip ?? ip_), port ?? sendPort_);
+                    socket_.SendTo(data, lastSendPoint);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 Close();
+                throw ex.GetBaseException();
             }
         }
+
         public Tuple<string, IPEndPoint> ReceiveMessage()
         {
             if (socket_ == null)
@@ -193,14 +232,14 @@ namespace TestCS
                 int bytes = 0;
                 byte[] data = new byte[BufferSize];
 
-                EndPoint remoteIp = new IPEndPoint(IPAddress.Any, 0);
+                lastRecievePoint = new IPEndPoint(IPAddress.Any, 0);
                 do
                 {
-                    bytes = socket_.ReceiveFrom(data, ref remoteIp);
+                    bytes = socket_.ReceiveFrom(data, BufferSize, 0, ref lastRecievePoint);
                     builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
                 }
                 while (socket_.Available > 0);
-                IPEndPoint remoteFullIp = remoteIp as IPEndPoint;
+                IPEndPoint remoteFullIp = lastRecievePoint as IPEndPoint;
 
                 if (builder.ToString() == HandshakeSequence.ToString())
                 {
@@ -222,7 +261,12 @@ namespace TestCS
             {
                 Console.WriteLine(ex.Message);
                 Close();
-                return null;
+                if (isHost_)
+                {
+                    StopListener();
+                    ReOpen();
+                }
+                throw ex.GetBaseException();
             }
         }
 
@@ -230,29 +274,17 @@ namespace TestCS
         {
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested)
+                if (socket_ != null)
                 {
-                    return;
-                }
-                Tuple<string, IPEndPoint> message = ReceiveMessage();
-                callback?.Invoke(message);
-            }
-        }
-
-        private void Close()
-        {
-            if (socket_ != null)
-            {
-                try
-                {
-                    clients.Clear();
-                    socket_.Shutdown(SocketShutdown.Both);
-                    socket_.Close();
-                    socket_ = null;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
+                    Tuple<string, IPEndPoint> message = ReceiveMessage();
+                    callback?.Invoke(message);
+                    if (message.Item1 == "clients")
+                    {
+                        foreach (var client in clients)
+                        {
+                            Console.WriteLine(client);
+                        }
+                    }
                 }
             }
         }
