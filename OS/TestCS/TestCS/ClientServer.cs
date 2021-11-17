@@ -13,6 +13,7 @@ namespace TestCS
     {
         private readonly int BufferSize = 65535;
         private readonly int HandshakeSequence = int.MinValue;
+        private readonly int DisconnectSequence = int.MaxValue;
 
         private Socket socket_;
 
@@ -69,12 +70,13 @@ namespace TestCS
             OpenWithoutClearClient(ip_, receivePort_.ToString(), Timeout, isHost_, callback_);
         }
 
-        private void Close()
+        public void Close()
         {
             if (socket_ != null)
             {
                 try
                 {
+                    SendMessage(DisconnectSequence);
                     socket_.Shutdown(SocketShutdown.Both);
                     socket_.Close();
                     socket_ = null;
@@ -91,7 +93,7 @@ namespace TestCS
             Close();
             const int SIO_UDP_CONNRESET = -1744830452;
             socket_ = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            //socket_.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
+            socket_.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
 
         private void CheckConnection()
@@ -140,11 +142,11 @@ namespace TestCS
             //{
             //}
             callback_ = callback;
-            listener_ = new Task(() => Listen(callback_));
         }
 
         public void StartListener()
         {
+            listener_ = new Task(() => Listen(callback_));
             listener_.Start();
         }
 
@@ -247,12 +249,39 @@ namespace TestCS
                     {
                         clients.Add(Tuple.Create(remoteFullIp.Address.ToString(), remoteFullIp.Port));
                         SendMessage(HandshakeSequence, remoteFullIp.Address.ToString(), remoteFullIp.Port);
-                        return Tuple.Create("", remoteFullIp);
+                        return Tuple.Create(builder.ToString(), remoteFullIp);
                     }
                     else
                     {
                         isTimeout = false;
+                        return Tuple.Create(builder.ToString(), remoteFullIp);
                     }
+                }
+                else if (builder.ToString() == DisconnectSequence.ToString())
+                {
+                    if (isHost_)
+                    {
+                        clients.TryGetValue(Tuple.Create(remoteFullIp.Address.ToString(), remoteFullIp.Port), out Tuple<string, int> dummy);
+                        if (dummy != null)
+                        {
+                            clients.Remove(dummy);
+                        }
+                        return Tuple.Create(builder.ToString(), remoteFullIp);
+                    }
+                    else
+                    {
+                        return Tuple.Create(builder.ToString(), remoteFullIp);
+                    }
+                }
+                else if (builder.ToString() == "clients")
+                {
+                    string outMessage = "";
+                    foreach (var client in clients)
+                    {
+                        outMessage += client.ToString() + "\n";
+                    }
+                    outMessage = outMessage[0..^1];
+                    SendMessage(outMessage, remoteFullIp.Address.ToString(), remoteFullIp.Port);
                 }
 
                 return Tuple.Create(builder.ToString(), remoteFullIp);
@@ -261,11 +290,11 @@ namespace TestCS
             {
                 Console.WriteLine(ex.Message);
                 Close();
-                if (isHost_)
-                {
-                    StopListener();
-                    ReOpen();
-                }
+                //if (isHost_)
+                //{
+                //    StopListener();
+                //    ReOpen();
+                //}
                 throw ex.GetBaseException();
             }
         }
@@ -278,13 +307,6 @@ namespace TestCS
                 {
                     Tuple<string, IPEndPoint> message = ReceiveMessage();
                     callback?.Invoke(message);
-                    if (message.Item1 == "clients")
-                    {
-                        foreach (var client in clients)
-                        {
-                            Console.WriteLine(client);
-                        }
-                    }
                 }
             }
         }
