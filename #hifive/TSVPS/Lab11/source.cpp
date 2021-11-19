@@ -109,7 +109,7 @@ string regularMultiply(string first, string second) {
 //void callAndLogMultiply(string a, string b, string (*function)(string, string)) {
 //	cout << a << ", " << b << ": " << function(a, b) << endl;
 //}
-void callAndLogMultiply(ll a, ll b, ll (*function)(ll, ll)) {
+void callAndLogMultiply(ll a, ll b, ll(*function)(ll, ll)) {
 	cout << a << ", " << b << ": " << function(a, b) << endl;
 }
 
