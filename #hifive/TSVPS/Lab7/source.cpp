@@ -5,11 +5,11 @@
 #include <complex>
 #include <cmath>
 #include <sstream>
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <tuple>
 using namespace std;
-
 
 namespace utils {
 	size_t resizeDoubleTheMax(vector<double>& a, vector<double>& b) {
@@ -42,12 +42,14 @@ namespace utils {
 	enum {
 		DISCRETE,
 		SEMI_FAST,
+		FAST,
 	};
 }
 
 size_t counter = 0;
 size_t counterDF = 0;
 size_t counterSF = 0;
+size_t counterFF = 0;
 
 vector<complex<double>> getDiscreteFourierTransform(const vector<double>& data) {
 	if (data.size() == 0) return vector<complex<double>>();
@@ -233,9 +235,125 @@ vector<double> forierConvolute(vector<double> a, vector<double> b, int type) {
 	return out;
 }
 
+int rev(int num, int lg_n) {
+	int res = 0;
+
+	for (int i = 0; i < lg_n; ++i) {
+		if (num & (1 << i)) {
+			res |= 1 << (lg_n - 1 - i);
+		}
+	}
+
+	return res;
+}
+
+vector<complex<double>> getFastFourierTransform(const vector<double>& data) {
+	if (data.size() == 0) {
+		return vector<complex<double>>();
+	}
+
+	vector<complex<double>> out;
+	transform(data.begin(), data.end(), std::back_inserter(out), [](const double& e) { return complex<double>(e); });
+
+	int lg_n = 0;
+	while ((static_cast<unsigned long long>(1) << lg_n) < data.size()) {
+		++lg_n;
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (i < rev(i, lg_n)) {
+			swap(out[i], out[rev(i, lg_n)]);
+		}
+	}
+
+	for (int len = 2; len <= data.size(); len <<= 1) {
+		double ang = 2 * M_PI / len;
+
+		complex<double> wlen(cos(ang), sin(ang));
+
+		for (int i = 0; i < data.size(); i += len) {
+			complex<double> w(1);
+			for (int j = 0; j < len / 2; ++j) {
+				complex<double> u = out[i + j];
+				complex<double> v = out[i + j + len / 2] * w;
+				out[i + j] = u + v;
+				out[i + j + len / 2] = u - v;
+				w *= wlen;
+				counterFF += 2;
+			}
+		}
+	}
+
+	return out;
+}
+
+vector<double> getReverseFastFourierTransform(const vector<complex<double>>& data) {
+	if (data.size() == 0) {
+		return vector<double>();
+	}
+
+	vector<complex<double>> outComplex(data);
+
+	int lg_n = 0;
+	while ((static_cast<unsigned long long>(1) << lg_n) < data.size()) {
+		++lg_n;
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (i < rev(i, lg_n)) {
+			swap(outComplex[i], outComplex[rev(i, lg_n)]);
+		}
+	}
+
+	for (int len = 2; len <= data.size(); len <<= 1) {
+		double ang = -2 * M_PI / len;
+
+		complex<double> wlen(cos(ang), sin(ang));
+
+		for (int i = 0; i < data.size(); i += len) {
+			complex<double> w(1);
+			for (int j = 0; j < len / 2; ++j) {
+				complex<double> u = outComplex[i + j];
+				complex<double> v = outComplex[i + j + len / 2] * w;
+				outComplex[i + j] = u + v;
+				outComplex[i + j + len / 2] = u - v;
+				w *= wlen;
+			}
+		}
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		outComplex[i] /= data.size();
+	}
+
+	vector<double> out;
+	transform(outComplex.begin(), outComplex.end(), std::back_inserter(out), [](const complex<double>& e) { return e.real(); });
+
+	return out;
+}
+
+vector<double> convolutionFastFourier(vector<double> a, vector<double> b) {
+	size_t size_ = utils::resizeDoubleTheMax(a, b);
+	vector<double> out(size_, 0);
+	vector<complex<double>> temp(size_, 0);
+
+	vector<complex<double>> fourierA = getFastFourierTransform(a);
+	vector<complex<double>> fourierB = getFastFourierTransform(b);
+
+	for (size_t i = 0; i < size_; i++)
+	{
+		temp[i] = static_cast<double>(size_) * fourierA[i] * fourierB[i];
+		counterFF++;
+	}
+
+	out = getReverseFastFourierTransform(temp);
+
+	return out;
+}
+
 int main() {
 	vector<int> sizes = { 16, 64, 128, 512 };
-	//vector<int> sizes = { 5*5, 10*10, 20*20 };
+
 	cout << "Convolutions:" << endl
 		<< endl << "===================" << endl;
 	for (size_t i = 0; i < sizes.size(); ++i) {
@@ -259,10 +377,12 @@ int main() {
 		vector<double> out = convolute(dataA, dataB);
 		vector<double> outDF = forierConvolute(dataA, dataB, utils::DISCRETE);
 		vector<double> outSF = forierConvolute(dataA, dataB, utils::SEMI_FAST);
+		vector<double> outFF = convolutionFastFourier(dataA, dataB);
 
 		cout << "Regular: " << counter << endl;
 		cout << "DFT: " << counterDF << endl;
 		cout << "SFFT: " << counterSF << endl;
+		cout << "FFT: " << counterFF << endl;
 		cout << "===================" << endl;
 	}
 }
