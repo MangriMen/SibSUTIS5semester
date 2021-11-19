@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <complex>
 #include <tuple>
 using namespace std;
@@ -124,7 +125,6 @@ vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) 
 		for (size_t j2 = 0; j2 < p2; j2++) {
 			for (size_t j1 = 0; j1 < p1; j1++) {
 				temp1[k1][j2] += data[j2 + p2 * j1] * exp(1i * EXPR_PART * (static_cast<double>(j1) * static_cast<double>(k1)));
-				counter++;
 			}
 			temp1[k1][j2] *= REVERSE_P1;
 		}
@@ -134,7 +134,6 @@ vector<complex<double>> getSemiFastFourierTransform(const vector<double>& data) 
 		for (size_t k2 = 0; k2 < p2; k2++) {
 			for (size_t j2 = 0; j2 < p2; j2++) {
 				temp2[k1][k2] += temp1[k1][j2] * exp(1i * EXPR_PART * (static_cast<double>(j2) * (static_cast<double>(k1) + static_cast<double>(p1) * static_cast<double>(k2)) / static_cast<double>(p2)));
-				counter++;
 			}
 			temp2[k1][k2] *= REVERSE_P2;
 		}
@@ -200,42 +199,127 @@ vector<double> getReverseSemiFastFourierTransform(const vector<complex<double>>&
 	return out;
 }
 
+int rev(int num, int lg_n) {
+	int res = 0;
+
+	for (int i = 0; i < lg_n; ++i) {
+		if (num & (1 << i)) {
+			res |= 1 << (lg_n - 1 - i);
+		}
+	}
+
+	return res;
+}
+
+vector<complex<double>> getFastFourierTransform(const vector<double>& data) {
+	if (data.size() == 0) {
+		return vector<complex<double>>();
+	}
+
+	vector<complex<double>> out;
+	transform(data.begin(), data.end(), std::back_inserter(out), [](const double& e) { return complex<double>(e); });
+
+	int lg_n = 0;
+	while ((static_cast<unsigned long long>(1) << lg_n) < data.size()) {
+		++lg_n;
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (i < rev(i, lg_n)) {
+			swap(out[i], out[rev(i, lg_n)]);
+		}
+	}
+
+	for (int len = 2; len <= data.size(); len <<= 1) {
+		double ang = 2 * M_PI / len;
+
+		complex<double> wlen(cos(ang), sin(ang));
+
+		for (int i = 0; i < data.size(); i += len) {
+			complex<double> w(1);
+			for (int j = 0; j < len / 2; ++j) {
+				complex<double> u = out[i + j];
+				complex<double> v = out[i + j + len / 2] * w;
+				out[i + j] = u + v;
+				out[i + j + len / 2] = u - v;
+				w *= wlen;
+			}
+		}
+	}
+
+	return out;
+}
+
+vector<double> getReverseFastFourierTransform(const vector<complex<double>>& data) {
+	if (data.size() == 0) {
+		return vector<double>();
+	}
+
+	vector<complex<double>> outComplex(data);
+
+	int lg_n = 0;
+	while ((static_cast<unsigned long long>(1) << lg_n) < data.size()) {
+		++lg_n;
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		if (i < rev(i, lg_n)) {
+			swap(outComplex[i], outComplex[rev(i, lg_n)]);
+		}
+	}
+
+	for (int len = 2; len <= data.size(); len <<= 1) {
+		double ang = -2 * M_PI / len;
+
+		complex<double> wlen(cos(ang), sin(ang));
+
+		for (int i = 0; i < data.size(); i += len) {
+			complex<double> w(1);
+			for (int j = 0; j < len / 2; ++j) {
+				complex<double> u = outComplex[i + j];
+				complex<double> v = outComplex[i + j + len / 2] * w;
+				outComplex[i + j] = u + v;
+				outComplex[i + j + len / 2] = u - v;
+				w *= wlen;
+			}
+		}
+	}
+
+	for (int i = 0; i < data.size(); ++i) {
+		outComplex[i] /= data.size();
+	}
+
+	vector<double> out;
+	transform(outComplex.begin(), outComplex.end(), std::back_inserter(out), [](const complex<double>& e) { return e.real(); });
+
+	return out;
+}
+
 int main() {
 	srand(time(NULL));
 
 	const int VECTOR_SIZE = 16;
-	vector<size_t> sizes {5*5, 10*10, 20*20};
+	//vector<size_t> sizes {5*5, 10*10, 20*20};
 	vector<double> startArray(VECTOR_SIZE, 0);
 
 	for (int i = 0; i < VECTOR_SIZE; i += 1) {
 		startArray[i] = i*i;
 	}
 
-	//for (int j = 0; j < sizes.size(); ++j) {
-	//	counter = 0;
-	//	vector<double> startArray(sizes[j], 0);
-	//
-	//	for (int i = 0; i < sizes[j]; i += 1) {
-	//		startArray[i] = i*i;
-	//	}
-
-	//	vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
-	//	//vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
-
-	//	cout << "Size: " << sizes[j] << endl;
-	//	cout << "Counter: " << counter << endl << endl;
-	//}
-
-	vector<complex<double>> discreteFourier = getDiscreteFourierTransform(startArray);
-	vector<double> reverseDiscreteFourier = getReverseDiscreteFourierTransform(discreteFourier);
-	vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
-	vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
+	//vector<complex<double>> discreteFourier = getDiscreteFourierTransform(startArray);
+	//vector<double> reverseDiscreteFourier = getReverseDiscreteFourierTransform(discreteFourier);
+	//vector<complex<double>> semiFastFourier = getSemiFastFourierTransform(startArray);
+	//vector<double> reverseSemiFastFourier = getReverseSemiFastFourierTransform(semiFastFourier);
+	vector<complex<double>> FastFourier = getSemiFastFourierTransform(startArray);
+	vector<double> reverseFastFourier = getReverseSemiFastFourierTransform(FastFourier);
 
 	arrayTweaks::printArrayLog(startArray, "Original array:");
-	arrayTweaks::printArrayLog(discreteFourier, "Array aquired by DF:");
-	arrayTweaks::printArrayLog(reverseDiscreteFourier, "Array aquired by RDF:");
-	arrayTweaks::printArrayLog(semiFastFourier, "Array aquired by SFF:");
-	arrayTweaks::printArrayLog(reverseSemiFastFourier, "Array aquired by RSFF:");
+	//arrayTweaks::printArrayLog(discreteFourier, "Array aquired by DF:");
+	//arrayTweaks::printArrayLog(reverseDiscreteFourier, "Array aquired by RDF:");
+	//arrayTweaks::printArrayLog(semiFastFourier, "Array aquired by SFF:");
+	//arrayTweaks::printArrayLog(reverseSemiFastFourier, "Array aquired by RSFF:");
+	arrayTweaks::printArrayLog(FastFourier, "Array aquired by FF:");
+	arrayTweaks::printArrayLog(reverseFastFourier, "Array aquired by RFF:");
 
 	return 0;
 }

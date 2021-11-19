@@ -13,9 +13,9 @@ int setDistance(int graph[SIZE][SIZE], int i, int j, int distance) {
 int main()
 {
     // Init
-    int graph[SIZE][SIZE] = { 0 }; // матрица связей
-    int minimalDistance[SIZE] = { INT_MAX }; // минимальное расстояние
-    int visitedVertexes[SIZE] = { 1 }; // посещенные вершины
+    int graph[SIZE][SIZE] = { 0 };
+    int minimalDistance[SIZE] = { INT_MAX };
+    int visitedVertexes[SIZE] = { 1 };
     int minIndex = INT_MAX;
     int minWeight = INT_MAX;
 
@@ -37,15 +37,14 @@ int main()
         minIndex = INT_MAX;
         minWeight = INT_MAX;
         for (int i = 0; i < SIZE; i++)
-        { // Если вершину ещё не обошли и вес меньше minWeight
+        {
             if ((visitedVertexes[i] == 1) && (minimalDistance[i] < minWeight))
-            { // Переприсваиваем значения
+            { 
                 minWeight = minimalDistance[i];
                 minIndex = i;
             }
         }
-        // Добавляем найденный минимальный вес к текущему весу вершины
-        // и сравниваем с текущим минимальным весом вершины
+
         if (minIndex != INT_MAX)
         {
             for (int i = 0; i < SIZE; i++)
@@ -63,27 +62,28 @@ int main()
         }
     } while (minIndex < INT_MAX);
 
-    // Восстановление пути
-    int lastVertexIndex = 1; // индекс предыдущей вершины
     memset(visitedVertexes, 0, sizeof visitedVertexes);
-    int endIndex = SIZE - 1; // индекс конечной вершины = 5 - 1
-    int weight = minimalDistance[endIndex]; // вес конечной вершины
-    visitedVertexes[0] = endIndex; // начальный элемент - конечная вершина
+    int lastVertexIndex = 1;
+    int endIndex = SIZE - 1;
+    visitedVertexes[0] = endIndex + 1;
+    int weight = minimalDistance[endIndex];
 
-    while (endIndex != 0) // пока не дошли до начальной вершины
+    while (endIndex != 0)
     {
-        for (int i = 0; i < SIZE; i++) // просматриваем все вершины
-            if (graph[i][endIndex] != 0)   // если связь есть
+        for (int i = 0; i < SIZE; i++) {
+            if (graph[i][endIndex] != 0)
             {
-                int temp = weight - graph[i][endIndex]; // определяем вес пути из предыдущей вершины
-                if (temp == minimalDistance[i]) // если вес совпал с рассчитанным
-                {                 // значит из этой вершины и был переход
-                    weight = temp; // сохраняем новый вес
-                    endIndex = i;       // сохраняем предыдущую вершину
-                    visitedVertexes[lastVertexIndex] = i; // и записываем ее в массив
+                int temp = weight - graph[i][endIndex];
+                if (temp == minimalDistance[i])
+                {                
+                    weight = temp;
+                    endIndex = i;
+                    visitedVertexes[lastVertexIndex] = i + 1;
                     lastVertexIndex++;
+                    printf("%d\n", i);
                 }
             }
+        }
     }
 
     // Data print
@@ -103,7 +103,6 @@ int main()
         printf("%5d ", minimalDistance[i]);
     }
 
-    // (начальная вершина оказалась в конце массива из lastVertexIndex элементов)
     printf("\n\nShortest path:\n");
     for (int i = lastVertexIndex - 1; i >= 0; i--)
     {
