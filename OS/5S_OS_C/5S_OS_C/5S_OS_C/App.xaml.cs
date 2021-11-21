@@ -36,6 +36,8 @@ namespace _5S_OS_C
             this.InitializeComponent();
         }
 
+        public XamlRoot AppRoot { get; private set; }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
@@ -45,6 +47,7 @@ namespace _5S_OS_C
         {
             m_window = new MainWindow();
             m_window.Activate();
+            AppRoot = m_window.Content.XamlRoot;
         }
 
         private Window m_window;

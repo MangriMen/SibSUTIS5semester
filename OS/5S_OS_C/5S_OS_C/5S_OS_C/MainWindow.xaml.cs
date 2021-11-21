@@ -1,28 +1,15 @@
-﻿using CommunityToolkit.WinUI.UI.Controls;
+﻿using _5S_OS_C.Models;
+using _5S_OS_C.Utils;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using Newtonsoft.Json;
+using ProcessInfoProj;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage.Streams;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -34,282 +21,146 @@ namespace _5S_OS_C
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        public MyViewModel MyViewModel { get; set; } = new MyViewModel();
+        public TaskScheduler UISyncContext { get; } = TaskScheduler.FromCurrentSynchronizationContext();
+        public TaskManagerModel TaskManager { get; set; } = new TaskManagerModel();
+        int wantRefreshInterval = 1000;
+        bool stopTask = false;
 
         public MainWindow()
         {
             this.InitializeComponent();
-
-            //DispatcherTimer timer = new DispatcherTimer();
-            //timer.Tick += MyViewModel.RefreshProcesses;
-            //timer.Interval = new TimeSpan(0, 0, 0, 0, 1000);
-            //timer.Start();
+            TaskManager.UISyncContext = UISyncContext;
+            TaskManager.PropertyChanged += TaskManager_PropertyChanged;
         }
 
-        private void TextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        private void TaskManager_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.Key == Windows.System.VirtualKey.Enter)
+            //if (e.PropertyName == nameof(TaskManager.clientServer))
+            //{
+            //    TaskManager.clientServer.Close();
+
+            //    StartServer.IsEnabled = true;
+            //    ConnectServer.Content = "Connect";
+            //    ConnectedServerIP.Text = "";
+            Task.Run(() => { }).ContinueWith((t) =>
             {
-                MyViewModel.Port = 12000;
-                MyViewModel.IP = (sender as TextBox).Text;
-                MyViewModel.ConnectToServer();
+                ContentDialogEx.Exception(Content.XamlRoot, "Server disconnected or error when getting data", "", "Ok");
+            }, UISyncContext);
+            //}
+        }
+
+        private void StartTask()
+        {
+            Task.Run(() =>
+            {
+                if (stopTask)
+                {
+                    return;
+                }
+
+                while (TaskManager.IsBusy)
+                {
+                    Thread.Sleep(wantRefreshInterval);
+                }
+
+                RefreshAndSend();
+
+                StartTask();
+            });
+        }
+
+        private void StartServer_Click(object sender, RoutedEventArgs e)
+        {
+            if (!TaskManager.clientServer.IsRunning)
+            {
+                try
+                {
+                    TaskManager.clientServer.Open("127.0.0.1", "49061", 3, true, TaskManager.Listener);
+                }
+                catch (Exception ex)
+                {
+                    ContentDialogEx exDlg = ContentDialogEx.Exception(Content.XamlRoot, "Failed to start ClientServer", ex.Message, "Ok");
+                    _ = exDlg.ShowAsync();
+                    TaskManager.clientServer.Close();
+                    return;
+                }
+
+                StartTask();
+
+                ConnectServer.IsEnabled = false;
+                StartServer.Content = "Stop Server";
+                ShowConnected.IsEnabled = true;
+                ShowConnected.Content = "Hide connected";
+                ConnectedClients.Visibility = Visibility.Visible;
             }
             else
             {
-                MyViewModel.GetProcesses();
-                DispatcherTimer timer = new DispatcherTimer();
-                timer.Tick += MyViewModel.RefreshProcesses;
-                timer.Interval = new TimeSpan(0, 0, 0, 0, 1000);
-                timer.Start();
-                MyViewModel.StartListener();
-            }
-        }
-    }
-
-    public class MyViewModel : INotifyPropertyChanged
-    {
-
-        public string Data { get; set; }
-        short port_ = 0;
-        public Int32 Port
-        {
-            get
-            {
-                return port_;
-            }
-            set
-            {
-                port_ = (short)value;
-                if (client.Connected)
-                {
-                    client.Close();
-                    client.Connect(new IPEndPoint(IPAddress.Parse(ip_), port_));
-                }
+                TaskManager.clientServer.Close();
+                ConnectServer.IsEnabled = true;
+                StartServer.Content = "Start Server";
+                ShowConnected.IsEnabled = false;
+                ShowConnected.Content = "Show connected";
+                ConnectedClients.Visibility = Visibility.Collapsed;
             }
         }
 
-        string ip_ = IPAddress.Loopback.ToString();
-        public string IP
+        private async void ConnectServer_Click(object sender, RoutedEventArgs e)
         {
-            get
+            if (!TaskManager.clientServer.IsRunning)
             {
-                return ip_;
-            }
-            set
-            {
-                ip_ = value;
-                if (client.Connected)
+                ContentDialogEx dlg = ContentDialogEx.Request(Content.XamlRoot, "Enter server address", "IP or IP:Port", "Ok");
+                await dlg.ShowAsync();
+
+                string[] result = dlg.Result.Split(":");
+
+                if (result[0] == "")
                 {
-                    client.Close();
+                    return;
                 }
-                client.Connect(new IPEndPoint(IPAddress.Parse(ip_), port_));
+
+                string IP = result[0];
+                string port = result.Length > 1 ? result[1] : "49061";
+
+                try
+                {
+                    TaskManager.clientServer.Open(IP, port, 3, false, TaskManager.Listener);
+                }
+                catch (Exception ex)
+                {
+                    ContentDialogEx exDlg = ContentDialogEx.Exception(Content.XamlRoot, "Failed to start ClientServer", ex.Message, "Ok");
+                    _ = exDlg.ShowAsync();
+                    return;
+                }
+
+                StartServer.IsEnabled = false;
+                ConnectServer.Content = "Disconnect";
+                ConnectedServerIP.Text = IP + ":" + port;
+            }
+            else
+            {
+                TaskManager.clientServer.Close();
+                StartServer.IsEnabled = true;
+                ConnectServer.Content = "Connect";
+                ConnectedServerIP.Text = "";
             }
         }
 
-        TcpListener listner = new TcpListener(new IPEndPoint(IPAddress.Any, 12000));
-        Thread listnerThread;
-        TcpClient client = new TcpClient();
-        Thread clientThread;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        public ObservableCollection<ProcessData> Processes { get; set; } = new ObservableCollection<ProcessData>();
-
-        public void ConnectToServer()
+        private void RefreshAndSend()
         {
-            clientThread = new(new ThreadStart(WhileConnected));
-            clientThread.Start();
+            TaskManager.GetProcesses();
+            TaskManager.SendToClient();
         }
 
-        public void DisconnectFromServer()
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            if (clientThread != null)
-            {
-                ;
-            }
-            client.Dispose();
+            TaskManager.GetProcesses();
+            TaskManager.SendToClient();
         }
 
-        public void WhileConnected()
+        private void ShowConnected_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                NetworkStream stream = client.GetStream();
-
-                byte[] buffer = new byte[64000];
-                int bytes = stream.Read(buffer, 0, buffer.Length);
-
-                var stringObj = Encoding.UTF8.GetString(buffer);
-
-                // proper way to Deserialize object
-                ProcessData[] temp = JsonConvert.DeserializeObject<ProcessData[]>(stringObj);
-                foreach (var pw in temp)
-                {
-                    _ = Processes.Append(pw);
-                }
-
-                stream.Close();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("EXCEPTION:" + ex.ToString()); 
-            }
-        }
-
-        public void StartListener()
-        {
-            listner.Start();
-
-            listnerThread = new(new ThreadStart(WhileListen));
-            listnerThread.Start();
-        }
-        public void StopListener()
-        {
-            if (listnerThread != null)
-            {
-                ;
-            }
-            listner.Stop();
-        }
-
-        public void WhileListen()
-        {
-            TcpClient client = listner.AcceptTcpClient();
-
-            NetworkStream stream = client.GetStream();
-
-            //var objToString = System.Text.Json.JsonSerializer.Serialize(Processes.ToArray());
-            string objToString = JsonConvert.SerializeObject(Processes, Formatting.None);
-            byte[] data = Encoding.UTF8.GetBytes(objToString);
-            stream.Write(data, 0, data.Length);
-
-            stream.Close();
-            client.Close();
-        }
-
-        public void GetProcesses()
-        {
-            var allProcesses = Process.GetProcesses();
-            foreach (var process in allProcesses)
-            {
-                Processes.Add(new ProcessWrapper(process));
-            }
-        }
-
-        public void UpdateProcessList()
-        {
-            var allProcesses = Process.GetProcesses();
-            var temp = new ObservableCollection<ProcessData>();
-            foreach (var process in allProcesses)
-            {
-                temp.Add(new ProcessWrapper(process));
-            }
-            Processes.Concat(temp);
-        }
-
-        public void RefreshProcesses(object sender, object e)
-        {
-            //UpdateProcessList();
-
-            foreach (var process in Processes)
-            {
-                process.Update();
-                if (!process.IsRunning())
-                {
-                    Processes.Remove(process);
-                }
-            }
-        }
-
-        public void Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
-        {
-            var dg = (DataGrid)sender;
-            ObservableCollection<ProcessData> temp = Processes;
-
-            if (e.Column.Header.ToString() == "Name")
-            {
-                if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
-                {
-                    temp = new ObservableCollection<ProcessData>(from item in Processes
-                                                                    orderby item.Name ascending
-                                                                    select item);
-                    e.Column.SortDirection = DataGridSortDirection.Ascending;
-                }
-                else
-                {
-                    temp = new ObservableCollection<ProcessData>(from item in Processes
-                                                                    orderby item.Name descending
-                                                                    select item);
-                    e.Column.SortDirection = DataGridSortDirection.Descending;
-                }
-            }
-            else if (e.Column.Header.ToString() == "PID")
-            {
-                if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
-                {
-                    temp = new ObservableCollection<ProcessData>(from item in Processes
-                                                                    orderby item.PID ascending
-                                                                    select item);
-                    e.Column.SortDirection = DataGridSortDirection.Ascending;
-                }
-                else
-                {
-                    temp = new ObservableCollection<ProcessData>(from item in Processes
-                                                                    orderby item.PID descending
-                                                                    select item);
-                    e.Column.SortDirection = DataGridSortDirection.Descending;
-                }
-            }
-            else if (e.Column.Header.ToString() == "CPU")
-            {
-                if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
-                {
-                    temp = new ObservableCollection<ProcessData>(from item in Processes
-                                                                    orderby item.CPU ascending
-                                                                    select item);
-                    e.Column.SortDirection = DataGridSortDirection.Ascending;
-                }
-                else
-                {
-                    temp = new ObservableCollection<ProcessData>(from item in Processes
-                                                                    orderby item.CPU descending
-                                                                    select item);
-                    e.Column.SortDirection = DataGridSortDirection.Descending;
-                }
-            }
-            else if (e.Column.Header.ToString() == "Memory")
-            {
-                if (e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Descending)
-                {
-                    temp = new ObservableCollection<ProcessData>(from item in Processes
-                                                                    orderby item.Memory ascending
-                                                                    select item);
-                    e.Column.SortDirection = DataGridSortDirection.Ascending;
-                }
-                else
-                {
-                    temp = new ObservableCollection<ProcessData>(from item in Processes
-                                                                    orderby item.Memory descending
-                                                                    select item);
-                    e.Column.SortDirection = DataGridSortDirection.Descending;
-                }
-            }
-
-            Processes.Clear();
-            foreach (var sortedProcess in temp)
-            {
-                Processes.Add(sortedProcess);
-            }
-
-            // add code to handle sorting by other columns as required
-
-            //Remove sorting indicators from other columns
-            foreach (var dgColumn in dg.Columns)
-            {
-                if (dgColumn.Header.ToString() != e.Column.Header.ToString())
-                {
-                    dgColumn.SortDirection = null;
-                }
-            }
+            ConnectedClients.Visibility = ConnectedClients.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+            ShowConnected.Content = ConnectedClients.Visibility == Visibility.Collapsed ? "Show connected" : "Hide connected";
         }
     }
 }

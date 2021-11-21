@@ -24,6 +24,14 @@ namespace TestCS
 
         private readonly SortedSet<Tuple<string, int>> clients = new();
 
+        public SortedSet<Tuple<string, int>> Clients
+        {
+            get
+            {
+                return clients;
+            }
+        }
+
         private bool isHost_;
         private bool isTimeout = true;
         private CancellationTokenSource cancellationToken = new();
@@ -31,6 +39,8 @@ namespace TestCS
         private Action<Tuple<string, IPEndPoint>> callback_;
         private EndPoint lastRecievePoint;
         private EndPoint lastSendPoint;
+
+        public bool IsHost { get { return isHost_; } }
 
         public int Timeout { get; set; }
 
@@ -305,8 +315,15 @@ namespace TestCS
             {
                 if (socket_ != null)
                 {
-                    Tuple<string, IPEndPoint> message = ReceiveMessage();
-                    callback?.Invoke(message);
+                    try
+                    {
+                        Tuple<string, IPEndPoint> message = ReceiveMessage();
+                        callback?.Invoke(message);
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
             }
         }

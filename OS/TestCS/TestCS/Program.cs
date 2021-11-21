@@ -10,23 +10,23 @@ namespace TestCS
         {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
 
-            Console.Write("Client (0) or Server (1): ");
-            bool isServer = Convert.ToInt32(Console.ReadLine()) == 1;
-
+            //Console.Write("Client (0) or Server (1): ");
+            //bool isServer = Convert.ToInt32(Console.ReadLine()) == 1;
+            bool isServer = true;
             string IP = "127.0.0.1";
-            string port = "4004";
-            if (!isServer)
-            {
-                Console.Write("Enter IP and port in IPv4:port format: ");
-                string[] temp = Console.ReadLine().Split(":");
-                IP = temp[0];
-                port = temp[1];
-            }
-            else
-            {
-                Console.Write("Enter port: ");
-                port = Console.ReadLine();
-            }
+            string port = "49061";
+            //if (!isServer)
+            //{
+            //    Console.Write("Enter IP and port in IPv4:port format: ");
+            //    string[] temp = Console.ReadLine().Split(":");
+            //    IP = temp[0];
+            //    port = temp[1];
+            //}
+            //else
+            //{
+            //    Console.Write("Enter port: ");
+            //    port = Console.ReadLine();
+            //}
 
             try
             {
