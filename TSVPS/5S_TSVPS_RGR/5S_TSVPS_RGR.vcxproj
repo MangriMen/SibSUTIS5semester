@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{1a66aec4-5477-477d-8ca3-7aa652a23c9b}</ProjectGuid>
-    <RootNamespace>My5STSVPSLab11</RootNamespace>
+    <ProjectGuid>{06c4c69d-94a3-4e10-be79-28f40593ae94}</ProjectGuid>
+    <RootNamespace>My5STSVPSRGR</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -88,7 +88,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -103,7 +102,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,10 +141,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="5S_TSVPS_Lab11.cpp" />
+    <ClCompile Include="5S_TSVPS_RGR.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="utils.hpp" />
+    <ProjectReference Include="..\5S_TSVPS_Lab11\5S_TSVPS_Lab11.vcxproj">
+      <Project>{1a66aec4-5477-477d-8ca3-7aa652a23c9b}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
