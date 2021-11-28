@@ -2,80 +2,86 @@
 #include <string>
 #include <algorithm>
 #include <vector>
-#include <cstddef>
+#include <tuple>
 #include <bitset>
 using namespace std;
 
-#define ll long long
-
-string itobs(int number) {
-	string binaryNumber = "";
-
-	if (number) {
-		do {
-			binaryNumber += std::to_string(number % 2);
-		} while (number /= 2);
-		reverse(binaryNumber.begin(), binaryNumber.end());
+string paddedWithZerosToSizeFront(const string& str, size_t size) {
+	if (str.size() >= size) {
+		return str;
 	}
 
-	return binaryNumber;
+	return string(size - str.size(), '0') + str;
 }
 
-int ctoi(const char& number) {
+string paddedWithZerosByNumberBack(const string& str, size_t size) {
+	return str + string(size, '0');
+}
+
+tuple<const string, const string> splitIntoTwoSegments(const string& str, size_t size) {
+	return make_tuple(str.substr(0, size), str.substr(size));
+}
+
+char itoc(const int& num) {
+    return static_cast<unsigned char>(num + '0');
+}
+
+int ctoi(const unsigned char& number) {
 	return (number - '0');
 }
 
-long long fastMultiply(ll first, ll second) {
-	string xBinStr = itobs(first);
-	string yBinStr = itobs(second);
+string add(string x, string y) {
+    const size_t n = max(x.size(), y.size());
+    unsigned short carry = 0;
+    unsigned short sum_col;
+    string result;
 
-	long n = max(xBinStr.size(), yBinStr.size());
-	n = (n & 1) ? n + 1 : n;
-	const long k = n >> 1;
+    x = paddedWithZerosToSizeFront(x, n);
+    y = paddedWithZerosToSizeFront(y, n);
 
-	xBinStr.insert(0, string(n - xBinStr.size(), '0'));
-	yBinStr.insert(0, string(n - yBinStr.size(), '0'));
+    for (size_t i = n - 1; i != numeric_limits<size_t>::max(); i--) {
+        sum_col = (x[i] - '0') + (y[i] - '0') + carry;
+        carry = sum_col / 10;
+        result.insert(0, to_string(sum_col % 10));
+    }
 
-	const string aNumStr = xBinStr.substr(0, k);
-	const string bNumStr = xBinStr.substr(k, xBinStr.size());
-	const string cNumStr = yBinStr.substr(0, k);
-	const string dNumStr = yBinStr.substr(k, yBinStr.size());
+    if (carry) {
+        result.insert(0, to_string(carry));
+    }
 
-	bitset<sizeof(string)* CHAR_BIT> aBin(aNumStr);
-	bitset<sizeof(string)* CHAR_BIT> bBin(bNumStr);
-	bitset<sizeof(string)* CHAR_BIT> cBin(cNumStr);
-	bitset<sizeof(string)* CHAR_BIT> dBin(dNumStr);
+    return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
+}
 
-	const long a = static_cast<long>(aBin.to_ulong());
-	const long b = static_cast<long>(bBin.to_ulong());
-	const long c = static_cast<long>(cBin.to_ulong());
-	const long d = static_cast<long>(dBin.to_ulong());
+string subtract(string x, string y) {
+    const size_t n = max(x.size(), y.size());
+    short diff;
+    string result;
 
-	//const string a1 = aBin.to_string();
-	//const string b1 = bBin.to_string();
-	//const string c1 = cBin.to_string();
-	//const string d1 = dBin.to_string();
+    while (x.size() < n)
+        x.insert(0, "0");
 
-	//cout << endl << endl << endl;
-	//cout << "a: " << a << " " << a1 << endl;
-	//cout << "a: " << b << " " << b1 << endl;
-	//cout << "a: " << c << " " << c1 << endl;
-	//cout << "a: " << d << " " << d1 << endl;
-	//cout << endl << endl << endl;
+    while (y.size() < n)
+        y.insert(0, "0");
 
-	//const long u = (stol(a) + stol(b)) * (stol(c) + stol(d));
-	//const long v = stol(a) * stol(c);
-	//const long w = stol(b) * stol(d);
+    for (long long i = n - 1; i >= 0; i--) {
+        diff = ctoi(x[i]) - ctoi(y[i]);
 
-	const long u = (a + b) * (c + d);
-	const long v = a * c;
-	const long w = b * d;
+        if (diff >= 0) {
+            result.insert(0, to_string(diff));
+        }
+        else {
+            for (long long j = i - 1; j >= 0; j--) {
+                x[j] = itoc((ctoi(x[j]) - 1) % 10);
 
-	const ll xy = v * pow(2, 2 * k)
-		+ (static_cast<ll>(u) - static_cast<ll>(v) - static_cast<ll>(w)) * pow(2, k)
-		+ w;
+                if (x[j] != '9') {
+                    break;
+                }
+            }
+            result.insert(0, to_string(diff + 10));
+        }
+    }
 
-	return xy;
+    return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
 }
 
 string regularMultiply(string first, string second) {
@@ -106,26 +112,59 @@ string regularMultiply(string first, string second) {
 	return (result[0] == '0') ? result.erase(0, 1) : result;
 }
 
-//void callAndLogMultiply(string a, string b, string (*function)(string, string)) {
-//	cout << a << ", " << b << ": " << function(a, b) << endl;
-//}
-void callAndLogMultiply(ll a, ll b, ll(*function)(ll, ll)) {
+string fastMultiply(string first, string second) {
+    string x(first);
+    string y(second);
+
+    const size_t n = max(x.size(), y.size());
+
+    if (n == 1) {
+        return to_string(ctoi(x[0]) * ctoi(y[0]));
+    }
+
+    const size_t k = n >> 1;
+    const string halfNeededZeroes = string(n - k, '0');
+
+    x = paddedWithZerosToSizeFront(x, n);
+    y = paddedWithZerosToSizeFront(y, n);
+
+    auto [a, b] = splitIntoTwoSegments(x, k);
+    auto [c, d] = splitIntoTwoSegments(y, k);
+
+    string u = fastMultiply(add(a, b), add(c, d));
+    string v = fastMultiply(a, c);
+    string w = fastMultiply(b, d);
+
+    string uvwSub = subtract(u, add(v, w));
+
+    v = paddedWithZerosByNumberBack(v, 2 * (n - k));
+    uvwSub = paddedWithZerosByNumberBack(uvwSub, (n - k));
+
+    string result = add(add(v, w), uvwSub);
+
+    return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
+}
+
+void callAndLogMultiply(string a, string b, string (*function)(string, string)) {
 	cout << a << ", " << b << ": " << function(a, b) << endl;
 }
 
 int main() {
-	/*cout << "Regular multiply: " << endl;
+	cout << "Regular multiply: " << endl;
 	callAndLogMultiply("12345", "2", regularMultiply);
 	callAndLogMultiply("3", "3", regularMultiply);
 	callAndLogMultiply("6463", "21315", regularMultiply);
 	callAndLogMultiply("18", "23", regularMultiply);
 	callAndLogMultiply("625", "625", regularMultiply);
-	callAndLogMultiply("455689967848757865764", "87578121242346457455689967", regularMultiply);*/
+	callAndLogMultiply("455689967848757865764", "87578121242346457455689967", regularMultiply);
 
 	cout << endl << "Fast multiply: " << endl;
-	//callAndLogMultiply("3", "3", fastMultiply);
-	//callAndLogMultiply("18", "23", fastMultiply);
-	callAndLogMultiply(18, 23, fastMultiply);
+	callAndLogMultiply("12345", "2", fastMultiply);
+	callAndLogMultiply("3", "3", fastMultiply);
+	callAndLogMultiply("6463", "21315", fastMultiply);
+	callAndLogMultiply("18", "23", fastMultiply);
+	callAndLogMultiply("625", "625", fastMultiply);
+	callAndLogMultiply("455689967848757865764", "87578121242346457455689967", fastMultiply);
 
 	return 0;
 }
