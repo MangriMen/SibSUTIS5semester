@@ -31,7 +31,7 @@
       </property>
       <widget class="QWidget" name="tabWeek">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Неделя</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
         <property name="spacing">
@@ -65,7 +65,7 @@
       </widget>
       <widget class="QWidget" name="tabAffairs">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>Дела</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
         <property name="spacing">
@@ -87,7 +87,7 @@
       </widget>
       <widget class="QWidget" name="tabShaping">
        <attribute name="title">
-        <string>Tab 3</string>
+        <string>Формирование</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <property name="spacing">
@@ -109,7 +109,7 @@
              </font>
             </property>
             <property name="text">
-             <string>testTranslation</string>
+             <string>Формирование плана посещений</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -147,7 +147,7 @@
              </font>
             </property>
             <property name="text">
-             <string>TextLabel</string>
+             <string>Формирование личных целей</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>

@@ -15,6 +15,9 @@ public:
     explicit HeaderTableItem(QWidget *parent = 0);
     ~HeaderTableItem();
 
+private slots:
+    void on_btnConfigure_clicked();
+
 private:
     Ui::HeaderTableItem *ui;
 };

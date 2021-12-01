@@ -15,6 +15,9 @@ public:
     explicit HeaderTableItemEditPage(QWidget *parent = 0);
     ~HeaderTableItemEditPage();
 
+private slots:
+    void on_btnAdd_clicked();
+
 private:
     Ui::HeaderTableItemEditPage *ui;
 };
