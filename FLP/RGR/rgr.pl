@@ -57,7 +57,7 @@ findOnlyMaxLength([Head | Tail], MaxLenghtWords, Lenght, Acc):- (
     )
 ).
 
-createReversedFile(Filename):- (
+createMaxLenghtWordsFile(Filename):- (
     working_directory(CWD, CWD),
 
     atom_concat(CWD, Filename, Path),
@@ -77,5 +77,5 @@ createReversedFile(Filename):- (
 testMaxLenghtWords:- (
     write("Enter the filename:"),
     read(Filename),
-    createReversedFile(Filename)
+    createMaxLenghtWordsFile(Filename)
 ).
