@@ -68,6 +68,6 @@ int main()
 	cout << "\tMult, Div op: " << regMultDiv << endl;
 
 	cout << "Fast multiply" << endl;
-	cout << "\tSum, Sub  op: " << fastSumSub << endl;
-	cout << "\tMult, Div op: " << fastMultDiv << endl;
+	cout << "\t1-bit mult: " << fast1bitMult << endl;
+	cout << "\t2-bit mult: " << fast2bitMult << " of them with overflow: " << fast2bitMultOverflow << endl;
 }

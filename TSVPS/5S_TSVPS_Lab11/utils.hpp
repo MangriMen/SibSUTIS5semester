@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -8,7 +9,13 @@ size_t regSumSub = 0;
 size_t regMultDiv = 0;
 
 size_t fastSumSub = 0;
-size_t fastMultDiv = 0;
+size_t fast1bitMult = 0;
+map<size_t, size_t> fastDigitMult;
+map<size_t, size_t> fastDigitMultOverflow;
+
+size_t fastRecCounter = 0;
+
+bool isMultiplyDebug = false;
 
 int ctoi(const unsigned char& num) {
 	return num - '0';
@@ -120,18 +127,50 @@ string subtract(string x, string y) {
 	return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
 }
 
-string fastMultiply(const string& first, const string& second) {
+size_t checkDigit(string a, string b) {
+	return max(a.size(), b.size());
+}
+
+int checkOverflowCount(string a, string b, string c, string d) {
+	int digitsOverflow = 0;
+
+	if (add(a, b).size() > max(a.size(), b.size())) {
+		digitsOverflow++;
+	}
+
+	if (add(c, d).size() > max(a.size(), b.size())) {
+		digitsOverflow++;
+	}
+
+	return digitsOverflow;
+}
+
+string checkOverflow(string a, string b, string c, string d) {
+	int digitsOverflow = checkOverflowCount(a, b, c, d);
+
+	if (digitsOverflow == 1) {
+		return "with 1 overflow";
+	}
+	else if (digitsOverflow == 2) {
+		return "with 2 overflows";
+	}
+	else {
+		return "without overflow";
+	}
+}
+
+string fastMultiplyAction(const string& first, const string& second, int overflow = 0) {
 	string x(first);
 	string y(second);
 
 	const size_t n = max(x.size(), y.size());
+	const size_t k = n >> 1;
 
 	if (n == 1) {
-		fastMultDiv += 1;
+		fast1bitMult += 1;
 		return to_string(ctoi(x[0]) * ctoi(y[0]));
 	}
 
-	const size_t k = n >> 1;
 	const string halfNeededZeroes = string(n - k, '0');
 
 	x = paddedWithZerosToSizeFront(x, n);
@@ -140,20 +179,59 @@ string fastMultiply(const string& first, const string& second) {
 	auto [a, b] = splitIntoTwoSegments(x, k);
 	auto [c, d] = splitIntoTwoSegments(y, k);
 
-	string u = fastMultiply(add(a, b), add(c, d));
-	string v = fastMultiply(a, c);
-	string w = fastMultiply(b, d);
+	string res;
+	if (overflow >= 2) {
+		string a1b1 = static_cast<bool>(stoll(a) * stoll(c)) ? paddedWithZerosByNumberBack("", 2 * (n - k)) : "0";
+		string a2 = static_cast<bool>(stoll(c)) ? b : "0";
+		string b2 = static_cast<bool>(stoll(a)) ? d : "0";
+		string brackets = add(a2, b2);
+		brackets = paddedWithZerosByNumberBack(brackets, (n - k));
+		string a2b2 = fastMultiplyAction(b, d);
+		fastDigitMultOverflow[checkDigit(x, y)]++;
+		res = add(add(a1b1, brackets), a2b2);
+		return res;
+	}
+
+	string u = fastMultiplyAction(add(a, b), add(c, d), checkOverflowCount(a, b, c, d));
+	string v = fastMultiplyAction(a, c);
+	string w = fastMultiplyAction(b, d);
 
 	string uvwSub = subtract(u, add(v, w));
 
 	fastSumSub += 4;
+
+	if (isMultiplyDebug) {
+		cout
+			<< "\n"
+			<< "U" << fastRecCounter << ": " << "(" << a << " + " << b << ")" << "(" << c << " + " << d << ")" << " = " << add(a, b) << " * " << add(c, d)
+			<< " (" << checkDigit(a, b) << "-bit " << checkOverflow(a, b, c, d) << ")" << "\n"
+			<< "V" << fastRecCounter << ": " << a << " * " << c << " = " << v
+			<< " (" << checkDigit(a, c) << "-bit " << checkOverflow(a, "0", c, "0") << ")" << "\n"
+			<< "W" << fastRecCounter << ": " << b << " * " << d << " = " << w
+			<< " (" << checkDigit(b, d) << "-bit " << checkOverflow(b, "0", d, "0") << ")" << "\n";
+	}
+
+	fastDigitMult[checkDigit(a, b)]++;
+	fastDigitMult[checkDigit(a, c)]++;
+	fastDigitMult[checkDigit(b, d)]++;
+
+	fastRecCounter++;
 
 	v = paddedWithZerosByNumberBack(v, 2 * (n - k));
 	uvwSub = paddedWithZerosByNumberBack(uvwSub, (n - k));
 
 	string result = add(add(v, w), uvwSub);
 
+	if (isMultiplyDebug) {
+		cout
+			<< "Re" << ": " << result << "\n";
+	}
+
 	return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
+}
+
+string fastMultiply(const string& first, const string& second) {
+	return fastMultiplyAction(first, second);
 }
 
 void multiplyWithPrint(string a, string b, string(*function)(const string&, const string&)) {

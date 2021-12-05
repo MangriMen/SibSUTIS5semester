@@ -141,6 +141,9 @@
   <ItemGroup>
     <ClCompile Include="5S_TSVPS_Lab17.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="data5.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
