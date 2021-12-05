@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1092</width>
-    <height>647</height>
+    <width>1280</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,165 +16,194 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="tabPosition">
-       <enum>QTabWidget::South</enum>
-      </property>
-      <property name="tabShape">
-       <enum>QTabWidget::Rounded</enum>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <property name="documentMode">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="tabWeek">
-       <attribute name="title">
-        <string>Неделя</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <property name="spacing">
-         <number>9</number>
+     <layout class="QGridLayout" name="layoutHolder">
+      <item row="0" column="0">
+       <widget class="QTabWidget" name="twNavigation">
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+          <pointsize>12</pointsize>
+         </font>
         </property>
-        <item row="0" column="0">
-         <widget class="HeaderTableItem" name="dayMonday" native="true"/>
-        </item>
-        <item row="0" column="1">
-         <widget class="HeaderTableItem" name="dayTuesday" native="true"/>
-        </item>
-        <item row="0" column="2">
-         <widget class="HeaderTableItem" name="dayWednesday" native="true"/>
-        </item>
-        <item row="0" column="3" colspan="2">
-         <widget class="HeaderTableItem" name="dayThursday" native="true"/>
-        </item>
-        <item row="1" column="0">
-         <widget class="HeaderTableItem" name="dayFriday" native="true"/>
-        </item>
-        <item row="1" column="1">
-         <widget class="HeaderTableItem" name="daySaturday" native="true"/>
-        </item>
-        <item row="1" column="2" colspan="2">
-         <widget class="HeaderTableItem" name="daySunday" native="true"/>
-        </item>
-        <item row="1" column="4">
-         <widget class="HeaderTableItem" name="dayAny" native="true"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabAffairs">
-       <attribute name="title">
-        <string>Дела</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <property name="spacing">
-         <number>9</number>
+        <property name="tabPosition">
+         <enum>QTabWidget::South</enum>
         </property>
-        <item row="0" column="1">
-         <widget class="HeaderTableItem" name="tableEducationAffairs" native="true"/>
-        </item>
-        <item row="0" column="3">
-         <widget class="HeaderTableItem" name="tableWorkAffairs" native="true"/>
-        </item>
-        <item row="1" column="1">
-         <widget class="HeaderTableItem" name="tablePersonalAffairs" native="true"/>
-        </item>
-        <item row="1" column="3">
-         <widget class="HeaderTableItem" name="tablePlaces" native="true"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabShaping">
-       <attribute name="title">
-        <string>Формирование</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <property name="spacing">
-         <number>9</number>
+        <property name="tabShape">
+         <enum>QTabWidget::Rounded</enum>
         </property>
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QLabel" name="lblFormVisitPlan">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>18</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Формирование плана посещений</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="documentMode">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="tabWeek">
+         <attribute name="title">
+          <string>Week</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="HeaderTableItem" name="dayMonday" native="true"/>
           </item>
-          <item>
-           <widget class="QPushButton" name="btnFormVisitPlan">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
+          <item row="0" column="1">
+           <widget class="HeaderTableItem" name="dayTuesday" native="true"/>
+          </item>
+          <item row="0" column="2">
+           <widget class="HeaderTableItem" name="dayWednesday" native="true"/>
+          </item>
+          <item row="0" column="3">
+           <widget class="HeaderTableItem" name="dayThursday" native="true"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="HeaderTableItem" name="dayFriday" native="true"/>
+          </item>
+          <item row="1" column="1">
+           <widget class="HeaderTableItem" name="daySaturday" native="true"/>
+          </item>
+          <item row="1" column="3">
+           <widget class="HeaderTableItem" name="dayAny" native="true"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="HeaderTableItem" name="daySunday" native="true"/>
           </item>
          </layout>
-        </item>
-        <item row="0" column="1">
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QLabel" name="lblFormPersonalAffairs">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>18</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Формирование личных целей</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
+        </widget>
+        <widget class="QWidget" name="tabAffairs">
+         <attribute name="title">
+          <string>Affairs</string>
+         </attribute>
+         <layout class="QGridLayout" name="layoutAffairs">
+          <property name="spacing">
+           <number>9</number>
+          </property>
+          <item row="0" column="1">
+           <widget class="HeaderTableItem" name="tableEducationAffairs" native="true"/>
           </item>
-          <item>
-           <widget class="QPushButton" name="btnFormPersonalAffairs">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
+          <item row="0" column="3">
+           <widget class="HeaderTableItem" name="tableWorkAffairs" native="true"/>
+          </item>
+          <item row="1" column="1">
+           <widget class="HeaderTableItem" name="tablePersonalAffairs" native="true"/>
+          </item>
+          <item row="1" column="3">
+           <widget class="HeaderTableItem" name="tablePlaces" native="true"/>
           </item>
          </layout>
-        </item>
-       </layout>
-      </widget>
-     </widget>
+        </widget>
+        <widget class="QWidget" name="tabShaping">
+         <attribute name="title">
+          <string>Forming</string>
+         </attribute>
+         <layout class="QGridLayout" name="layoutForming">
+          <property name="spacing">
+           <number>9</number>
+          </property>
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QLabel" name="lblFormVisitPlan">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>18</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Formation of a visit plan</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnFormVisitPlan">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="lblFormPersonalAffairs">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>18</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Formation of personal goals</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnFormPersonalAffairs">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelp"/>
+   </widget>
+   <addaction name="menuHelp"/>
+  </widget>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

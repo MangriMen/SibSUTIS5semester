@@ -14,8 +14,58 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="5" column="2">
+   <item row="5" column="0">
+    <widget class="QLabel" name="lblTime">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Time</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="lblDescription">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Description</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="3">
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -27,47 +77,73 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="lblTime">
-     <property name="text">
-      <string>Время</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="lblDescription">
-     <property name="text">
-      <string>Описание</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0">
     <widget class="QLabel" name="lblTask">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
      <property name="text">
-      <string>Задача</string>
+      <string>Task</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="1" colspan="2">
-    <widget class="QPlainTextEdit" name="pteDescription"/>
+   <item row="2" column="1" colspan="3">
+    <widget class="QPlainTextEdit" name="pteDescription">
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+    </widget>
    </item>
-   <item row="1" column="1" colspan="2">
+   <item row="1" column="1" colspan="3">
     <widget class="QComboBox" name="cmbTask">
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
      <property name="editable">
+      <bool>true</bool>
+     </property>
+     <property name="frame">
       <bool>true</bool>
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
-    <widget class="QTimeEdit" name="tmeTime">
+   <item row="5" column="1" colspan="2">
+    <widget class="QDateTimeEdit" name="dtTime">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
-     <property name="accelerated">
-      <bool>false</bool>
+     <property name="displayFormat">
+      <string>dd.MM.yyyy HH:mm</string>
      </property>
-     <property name="showGroupSeparator" stdset="0">
-      <bool>false</bool>
+     <property name="calendarPopup">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -75,22 +151,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>AddDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>

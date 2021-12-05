@@ -4,31 +4,39 @@
 #include <QMessageBox>
 #include <QLibraryInfo>
 
-void initializeTranslator(QString translation, QString directory = QString("")) {
+void loadTranslation(QString translation, QString directory = QString()) {
     QTranslator *translator = new QTranslator(qApp);
-    bool isSuccess = false;
-
-    if (directory.isEmpty()) {
-        isSuccess = translator->load(translation);
-    }
-    else {
-        isSuccess = translator->load(translation, directory);
-    }
+    bool isSuccess = translator->load(translation, directory);
 
     if (isSuccess) {
         qApp->installTranslator(translator);
     }
     else {
-        QMessageBox::warning(0, "Error when loading translation", "There was an error loading the default translation\"" + QLocale::system().name() + "\"");
+        delete translator;
+        QMessageBox::warning(0,
+                    "Error when loading translation",
+                    "There was an error loading the default translation\"" + QLocale::system().name() + "\"");
     }
+}
+void loadStylesheet(QString filename) {
+    QFile file(filename);
+    file.open(QFile::ReadOnly);
+    qApp->setStyleSheet(qApp->styleSheet() + file.readAll());
+}
+
+void loadIcon(QString filename) {
+    QIcon appIcon = QIcon(filename);
+    qApp->setWindowIcon(appIcon);
 }
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    initializeTranslator(QLatin1String("qt_") + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-    initializeTranslator(QString("QtLanguage_") + QString("ru_RU"), QString(":/translations/"));
+    loadTranslation(QLatin1String("qt_") + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    loadTranslation(QString("QtLanguage_") + QString("ru_RU"), QString(":/translations/"));
+
+    loadIcon(":/images/app_icon.ico");
 
     MainWindow w;
     w.show();
