@@ -145,6 +145,9 @@ void MainWindow::onHelpRequested() {
 
 void MainWindow::onConfigurePageRequested(HeaderTableItem *item) {
     ui->twNavigation->setVisible(false);
+    ui->btnSelectWeek->setEnabled(false);
+    ui->btnWeekNext->setEnabled(false);
+    ui->btnWeekPrevious->setEnabled(false);
 
     HeaderTableItemEditPage* editPage = new HeaderTableItemEditPage(this, item);
     connect(editPage, SIGNAL(btnBackClicked()), this, SLOT(onRestoreNavigationRequested()));
@@ -156,6 +159,9 @@ void MainWindow::onConfigurePageRequested(HeaderTableItem *item) {
 void MainWindow::onRestoreNavigationRequested() {
     ui->twNavigation->setVisible(true);
     ui->layoutHolder->removeWidget(savedTab);
+    ui->btnSelectWeek->setEnabled(true);
+    ui->btnWeekNext->setEnabled(true);
+    ui->btnWeekPrevious->setEnabled(true);
 
     delete savedTab;
 }

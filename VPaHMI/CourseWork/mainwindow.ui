@@ -179,7 +179,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="layoutWeekChoose">
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
