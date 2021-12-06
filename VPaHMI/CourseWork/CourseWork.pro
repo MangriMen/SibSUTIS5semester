@@ -33,14 +33,16 @@ SOURCES += \
     headertableitemeditpage.cpp \
     adddialog.cpp \
     headertableitem.cpp \
-    widecombobox.cpp
+    widecombobox.cpp \
+    datepopup.cpp
 
 HEADERS += \
         mainwindow.h \
     headertableitem.h \
     headertableitemeditpage.h \
     adddialog.h \
-    widecombobox.h
+    widecombobox.h \
+    datepopup.h
 
 FORMS += \
         mainwindow.ui \

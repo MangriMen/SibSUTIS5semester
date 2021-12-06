@@ -11,7 +11,7 @@ HeaderTableItem::HeaderTableItem(QWidget *parent) :
 
     setWeekNum(QDateTime::currentDateTime().date().weekNumber());
     setYearNum(QDateTime::currentDateTime().date().year());
-    ui->frame->setStyleSheet("QFrame {background-color: white;}");
+    ui->frameHeader->setStyleSheet("QFrame {background-color: white;}");
 }
 
 HeaderTableItem::~HeaderTableItem()
@@ -40,16 +40,16 @@ void HeaderTableItem::setDayType(HeaderTableItem::DayType type) {
 
     switch (dayType_) {
     case DayType::Work:
-        ui->frame->setStyleSheet("QFrame {background-color: #E57373;}");
+        ui->frameHeader->setStyleSheet("QFrame {background-color: #E57373;}");
         break;
     case DayType::Education:
-        ui->frame->setStyleSheet("QFrame {background-color: #64B5F6;}");
+        ui->frameHeader->setStyleSheet("QFrame {background-color: #64B5F6;}");
         break;
     case DayType::EducationAndWork:
-        ui->frame->setStyleSheet("QFrame {background-color: #9575CD;}");
+        ui->frameHeader->setStyleSheet("QFrame {background-color: #9575CD;}");
         break;
     case DayType::DayOff:
-        ui->frame->setStyleSheet("QFrame {background-color: white;}");
+        ui->frameHeader->setStyleSheet("QFrame {background-color: white;}");
         break;
     default:
         break;
@@ -84,6 +84,10 @@ void HeaderTableItem::setTableModel(QAbstractItemModel* model) {
         ui->tblData->hideColumn(sqlModel->fieldIndex((QString("Описание"))));
         ui->tblData->hideColumn(sqlModel->fieldIndex((QString("Год"))));
         ui->tblData->hideColumn(sqlModel->fieldIndex((QString("Неделя"))));
+        ui->lblDay->setMinimumWidth(ui->tblData->columnWidth(0) - 1);
+    }
+    else {
+        dayVisible(false);
     }
 }
 
@@ -103,10 +107,6 @@ void HeaderTableItem::setType(HeaderTableItem::Type type) {
             if (day_ != HeaderTableItem::WeekDay::None) {
                 setDay(QString::number(weekStart.addDays(static_cast<int>(day_) - 1).day()));
             }
-
-            if (day_ == HeaderTableItem::WeekDay::Any) {
-                dayVisible(false);
-            }
         }
     }
 }
@@ -118,6 +118,9 @@ HeaderTableItem::Type HeaderTableItem::getType() {
 void HeaderTableItem::setDayNum(HeaderTableItem::WeekDay day) {
     if (day_ == HeaderTableItem::WeekDay::None) {
         day_ = day;
+        if (day_ == HeaderTableItem::WeekDay::Any) {
+            dayVisible(false);
+        }
     }
 }
 
@@ -212,6 +215,7 @@ void HeaderTableItem::columnVisible(QString columnName, bool state) {
 
 void HeaderTableItem::dayVisible(bool state) {
     ui->lblDay->setVisible(state);
+    ui->lnDayHeader->setVisible(state);
 }
 
 void HeaderTableItem::configureVisible(bool state) {

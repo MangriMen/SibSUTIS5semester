@@ -55,7 +55,7 @@
         <translation>Форма</translation>
     </message>
     <message>
-        <location filename="../headertableitem.ui" line="117"/>
+        <location filename="../headertableitem.ui" line="111"/>
         <source>30</source>
         <translation></translation>
     </message>
@@ -81,13 +81,17 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../mainwindow.ui" line="14"/>
         <source>MainWindow</source>
-        <translation>Главное окно</translation>
+        <translation type="vanished">Главное окно</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="14"/>
+        <source>Diary</source>
+        <translation>Ежедневник</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="42"/>
-        <location filename="../mainwindow.cpp" line="51"/>
+        <location filename="../mainwindow.cpp" line="52"/>
         <source>Week</source>
         <translation>Неделя</translation>
     </message>
@@ -112,8 +116,18 @@
         <translation>Формирование личных целей</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="196"/>
-        <location filename="../mainwindow.ui" line="204"/>
+        <location filename="../mainwindow.ui" line="271"/>
+        <source>Year:</source>
+        <translation>Год:</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="316"/>
+        <source>Week:</source>
+        <translation>Неделя:</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="423"/>
+        <location filename="../mainwindow.ui" line="435"/>
         <source>Help</source>
         <translation>Справка</translation>
     </message>
@@ -122,57 +136,57 @@
         <translation type="vanished">тестовыйПеревод</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="44"/>
+        <location filename="../mainwindow.cpp" line="45"/>
         <source>Monday</source>
         <translation>Понедельник</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="45"/>
+        <location filename="../mainwindow.cpp" line="46"/>
         <source>Tuesday</source>
         <translation>Вторник</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="46"/>
+        <location filename="../mainwindow.cpp" line="47"/>
         <source>Wednesday</source>
         <translation>Среда</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="47"/>
+        <location filename="../mainwindow.cpp" line="48"/>
         <source>Thursday</source>
         <translation>Четверг</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="48"/>
+        <location filename="../mainwindow.cpp" line="49"/>
         <source>Friday</source>
         <translation>Пятница</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="49"/>
+        <location filename="../mainwindow.cpp" line="50"/>
         <source>Saturday</source>
         <translation>Суббота</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="50"/>
+        <location filename="../mainwindow.cpp" line="51"/>
         <source>Sunday</source>
         <translation>Воскресенье</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="81"/>
+        <location filename="../mainwindow.cpp" line="94"/>
         <source>Education affairs</source>
         <translation>Учебные дела</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="82"/>
+        <location filename="../mainwindow.cpp" line="95"/>
         <source>Work affairs</source>
         <translation>Рабочие дела</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="83"/>
+        <location filename="../mainwindow.cpp" line="96"/>
         <source>Personal affairs</source>
         <translation>Личные дела</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="84"/>
+        <location filename="../mainwindow.cpp" line="97"/>
         <source>Places</source>
         <translation>Места</translation>
     </message>

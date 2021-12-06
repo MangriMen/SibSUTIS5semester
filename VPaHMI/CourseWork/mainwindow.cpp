@@ -117,13 +117,26 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     connect(ui->actionHelp, SIGNAL(triggered(bool)), this, SLOT(onHelpRequested()));
+    connect(ui->btnSelectWeek, SIGNAL(clicked(bool)), this, SLOT(onWeekChangeRequested()));
 
     ui->layoutHolder->addWidget(ui->twNavigation);
+
+    setCurrentWeek(QDate::currentDate());
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setCurrentWeek(QDate date) {
+    QDate weekStart = date;
+    if (weekStart.dayOfWeek() != 1) {
+        weekStart = weekStart.addDays(-weekStart.dayOfWeek() + 1);
+    }
+    currentWeek = weekStart;
+    ui->lblChoosedYear->setText(QString::number(currentWeek.year()));
+    ui->lblChoosedWeek->setText(QString::number(currentWeek.weekNumber()) + " - " + QString::number(currentWeek.addDays(7).weekNumber()));
 }
 
 void MainWindow::onHelpRequested() {
@@ -145,4 +158,9 @@ void MainWindow::onRestoreNavigationRequested() {
     ui->layoutHolder->removeWidget(savedTab);
 
     delete savedTab;
+}
+
+void MainWindow::onWeekChangeRequested() {
+    DatePopup* calendar = new DatePopup(this);
+    calendar->exec();
 }
