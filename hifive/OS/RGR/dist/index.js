@@ -2630,7 +2630,7 @@ eval("/**\n * Helpers.\n */\n\nvar s = 1000;\nvar m = s * 60;\nvar h = m * 60;\n
   \***********************************************************************/
 /***/ ((module) => {
 
-eval("module.exports = require(\"./nodegui_core-9748779a84c6d33c0f41d4377e8f7ad7.node\");\n\n//# sourceURL=webpack://nodegui-starter/./node_modules/@nodegui/nodegui/build/Release/nodegui_core.node?");
+eval("module.exports = require(\"./nodegui_core-9ebf9fc915e8a84d80cfae08afdcebdb.node\");\n\n//# sourceURL=webpack://nodegui-starter/./node_modules/@nodegui/nodegui/build/Release/nodegui_core.node?");
 
 /***/ }),
 
