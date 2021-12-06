@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/arrow_drop_down_black_24dp.svg</file>
+        <file>images/check_box_outline_blank_black_24dp.svg</file>
+        <file>images/close_black_24dp.svg</file>
+        <file>images/delete_black_24dp.svg</file>
+        <file>images/done_black_24dp.svg</file>
+        <file>images/image_black_24dp.svg</file>
+        <file>images/maximize_black_24dp.svg</file>
+        <file>images/monetization_on_black_24dp.svg</file>
+    </qresource>
+</RCC>

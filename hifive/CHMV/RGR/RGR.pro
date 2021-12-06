@@ -25,10 +25,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    editfunds.cpp \
+    goals.cpp \
+    incomesexpenses.cpp \
+    accountcreation.cpp \
+    error.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    editfunds.h \
+    goals.h \
+    incomesexpenses.h \
+    accountcreation.h \
+    error.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    editfunds.ui \
+    goals.ui \
+    incomesexpenses.ui \
+    accountcreation.ui \
+    error.ui
+
+RESOURCES += \
+    resources.qrc
