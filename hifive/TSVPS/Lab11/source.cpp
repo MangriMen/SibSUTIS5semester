@@ -75,53 +75,57 @@ string regularMultiply(const string& first, const string& second) {
 	return result;
 }
 
-string add(string x, string y) {
+string add(const string& x, const string& y) {
 	const size_t n = max(x.size(), y.size());
 	unsigned short carry = 0;
 	unsigned short sum_col;
+
+	string xCopy = paddedWithZerosToSizeFront(x, n);
+	string yCopy = paddedWithZerosToSizeFront(y, n);
+
 	string result;
-
-	x = paddedWithZerosToSizeFront(x, n);
-	y = paddedWithZerosToSizeFront(y, n);
-
 	for (size_t i = n - 1; i != numeric_limits<size_t>::max(); i--) {
-		sum_col = (x[i] - '0') + (y[i] - '0') + carry;
+		sum_col = ctoi(xCopy[i]) + ctoi(yCopy[i]) + carry;
 		carry = sum_col / 10;
-		result.insert(0, to_string(sum_col % 10));
+		result += to_string(sum_col % 10);
 	}
 
 	if (carry) {
-		result.insert(0, to_string(carry));
+		result += to_string(carry);
 	}
+
+	reverse(result.begin(), result.end());
 
 	return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
 }
 
-string subtract(string x, string y) {
+string subtract(const string& x, const string& y) {
 	const size_t n = max(x.size(), y.size());
 	short diff;
+
+	string xCopy = paddedWithZerosToSizeFront(x, n);
+	string yCopy = paddedWithZerosToSizeFront(y, n);
+
 	string result;
-
-	x = paddedWithZerosToSizeFront(x, n);
-	y = paddedWithZerosToSizeFront(y, n);
-
 	for (long long i = n - 1; i >= 0; i--) {
-		diff = ctoi(x[i]) - ctoi(y[i]);
+		diff = ctoi(xCopy[i]) - ctoi(yCopy[i]);
 
 		if (diff >= 0) {
-			result.insert(0, to_string(diff));
+			result += to_string(diff);
 		}
 		else {
 			for (long long j = i - 1; j >= 0; j--) {
-				x[j] = itoc((ctoi(x[j]) - 1) % 10);
+				xCopy[j] = itoc((ctoi(xCopy[j]) - 1) % 10);
 
-				if (x[j] != '9') {
+				if (xCopy[j] != '9') {
 					break;
 				}
 			}
-			result.insert(0, to_string(diff + 10));
+			result += to_string(diff + 10);
 		}
 	}
+
+	reverse(result.begin(), result.end());
 
 	return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
 }
@@ -158,48 +162,45 @@ string checkOverflow(string a, string b, string c, string d) {
 	}
 }
 
-string fastMultiplyAction(const string& first, const string& second, int overflow = 0) {
-	string x(first);
-	string y(second);
-
-	const size_t n = max(x.size(), y.size());
-	const size_t k = n >> 1;
+string fastMultiplyAction(const string& first, const string& second, size_t overflow = 0) {
+	const size_t n = max(first.size(), second.size());
+	const size_t k = (overflow >= 2) ? 1 : (n >> 1);
 
 	if (n == 1) {
-		fast1bitMult += 1;
-		return to_string(ctoi(x[0]) * ctoi(y[0]));
+		return to_string(ctoi(first[0]) * ctoi(second[0]));
 	}
 
-	const string halfNeededZeroes = string(n - k, '0');
+	auto [a, b] = splitIntoTwoSegments(paddedWithZerosToSizeFront(first, n), k);
+	auto [c, d] = splitIntoTwoSegments(paddedWithZerosToSizeFront(second, n), k);
 
-	x = paddedWithZerosToSizeFront(x, n);
-	y = paddedWithZerosToSizeFront(y, n);
-
-	auto [a, b] = splitIntoTwoSegments(x, k);
-	auto [c, d] = splitIntoTwoSegments(y, k);
-
-	string res;
 	if (overflow >= 2) {
-		string a1b1 = static_cast<bool>(stoll(a) * stoll(c)) ? paddedWithZerosByNumberBack("", 2 * (n - k)) : "0";
-		string a2 = static_cast<bool>(stoll(c)) ? b : "0";
-		string b2 = static_cast<bool>(stoll(a)) ? d : "0";
-		string brackets = add(a2, b2);
-		brackets = paddedWithZerosByNumberBack(brackets, (n - k));
+		string a1b1 = (a[0] && c[0]) ? paddedWithZerosByNumberBack("1", 2 * (n - 1)) : "0";
+
+		string a2b1 = c[0] ? b : "0";
+		string a1b2 = a[0] ? d : "0";
+		string brackets = paddedWithZerosByNumberBack(add(a2b1, a1b2), (n - 1));
+
 		string a2b2 = fastMultiplyAction(b, d);
-		fastDigitMultOverflow[checkDigit(x, y)]++;
-		res = add(add(a1b1, brackets), a2b2);
-		return res;
+
+		return add(add(a1b1, brackets), a2b2);
 	}
 
-	string u = fastMultiplyAction(add(a, b), add(c, d), checkOverflowCount(a, b, c, d));
+	size_t overflowCount = checkOverflowCount(a, b, c, d);
+
+	string u = fastMultiplyAction(add(a, b), add(c, d), overflowCount);
 	string v = fastMultiplyAction(a, c);
 	string w = fastMultiplyAction(b, d);
 
-	string uvwSub = subtract(u, add(v, w));
+	if (overflowCount >= 2) {
+		fastDigitMultOverflow[checkDigit(a, b)]++;
+	}
 
-	fastSumSub += 4;
+	fastDigitMult[checkDigit(a, b)]++;
+	fastDigitMult[checkDigit(a, c)]++;
+	fastDigitMult[checkDigit(b, d)]++;
 
 	if (IS_MULTIPLY_DEBUG) {
+
 		cout
 			<< "\n"
 			<< "U" << fastRecCounter << ": " << "(" << a << " + " << b << ")" << "(" << c << " + " << d << ")" << " = " << add(a, b) << " * " << add(c, d)
@@ -210,11 +211,7 @@ string fastMultiplyAction(const string& first, const string& second, int overflo
 			<< " (" << checkDigit(b, d) << "-bit " << checkOverflow(b, "0", d, "0") << ")" << "\n";
 	}
 
-	fastDigitMult[checkDigit(a, b)]++;
-	fastDigitMult[checkDigit(a, c)]++;
-	fastDigitMult[checkDigit(b, d)]++;
-
-	fastRecCounter++;
+	string uvwSub = subtract(u, add(v, w));
 
 	v = paddedWithZerosByNumberBack(v, 2 * (n - k));
 	uvwSub = paddedWithZerosByNumberBack(uvwSub, (n - k));
@@ -224,6 +221,7 @@ string fastMultiplyAction(const string& first, const string& second, int overflo
 	if (IS_MULTIPLY_DEBUG) {
 		cout
 			<< "Re" << ": " << result << "\n";
+		fastRecCounter++;
 	}
 
 	return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
@@ -231,10 +229,6 @@ string fastMultiplyAction(const string& first, const string& second, int overflo
 
 string fastMultiply(const string& first, const string& second) {
 	return fastMultiplyAction(first, second);
-}
-
-void multiplyWithPrint(string a, string b, string(*function)(const string&, const string&)) {
-	cout << a << " * " << b << " = " << function(a, b) << endl;
 }
 
 void callAndLogMultiply(string a, string b, string(*function)(const string&, const string&)) {
@@ -246,24 +240,7 @@ int main() {
 	callAndLogMultiply("999999", "999999", regularMultiply);
 
 	cout << endl << "Fast multiply: " << endl;
-	callAndLogMultiply("999999", "999999", fastMultiply);
-
-	//cout << "Fast multiply" << endl;
-	//cout << "\t1-bit mult: " << fast1bitMult << endl;
-	//for (const auto& el : fastDigitMult) {
-	//	if (el.first != 1) {
-	//		cout << "\t" << el.first << "-bit mult: " << el.second;
-	//		try {
-	//			string out = " of them with overflow: " + to_string(fastDigitMultOverflow.at(el.first));
-	//			cout << out;
-	//		}
-	//		catch (exception)
-	//		{
-
-	//		};
-	//		cout << "\n";
-	//	}
-	//}
+	callAndLogMultiply("99999999", "99999999", fastMultiply);
 
 	return 0;
 }

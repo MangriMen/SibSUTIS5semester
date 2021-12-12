@@ -11,6 +11,8 @@ typedef vector<int> T_row;
 typedef vector<T_row> T_matr;
 typedef set<T_town> T_towns;
 
+#define B 5555555
+
 class T_path
 {
     T_matr dist_matr_;
@@ -44,11 +46,18 @@ public:
     void print_shortest() {
         cout << endl;
 
-        for (auto town : shortestPath) {
-            cout << town + 1 << '\t';
+        for (int i = 0; i < shortestPath.size() - 1; ++i) {
+            cout << shortestPath[i];
+            if (i != shortestPath.size() - 2) {
+                cout << " > ";
+            }
         }
 
         cout << endl;
+    }
+
+    int get_shortest_length() {
+        return shortestPathLen;
     }
 
 private:
@@ -99,16 +108,6 @@ private:
             && (successfully_push_good_min_free_town_not_less_than(pop_and_get_town() + 1) || successfully_inc_back_town());
     }
 
-    //// what the fuck is this style
-    //bool successfully_inc_back_town() {
-    //    return currentPath.size() > 1
-
-    //        && (successfully_push_good_min_free_town_not_less_than(
-    //            pop_and_get_town() + 1)
-
-    //            || successfully_inc_back_town());
-    //}
-
     T_town pop_and_get_town() {
         auto back_town = currentPath.back();
         currentPath.pop_back();
@@ -128,26 +127,30 @@ private:
 int main() {
     ios::sync_with_stdio(false);
 
-    int towns_total = 0;
-    cout << "Enter towns (2 or more): ";
-    cin >> towns_total;
-    if (towns_total < 2) { return EXIT_FAILURE; }
+    vector<vector<int>> dist_matr = {
+        {B,  13, 7, 5, 2, 9},
+        {8,  B,  4, 7, 5, B},
+        {8,  7,  B, 3, 6, 2},
+        {5,  8,  1, B, B, 1},
+        {B,  6,  1, 4, B, 9},
+        {10, B,  8, 3, 7, B }
+    };
 
-    cout << "Enter distances between towns:" << endl;
-
-    T_matr dist_matr(towns_total, T_row(towns_total));
-    for (T_town L{}; L < T_town(towns_total); ++L) {
-        for (T_town R{}; R < T_town(towns_total); ++R) {
-            if (L == R) { continue; }
-            cout << L + 1 << " to " << R + 1 << ":\t";
-            cin >> dist_matr[L][R];
-        }
-    }
+    //T_matr dist_matr(towns_total, T_row(towns_total));
+    //for (T_town L{}; L < T_town(towns_total); ++L) {
+    //    for (T_town R{}; R < T_town(towns_total); ++R) {
+    //        if (L == R) { continue; }
+    //        cout << L + 1 << " to " << R + 1 << ":\t";
+    //        cin >> dist_matr[L][R];
+    //    }
+    //}
 
     T_path path(dist_matr);
 
     path.find_shortest();
+    cout << "Shortest way: " << endl;
     path.print_shortest();
+    cout << "Cost: " << path.get_shortest_length();
 
     return EXIT_SUCCESS;
 }
