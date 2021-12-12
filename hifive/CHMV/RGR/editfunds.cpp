@@ -12,3 +12,18 @@ EditFunds::~EditFunds()
 {
     delete ui;
 }
+
+void EditFunds::on_btnAddToBank_clicked()
+{
+    AddToBankAccepted();
+}
+
+void EditFunds::on_btnWithdraw_clicked()
+{
+    WithdrawFromBankAccepted();
+}
+
+void EditFunds::on_btnRecurringPayment_clicked()
+{
+    RecurringPaymentAccepted();
+}

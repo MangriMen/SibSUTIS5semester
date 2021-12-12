@@ -31,8 +31,7 @@ SOURCES += \
     incomesexpenses.cpp \
     accountcreation.cpp \
     error.cpp \
-    widgetbutton.cpp \
-    groupboxbutton.cpp
+    widgetbutton.cpp
 
 HEADERS += \
         mainwindow.h \

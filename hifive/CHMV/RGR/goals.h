@@ -15,8 +15,17 @@ public:
     explicit Goals(QWidget *parent = 0);
     ~Goals();
 
+signals:
+    void GoalBalanceModified();
+
+private slots:
+    void on_btnTransferAccept_clicked();
+
+    void on_btnWithdrawAccept_clicked();
+
 private:
     Ui::Goals *ui;
+
 };
 
 #endif // GOALS_H

@@ -18,6 +18,18 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+private slots:
+    void openGoalsDialog();
+    void openFundsDialog();
+    void openIncomesDialog();
+    void openExpencesDialog();
+
+    void onGoalBalanceModified();
+
+    void onAddToBankAccepted();
+    void onWithdrawFromBankAccepted();
+    void onRecurringPaymentAccepted();
 };
 
 #endif // MAINWINDOW_H

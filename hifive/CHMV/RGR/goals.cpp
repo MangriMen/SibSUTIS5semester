@@ -12,3 +12,13 @@ Goals::~Goals()
 {
     delete ui;
 }
+
+void Goals::on_btnTransferAccept_clicked()
+{
+    GoalBalanceModified();
+}
+
+void Goals::on_btnWithdrawAccept_clicked()
+{
+    GoalBalanceModified();
+}
