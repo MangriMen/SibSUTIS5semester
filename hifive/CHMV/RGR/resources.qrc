@@ -8,5 +8,6 @@
         <file>images/image_black_24dp.svg</file>
         <file>images/maximize_black_24dp.svg</file>
         <file>images/monetization_on_black_24dp.svg</file>
+        <file>style/style.css</file>
     </qresource>
 </RCC>

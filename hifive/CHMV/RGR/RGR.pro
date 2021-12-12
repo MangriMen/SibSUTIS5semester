@@ -30,7 +30,9 @@ SOURCES += \
     goals.cpp \
     incomesexpenses.cpp \
     accountcreation.cpp \
-    error.cpp
+    error.cpp \
+    widgetbutton.cpp \
+    groupboxbutton.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +40,8 @@ HEADERS += \
     goals.h \
     incomesexpenses.h \
     accountcreation.h \
-    error.h
+    error.h \
+    widgetbutton.h
 
 FORMS += \
         mainwindow.ui \
