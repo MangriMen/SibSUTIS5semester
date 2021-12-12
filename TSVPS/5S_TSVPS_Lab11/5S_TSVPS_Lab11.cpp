@@ -11,30 +11,26 @@ int main() {
 	cout << "\n";
 
 	cout << "Fast multiply: " << endl;
-	multiplyWithPrint("9999999", "9999999", fastMultiply);
+	multiplyWithPrint("87653461", "83145694", fastMultiply);
 	//multiplyWithPrint("99999999999999999999", "99999999999999999999", fastMultiply);
 	cout << "\n";
 
 	cout << "Regular multiply" << endl;
-	cout << "\tSum,Sub : " << regSumSub << endl;
-	cout << "\tMult,Div: " << regMultDiv << endl;
-	cout << "\n";
+	cout << "\tSum, Sub  op: " << regularSumCounter << endl;
+	cout << "\tMult, Div op: " << regularMulCounter << endl;
 
 	cout << "Fast multiply" << endl;
-	cout << "\t1-bit mult: " << fast1bitMult << endl;
 	for (const auto& el : fastDigitMult) {
-		if (el.first != 1) {
-			cout << "\t" << el.first << "-bit mult: " << el.second;
-			try {
-				string out = " of them with overflow: " + to_string(fastDigitMultOverflow.at(el.first));
-				cout << out;
-			}
-			catch (exception)
-			{
-
-			};
-			cout << "\n";
+		cout << "\t" << el.first << "-bit mult: " << el.second;
+		try {
+			string out = " of them with overflow: " + to_string(fastDigitMultOverflow.at(el.first));
+			cout << out;
 		}
+		catch (exception)
+		{
+
+		};
+		cout << "\n";
 	}
 
 	return 0;

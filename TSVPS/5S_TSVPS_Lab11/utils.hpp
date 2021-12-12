@@ -5,11 +5,11 @@
 
 using namespace std;
 
-size_t regSumSub = 0;
-size_t regMultDiv = 0;
+size_t regularSumCounter = 0;
+size_t regularMulCounter = 0;
 
-size_t fastSumSub = 0;
-size_t fast1bitMult = 0;
+size_t fastMulCounter = 0;
+size_t fastSumCounter = 0;
 map<size_t, size_t> fastDigitMult;
 map<size_t, size_t> fastDigitMultOverflow;
 
@@ -58,11 +58,11 @@ string regularMultiply(const string& first, const string& second) {
 			carry = calculatedMult[i + j] / 10;
 			calculatedMult[i + j] %= 10;
 
-			regSumSub += 2;
-			regMultDiv += 3;
+			regularSumCounter += 2;
+			regularMulCounter += 3;
 		}
 		calculatedMult[i + second_.size()] += carry;
-		regSumSub += 1;
+		regularSumCounter += 1;
 	}
 
 	reverse(calculatedMult.begin(), calculatedMult.end());
@@ -76,53 +76,57 @@ string regularMultiply(const string& first, const string& second) {
 	return result;
 }
 
-string add(string x, string y) {
+string add(const string& x, const string& y) {
 	const size_t n = max(x.size(), y.size());
 	unsigned short carry = 0;
 	unsigned short sum_col;
+
+	string xCopy = paddedWithZerosToSizeFront(x, n);
+	string yCopy = paddedWithZerosToSizeFront(y, n);
+
 	string result;
-
-	x = paddedWithZerosToSizeFront(x, n);
-	y = paddedWithZerosToSizeFront(y, n);
-
 	for (size_t i = n - 1; i != numeric_limits<size_t>::max(); i--) {
-		sum_col = (x[i] - '0') + (y[i] - '0') + carry;
+		sum_col = ctoi(xCopy[i]) + ctoi(yCopy[i]) + carry;
 		carry = sum_col / 10;
-		result.insert(0, to_string(sum_col % 10));
+		result += to_string(sum_col % 10);
 	}
 
 	if (carry) {
-		result.insert(0, to_string(carry));
+		result += to_string(carry);
 	}
+
+	reverse(result.begin(), result.end());
 
 	return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
 }
 
-string subtract(string x, string y) {
+string subtract(const string& x, const string& y) {
 	const size_t n = max(x.size(), y.size());
 	short diff;
+
+	string xCopy = paddedWithZerosToSizeFront(x, n);
+	string yCopy = paddedWithZerosToSizeFront(y, n);
+
 	string result;
-
-	x = paddedWithZerosToSizeFront(x, n);
-	y = paddedWithZerosToSizeFront(y, n);
-
 	for (long long i = n - 1; i >= 0; i--) {
-		diff = ctoi(x[i]) - ctoi(y[i]);
+		diff = ctoi(xCopy[i]) - ctoi(yCopy[i]);
 
 		if (diff >= 0) {
-			result.insert(0, to_string(diff));
+			result += to_string(diff);
 		}
 		else {
 			for (long long j = i - 1; j >= 0; j--) {
-				x[j] = itoc((ctoi(x[j]) - 1) % 10);
+				xCopy[j] = itoc((ctoi(xCopy[j]) - 1) % 10);
 
-				if (x[j] != '9') {
+				if (xCopy[j] != '9') {
 					break;
 				}
 			}
-			result.insert(0, to_string(diff + 10));
+			result += to_string(diff + 10);
 		}
 	}
+
+	reverse(result.begin(), result.end());
 
 	return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));
 }
@@ -159,48 +163,50 @@ string checkOverflow(string a, string b, string c, string d) {
 	}
 }
 
-string fastMultiplyAction(const string& first, const string& second, int overflow = 0) {
-	string x(first);
-	string y(second);
-
-	const size_t n = max(x.size(), y.size());
-	const size_t k = n >> 1;
+string fastMultiplyAction(const string& first, const string& second, size_t overflow = 0) {
+	const size_t n = max(first.size(), second.size());
+	const size_t k = (overflow > 0) ? 1 : (n >> 1);
 
 	if (n == 1) {
-		fast1bitMult += 1;
-		return to_string(ctoi(x[0]) * ctoi(y[0]));
+		fastMulCounter++;
+		return to_string(ctoi(first[0]) * ctoi(second[0]));
 	}
 
-	const string halfNeededZeroes = string(n - k, '0');
+	auto [a, b] = splitIntoTwoSegments(paddedWithZerosToSizeFront(first, n), k);
+	auto [c, d] = splitIntoTwoSegments(paddedWithZerosToSizeFront(second, n), k);
 
-	x = paddedWithZerosToSizeFront(x, n);
-	y = paddedWithZerosToSizeFront(y, n);
+	if (overflow > 0) {
+		string a1b1 = (ctoi(a[0]) && ctoi(c[0])) ? paddedWithZerosByNumberBack("1", 2 * (n - 1)) : "0";
 
-	auto [a, b] = splitIntoTwoSegments(x, k);
-	auto [c, d] = splitIntoTwoSegments(y, k);
+		string a2b1 = ctoi(c[0]) ? b : "0";
+		string a1b2 = ctoi(a[0]) ? d : "0";
+		string brackets = paddedWithZerosByNumberBack(add(a2b1, a1b2), (n - 1));
 
-	string res;
-	if (overflow >= 2) {
-		string a1b1 = static_cast<bool>(stoll(a) * stoll(c)) ? paddedWithZerosByNumberBack("", 2 * (n - k)) : "0";
-		string a2 = static_cast<bool>(stoll(c)) ? b : "0";
-		string b2 = static_cast<bool>(stoll(a)) ? d : "0";
-		string brackets = add(a2, b2);
-		brackets = paddedWithZerosByNumberBack(brackets, (n - k));
 		string a2b2 = fastMultiplyAction(b, d);
-		fastDigitMultOverflow[checkDigit(x, y)]++;
-		res = add(add(a1b1, brackets), a2b2);
-		return res;
+
+		fastSumCounter += 3;
+
+		return add(add(a1b1, brackets), a2b2);
 	}
 
-	string u = fastMultiplyAction(add(a, b), add(c, d), checkOverflowCount(a, b, c, d));
+	size_t overflowCount = checkOverflowCount(a, b, c, d);
+
+	string u = fastMultiplyAction(add(a, b), add(c, d), overflowCount);
 	string v = fastMultiplyAction(a, c);
 	string w = fastMultiplyAction(b, d);
 
-	string uvwSub = subtract(u, add(v, w));
+	fastSumCounter += 2;
 
-	fastSumSub += 4;
+	if (overflowCount > 0) {
+		fastDigitMultOverflow[checkDigit(a, b)]++;
+	}
+
+	fastDigitMult[checkDigit(a, b)]++;
+	fastDigitMult[checkDigit(a, c)]++;
+	fastDigitMult[checkDigit(b, d)]++;
 
 	if (isMultiplyDebug) {
+
 		cout
 			<< "\n"
 			<< "U" << fastRecCounter << ": " << "(" << a << " + " << b << ")" << "(" << c << " + " << d << ")" << " = " << add(a, b) << " * " << add(c, d)
@@ -211,20 +217,21 @@ string fastMultiplyAction(const string& first, const string& second, int overflo
 			<< " (" << checkDigit(b, d) << "-bit " << checkOverflow(b, "0", d, "0") << ")" << "\n";
 	}
 
-	fastDigitMult[checkDigit(a, b)]++;
-	fastDigitMult[checkDigit(a, c)]++;
-	fastDigitMult[checkDigit(b, d)]++;
+	string uvwSub = subtract(u, add(v, w));
 
-	fastRecCounter++;
+	fastSumCounter += 1;
 
 	v = paddedWithZerosByNumberBack(v, 2 * (n - k));
 	uvwSub = paddedWithZerosByNumberBack(uvwSub, (n - k));
 
 	string result = add(add(v, w), uvwSub);
 
+	fastSumCounter += 2;
+
 	if (isMultiplyDebug) {
 		cout
 			<< "Re" << ": " << result << "\n";
+		fastRecCounter++;
 	}
 
 	return result.erase(0, min(result.find_first_not_of('0'), result.size() - 1));

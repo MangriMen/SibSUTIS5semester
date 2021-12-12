@@ -5,11 +5,43 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <array>
 #include <iomanip>
 
 #define MAX_ELEM 16777216
 
 using namespace std;
+
+string counter(string input) {
+	int i = 0;
+	int closingIndex = -1;
+
+	while (i < input.size()) {
+		while (i < input.size() && input[i] != ')') { i++; }
+		closingIndex = i;
+		if (closingIndex == input.size()) {
+			break;
+		}
+
+		while (i > 0 && input[i] != '(') { i--; }
+
+		if (input[i - 1] == '(' && closingIndex != -1 && input[closingIndex + 1] == ')') {
+			input[closingIndex] = '-';
+			input[i] = '-';
+			closingIndex = -1;
+		}
+		else {
+			i = closingIndex + 1;
+			closingIndex = -1;
+		}
+
+		i++;
+	}
+
+	input.erase(remove(input.begin(), input.end(), '-'), input.end());
+
+	return input;
+}
 
 string brackets(const vector<long long>& matrices, long long& operationsCount) {
 	const long long n = matrices.size() - 1;
@@ -24,12 +56,6 @@ string brackets(const vector<long long>& matrices, long long& operationsCount) {
 				if (min_ < 0 || checkMin < min_) {
 					min_ = checkMin;
 				}
-				//cout
-				//	<< "t-" << t << " k-" << k << " j-" << j
-				//	<< " " << setw(8) << f[k][j]
-				//	<< " " << setw(8) << f[j + 1][k + t]
-				//	<< " " << setw(8) << matrices[k] * matrices[j + 1] * matrices[k + t + 1]
-				//	<< "\n";
 			}
 
 			f[k][k + t] = min_;
@@ -37,7 +63,7 @@ string brackets(const vector<long long>& matrices, long long& operationsCount) {
 	}
 	operationsCount = f[0][n - 1];
 
-	const long long outN = 4 * n - 1; //	(n)+(n - 1) + (n + n - 1 + 1)
+	const long long outN = 4 * n - 1;
 	vector<vector<bool>> fMin(n, vector<bool>(n, false));
 	vector<string> out(outN);
 	fMin[0][n - 1] = true;
@@ -63,11 +89,11 @@ string brackets(const vector<long long>& matrices, long long& operationsCount) {
 					fMin[k][j] = true;
 					fMin[j + 1][k + t] = true;
 
-					out[(k * 4 + 1) - 1] += "(";
-					//	br[(k*4 + 1)-1] += "\"" + to_string(t) + "\" - (";
+					out[(k * 4 + 1) - 1] += '(';
+					//	out[(k * 4 + 1)-1] += "\"" + to_string(t) + "\" - (";
 					out[(j * 4 + 1) + 1] = ")" + out[(j * 4 + 1) + 1];
-					out[((j + 1) * 4 + 1) - 1] += "(";
-					//	br[((j+1)*4 + 1)-1] += "\"" + to_string(t) + "\" - (";
+					out[((j + 1) * 4 + 1) - 1] += '(';
+					//	out[((j + 1)*4 + 1)-1] += "\"" + to_string(t) + "\" - (";
 					out[((k + t) * 4 + 1) + 1] = ")" + out[((k + t) * 4 + 1) + 1];
 				}
 			}
@@ -109,7 +135,7 @@ int main() {
 
 	fileIn.close();
 
-	cout << "The number of matrices to be multiplied: " << n << "\n\n";
+	cout << "Matrices: " << n << "\n\n";
 	cout << "Multiplied matrices: ";
 
 	cout << "[" << matrices[0] << " x " << matrices[1] << "]";
@@ -119,10 +145,10 @@ int main() {
 	cout << "\n\n";
 
 	long long operationsCount = 0;
-	string order = brackets(matrices, operationsCount);
+	string order = counter(brackets(matrices, operationsCount));
 
 	cout << "Order of multiplications: " << order << "\n\n";
-	cout << "Operations count: " << operationsCount << "\n\n";
+	cout << "Operations: " << operationsCount << "\n\n";
 
 	return EXIT_SUCCESS;
 }
