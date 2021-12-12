@@ -4,7 +4,12 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QStringList>
+#include <QFileDialog>
+#include <QImage>
+#include <QPixmap>
+#include "adddialogenum.h"
 #include "headertableitem.h"
+#include "messageboxfontwrapper.h"
 
 namespace Ui {
 class AddDialog;
@@ -18,7 +23,7 @@ private:
     HeaderTableItem::Type type_;
 
 public:
-    explicit AddDialog(QWidget *parent = 0, HeaderTableItem::Type type = HeaderTableItem::Type::Places);
+    explicit AddDialog(QWidget *parent = 0, QString title = QString("Dialog"), HeaderTableItem::Type type = HeaderTableItem::Type::Places);
     ~AddDialog();
 
     void setTask(QString task);
@@ -30,12 +35,21 @@ public:
     void setTime(QDateTime time);
     QDateTime getTime();
 
+    void setImage(QString filename);
+    QString getImage();
+
     int count;
 
     int getFieldCount();
 
+    QMap<Field, QVariant> getFields();
+    void setFields(QMap<Field, QVariant> data);
+
 public slots:
     void checkAccepted();
+
+private slots:
+    void on_btnLoadImage_clicked();
 
 private:
     QString comboBoxSavedStyle;

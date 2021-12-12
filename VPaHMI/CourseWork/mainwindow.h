@@ -10,12 +10,16 @@
 #include <QSqlTableModel>
 #include <QSqlQueryModel>
 #include <QCalendarWidget>
+#include <QStandardItemModel>
+#include <QException>
 #include <QFile>
 #include <QDate>
+#include <QTimer>
+#include <QThread>
 #include "adddialog.h"
 #include "headertableitem.h"
 #include "headertableitemeditpage.h"
-#include "datepopup.h"
+#include "calendarpopup.h"
 
 namespace Ui {
 class MainWindow;
@@ -31,6 +35,8 @@ class MainWindow : public QMainWindow
     QSqlTableModel* workModel;
     QSqlTableModel* personalModel;
     QSqlTableModel* placesModel;
+    QStandardItemModel* visitPlanModel;
+    QStandardItemModel* personalGoalsModel;
     QDate currentWeek;
 
 public:
@@ -44,6 +50,10 @@ private slots:
     void onConfigurePageRequested(HeaderTableItem* item);
     void onRestoreNavigationRequested();
     void onWeekChangeRequested();
+
+    void on_btnFormVisitPlan_clicked();
+
+    void on_btnFormPersonalAffairs_clicked();
 
 private:
     Ui::MainWindow *ui;

@@ -10,7 +10,12 @@
 #include <QFont>
 #include <QDateTime>
 #include <QComboBox>
+#include <QFileDialog>
+#include <QTextDocument>
+#include <QPrinter>
+#include <QMap>
 #include "widecombobox.h"
+#include "pdfhelper.h"
 
 namespace Ui {
 class HeaderTableItemEditPage;
@@ -31,15 +36,17 @@ signals:
     void btnBackClicked();
 
 private slots:
-    void on_btnAdd_clicked();
-
     void on_btnBack_clicked();
+
+    void on_btnSave_clicked();
+
+    void on_dayTypeSelected(int index);
+
+    void on_btnAdd_clicked();
 
     void on_btnEdit_clicked();
 
     void on_btnRemove_clicked();
-
-    void on_dayTypeSelected(int index);
 
 private:
     Ui::HeaderTableItemEditPage *ui;

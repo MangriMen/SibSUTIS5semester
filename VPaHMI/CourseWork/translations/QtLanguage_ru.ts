@@ -4,47 +4,76 @@
 <context>
     <name>AddDialog</name>
     <message>
-        <location filename="../adddialog.ui" line="14"/>
+        <location filename="../adddialog.ui" line="20"/>
         <source>Dialog</source>
         <translation>Диалог</translation>
     </message>
     <message>
-        <location filename="../adddialog.ui" line="32"/>
+        <location filename="../adddialog.ui" line="61"/>
         <source>Time</source>
         <translation>Время</translation>
     </message>
     <message>
-        <location filename="../adddialog.ui" line="51"/>
+        <location filename="../adddialog.ui" line="99"/>
         <source>Description</source>
         <translation>Описание</translation>
     </message>
     <message>
-        <location filename="../adddialog.ui" line="95"/>
+        <location filename="../adddialog.ui" line="159"/>
+        <source>Image</source>
+        <translation>Изображение</translation>
+    </message>
+    <message>
+        <location filename="../adddialog.ui" line="249"/>
+        <source>Load</source>
+        <translation>Загрузить</translation>
+    </message>
+    <message>
+        <location filename="../adddialog.ui" line="32"/>
         <source>Task</source>
         <translation>Задача</translation>
     </message>
     <message>
-        <location filename="../adddialog.ui" line="143"/>
+        <location filename="../adddialog.ui" line="121"/>
         <source>dd.MM.yyyy HH:mm</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../adddialog.cpp" line="149"/>
-        <location filename="../adddialog.cpp" line="154"/>
-        <location filename="../adddialog.cpp" line="160"/>
+        <location filename="../adddialog.cpp" line="228"/>
         <source>Not all fields are filled</source>
         <translation>Не все поля заполнены</translation>
     </message>
     <message>
-        <location filename="../adddialog.cpp" line="149"/>
-        <location filename="../adddialog.cpp" line="154"/>
+        <location filename="../adddialog.cpp" line="229"/>
         <source>Fields must not be empty</source>
         <translation>Поля не должны быть пустыми</translation>
     </message>
     <message>
-        <location filename="../adddialog.cpp" line="160"/>
+        <location filename="../adddialog.cpp" line="263"/>
+        <source>Load image</source>
+        <translation>Загрузить изображение</translation>
+    </message>
+    <message>
         <source>Date cannot be set earlier than today</source>
-        <translation>Дата не может быть установлена раньше, чем сегодня</translation>
+        <translation type="vanished">Дата не может быть установлена раньше, чем сегодня</translation>
+    </message>
+</context>
+<context>
+    <name>CalendarPopup</name>
+    <message>
+        <location filename="../calendarpopup.ui" line="14"/>
+        <source>Dialog</source>
+        <translation>Диалог</translation>
+    </message>
+    <message>
+        <location filename="../calendarpopup.ui" line="63"/>
+        <source>Select current week</source>
+        <translation>Выбрать текущую неделю</translation>
+    </message>
+    <message>
+        <location filename="../calendarpopup.ui" line="78"/>
+        <source>Today</source>
+        <translation>Сегодня</translation>
     </message>
 </context>
 <context>
@@ -55,9 +84,19 @@
         <translation>Форма</translation>
     </message>
     <message>
-        <location filename="../headertableitem.ui" line="111"/>
+        <location filename="../headertableitem.ui" line="192"/>
         <source>30</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../headertableitem.ui" line="220"/>
+        <source>Configure</source>
+        <translation>Настроить</translation>
+    </message>
+    <message>
+        <location filename="../headertableitem.cpp" line="422"/>
+        <source>Day type:</source>
+        <translation>Тип дня:</translation>
     </message>
 </context>
 <context>
@@ -68,14 +107,79 @@
         <translation>Форма</translation>
     </message>
     <message>
-        <location filename="../headertableitemeditpage.cpp" line="61"/>
+        <location filename="../headertableitemeditpage.ui" line="38"/>
+        <source>Back</source>
+        <translation>Назад</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.ui" line="76"/>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.ui" line="130"/>
+        <source>Remove</source>
+        <translation>Удалить</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.ui" line="171"/>
+        <source>Edit</source>
+        <translation>Редактировать</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.ui" line="209"/>
+        <source>Add</source>
+        <translation>Добавить</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.cpp" line="29"/>
+        <source>Day type</source>
+        <translation>Тип дня</translation>
+    </message>
+    <message>
+        <source>Exit</source>
+        <translation type="vanished">Выход</translation>
+    </message>
+    <message>
+        <source>All data will be lost if you did not save the plan, are you sure you want to exit?</source>
+        <translation type="vanished">Все данные будут потеряны, если вы не сохранили план, вы уверены, что хотите выйти?</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.cpp" line="73"/>
+        <source>Cleanup page?</source>
+        <translation>Очистить страницу?</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.cpp" line="74"/>
+        <source>Do you want to clear the plan page before exiting?</source>
+        <translation>Вы хотите очистить страницу плана перед выходом?</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.cpp" line="100"/>
         <source>Add task</source>
         <translation>Добавить задачу</translation>
     </message>
     <message>
-        <location filename="../headertableitemeditpage.cpp" line="127"/>
+        <location filename="../headertableitemeditpage.cpp" line="122"/>
         <source>Edit task</source>
         <translation>Редактировать задачу</translation>
+    </message>
+    <message>
+        <location filename="../headertableitemeditpage.cpp" line="88"/>
+        <source>Saving the day plan</source>
+        <translation>Сохранение плана дня</translation>
+    </message>
+    <message>
+        <source>Unable to open file</source>
+        <translation type="vanished">Невозможно открыть файл</translation>
+    </message>
+    <message>
+        <source>Unable to open </source>
+        <translation type="vanished">Невозможно открыть </translation>
+    </message>
+    <message>
+        <source>Day type: </source>
+        <translation type="vanished">Тип дня: </translation>
     </message>
 </context>
 <context>
@@ -90,44 +194,74 @@
         <translation>Ежедневник</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="42"/>
+        <location filename="../mainwindow.ui" line="48"/>
         <location filename="../mainwindow.cpp" line="52"/>
         <source>Week</source>
         <translation>Неделя</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="73"/>
+        <location filename="../mainwindow.ui" line="129"/>
+        <source>Previous week</source>
+        <translation>Предыдущая неделя</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="332"/>
+        <source>Choose week</source>
+        <translation>Выбрать неделю</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="361"/>
+        <source>Next week</source>
+        <translation>Следующая неделя</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="397"/>
         <source>Affairs</source>
         <translation>Дела</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="95"/>
+        <location filename="../mainwindow.ui" line="419"/>
         <source>Forming</source>
         <translation>Формирование</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="117"/>
+        <location filename="../mainwindow.ui" line="441"/>
         <source>Formation of a visit plan</source>
         <translation>Формирование плана посещений</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="155"/>
+        <location filename="../mainwindow.ui" line="457"/>
+        <source>Form visit plan</source>
+        <translation>Сформировать план посещений</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="482"/>
         <source>Formation of personal goals</source>
         <translation>Формирование личных целей</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="271"/>
+        <location filename="../mainwindow.ui" line="205"/>
         <source>Year:</source>
         <translation>Год:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="316"/>
+        <location filename="../mainwindow.ui" line="241"/>
+        <source>Month:</source>
+        <translation>Месяц:</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="286"/>
         <source>Week:</source>
         <translation>Неделя:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="423"/>
-        <location filename="../mainwindow.ui" line="435"/>
+        <location filename="../mainwindow.ui" line="498"/>
+        <source>Form personal goals</source>
+        <translation>Сформировать личные цели</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.ui" line="529"/>
+        <location filename="../mainwindow.ui" line="541"/>
         <source>Help</source>
         <translation>Справка</translation>
     </message>
@@ -171,24 +305,34 @@
         <translation>Воскресенье</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="94"/>
+        <location filename="../mainwindow.cpp" line="99"/>
         <source>Education affairs</source>
         <translation>Учебные дела</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="95"/>
+        <location filename="../mainwindow.cpp" line="100"/>
         <source>Work affairs</source>
         <translation>Рабочие дела</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="96"/>
+        <location filename="../mainwindow.cpp" line="101"/>
         <source>Personal affairs</source>
         <translation>Личные дела</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="97"/>
+        <location filename="../mainwindow.cpp" line="102"/>
         <source>Places</source>
         <translation>Места</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="237"/>
+        <source>Visit plan</source>
+        <translation>План посещений</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="248"/>
+        <source>Personal goals</source>
+        <translation>Личные цели</translation>
     </message>
 </context>
 </TS>

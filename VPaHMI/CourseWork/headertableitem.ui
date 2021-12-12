@@ -16,6 +16,12 @@
   <property name="styleSheet">
    <string notr="true">#frameHeader {
 	border-bottom: 1px solid black;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+}
+
+#frameBox {
+	border: 1px solid black;
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -41,6 +47,9 @@
        <width>100</width>
        <height>0</height>
       </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
      <property name="frameShape">
       <enum>QFrame::Box</enum>
@@ -71,6 +80,9 @@
           <family>Roboto</family>
           <pointsize>12</pointsize>
          </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-radius: 4px;</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -105,9 +117,6 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
         </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -207,6 +216,9 @@
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
+           <property name="toolTip">
+            <string>Configure</string>
+           </property>
            <property name="text">
             <string/>
            </property>
@@ -246,6 +258,10 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>btnConfigure</tabstop>
+  <tabstop>tblData</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

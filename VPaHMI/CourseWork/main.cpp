@@ -23,7 +23,6 @@ void loadStylesheet(QString filename) {
     file.open(QFile::ReadOnly);
     qApp->setStyleSheet(qApp->styleSheet() + file.readAll());
 }
-
 void loadIcon(QString filename) {
     QIcon appIcon = QIcon(filename);
     qApp->setWindowIcon(appIcon);
@@ -33,10 +32,12 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    loadIcon(":/images/app_icon.ico");
+
     loadTranslation(QLatin1String("qt_") + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     loadTranslation(QString("QtLanguage_") + QString("ru_RU"), QString(":/translations/"));
 
-    loadIcon(":/images/app_icon.ico");
+    QLocale::setDefault(QLocale(QLocale::Russian, QLocale::Russia));
 
     MainWindow w;
     w.show();

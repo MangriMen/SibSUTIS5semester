@@ -8,6 +8,7 @@ HeaderTableItem::HeaderTableItem(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->tblData->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tblData->horizontalHeader()->setFont(ui->tblData->font());
 
     setWeekNum(QDateTime::currentDateTime().date().weekNumber());
     setYearNum(QDateTime::currentDateTime().date().year());
@@ -60,17 +61,27 @@ HeaderTableItem::DayType HeaderTableItem::getDayType() {
     return dayType_;
 }
 
-void HeaderTableItem::updateDayTypeInBase() {
-    QDate weekStart = QDate::currentDate();
-    if (weekStart.dayOfWeek() != 1) {
-        weekStart = weekStart.addDays(-weekStart.dayOfWeek() + 1);
+QString HeaderTableItem::getDayTypeStr() {
+    switch (dayType_) {
+    case DayType::Work:
+        return QString("Рабочий");
+    case DayType::Education:
+        return QString("Учебный");
+    case DayType::EducationAndWork:
+        return QString("Смешанный");
+    case DayType::DayOff:
+        return QString("Выходной");
+    default:
+        return QString();
     }
+}
 
+void HeaderTableItem::updateDayTypeInBase() {
     if (day_ != HeaderTableItem::WeekDay::None || day_ != HeaderTableItem::WeekDay::Any) {
         QSqlQuery* query = new QSqlQuery();
         query->prepare("REPLACE INTO ТипДня(Тип, День) VALUES(?, ?)");
         query->bindValue(0, static_cast<int>(dayType_));
-        query->bindValue(1, weekStart.addDays(static_cast<int>(day_) - 1));
+        query->bindValue(1, getDate());
         query->exec();
         query->clear();
         delete query;
@@ -153,6 +164,34 @@ QString HeaderTableItem::getDayDBName() {
     }
 }
 
+QStringList HeaderTableItem::getAllTasks() {
+    QStringList tasks;
+
+    QSqlTableModel* model = reinterpret_cast<QSqlTableModel*>(ui->tblData->model());
+
+    QSqlQuery query = model->query();
+    if (type_ == Type::Day) {
+        query.prepare("SELECT Время,Задание,Описание FROM " + model->tableName());
+    }
+    else {
+        query.prepare("SELECT * FROM " + model->tableName());
+    }
+    query.exec();
+
+    if (type_ == Type::Day) {
+        while(query.next()) {
+            tasks << query.value("Время").value<QString>() + " " + query.value("Задание").value<QString>() + " " + query.value("Описание").value<QString>();
+        }
+    }
+    else {
+
+    }
+
+    query.clear();
+
+    return tasks;
+}
+
 void HeaderTableItem::setWeekNum(int week) {
     weekNumber_ = week;
 }
@@ -167,6 +206,14 @@ void HeaderTableItem::setYearNum(int year) {
 
 int HeaderTableItem::getYearNum() {
     return yearNumber_;
+}
+
+void HeaderTableItem::setDate(QDate date) {
+    date_ = date;
+}
+
+QDate HeaderTableItem::getDate() {
+    return date_;
 }
 
 void HeaderTableItem::copySettings(HeaderTableItem* item) {
@@ -186,12 +233,150 @@ void HeaderTableItem::copySettings(HeaderTableItem* item) {
     setDayType(item->getDayType());
 }
 
-int HeaderTableItem::getSelectedRow() {
+int HeaderTableItem::getSelectedRowIndex() {
     return ui->tblData->currentIndex().row();
 }
 
-void HeaderTableItem::removeSelectedRow() {
-    ui->tblData->model()->removeRow(ui->tblData->currentIndex().row());
+void HeaderTableItem::setSelectedRow(int index) {
+    QModelIndex rowIndex = ui->tblData->model()->index(index, 0);
+    ui->tblData->scrollTo(rowIndex);
+    ui->tblData->setCurrentIndex(rowIndex);
+}
+
+QMap<Field, QVariant>  HeaderTableItem::getRow(int index) {
+    QSqlTableModel* model = reinterpret_cast<QSqlTableModel*>(ui->tblData->model());
+
+    QMap<Field, QVariant> data;
+    switch (getType()) {
+    case HeaderTableItem::Type::Day:
+        data[Field::Date] = QDateTime::fromString(model->index(index, 0).data().value<QString>(), "hh:mm");
+        data[Field::Task] = model->index(index, 1).data().value<QString>();
+        data[Field::Description] = model->index(index, 2).data().value<QString>();
+        break;
+    case HeaderTableItem::Type::Education:
+        data[Field::Task] = model->index(index, 0).data().value<QString>();
+        data[Field::Description] = model->index(index, 1).data().value<QString>();
+        data[Field::Date] = QDateTime::fromString(model->index(index, 2).data().value<QString>(), "dd.MM.yyyy HH:mm");
+        break;
+    case HeaderTableItem::Type::Work:
+        data[Field::Task] = model->index(index, 0).data().value<QString>();
+        data[Field::Date] = QDateTime::fromString(model->index(index, 1).data().value<QString>(), "dd.MM.yyyy HH:mm");
+        break;
+    case HeaderTableItem::Type::Personal:
+        data[Field::Task] = model->index(index, 0).data().value<QString>();
+        break;
+    case HeaderTableItem::Type::Places:
+        data[Field::Task] = model->index(index, 0).data().value<QString>();
+        break;
+    case HeaderTableItem::Type::VisitPlan:
+        data[Field::Task] = model->index(index, 0).data().value<QString>();
+        data[Field::Date] = QDateTime::fromString(model->index(index, 1).data().value<QString>(), "dd.MM.yyyy HH:mm");
+        break;
+    case HeaderTableItem::Type::PersonalPlan:
+        data[Field::Task] = model->index(index, 0).data().value<QString>();
+        data[Field::Image] = model->index(index, 0).data().value<QString>();
+        break;
+    default:
+        break;
+    }
+
+    return data;
+}
+
+void HeaderTableItem::addRow(QMap<Field, QVariant> data) {
+    QAbstractItemModel* model = ui->tblData->model();
+    int newRowIndex = model->rowCount();
+
+    model->insertRow(newRowIndex);
+
+    switch (getType()) {
+    case HeaderTableItem::Type::Day:
+        model->setData(model->index(newRowIndex, 0), data[Field::Date].value<QDateTime>().time().toString("hh:mm"));
+        model->setData(model->index(newRowIndex, 1), data[Field::Task].value<QString>());
+        model->setData(model->index(newRowIndex, 2), data[Field::Description].value<QString>());
+        model->setData(model->index(newRowIndex, 3), getYearNum());
+        model->setData(model->index(newRowIndex, 4), getWeekNum());
+        break;
+    case HeaderTableItem::Type::Education:
+        model->setData(model->index(newRowIndex, 0), data[Field::Task].value<QString>());
+        model->setData(model->index(newRowIndex, 1), data[Field::Description].value<QString>());
+        model->setData(model->index(newRowIndex, 2), data[Field::Date].value<QDateTime>().toString("dd.MM.yyyy HH:mm"));
+        break;
+    case HeaderTableItem::Type::Work:
+        model->setData(model->index(newRowIndex, 0), data[Field::Task].value<QString>());
+        model->setData(model->index(newRowIndex, 1), data[Field::Date].value<QDateTime>().toString("dd.MM.yyyy HH:mm"));
+        break;
+    case HeaderTableItem::Type::Personal:
+        model->setData(model->index(newRowIndex, 0), data[Field::Task].value<QString>());
+        break;
+    case HeaderTableItem::Type::Places:
+        model->setData(model->index(newRowIndex, 0), data[Field::Task].value<QString>());
+        break;
+    case HeaderTableItem::Type::VisitPlan:
+        model->setData(model->index(newRowIndex, 0), data[Field::Task].value<QString>());
+        model->setData(model->index(newRowIndex, 1), data[Field::Date].value<QDateTime>().toString("dd.MM.yyyy HH:mm"));
+        break;
+    case HeaderTableItem::Type::PersonalPlan:
+        model->setData(model->index(newRowIndex, 0), data[Field::Task].value<QString>());
+        model->setData(model->index(newRowIndex, 1), data[Field::Image].value<QString>());
+        model->setData(model->index(newRowIndex, 1), QPixmap(data[Field::Image].value<QString>()), Qt::DecorationRole);
+        break;
+    default:
+        break;
+    }
+
+    model->submit();
+}
+
+void HeaderTableItem::editRow(QMap<Field, QVariant> data, int row) {
+    QAbstractItemModel* model = ui->tblData->model();
+
+    switch (getType()) {
+    case HeaderTableItem::Type::Day:
+        model->setData(model->index(row, 0), data[Field::Date].value<QDateTime>().time().toString("hh:mm"));
+        model->setData(model->index(row, 1), data[Field::Task].value<QString>());
+        model->setData(model->index(row, 2), data[Field::Description].value<QString>());
+        break;
+    case HeaderTableItem::Type::Education:
+        model->setData(model->index(row, 0), data[Field::Task].value<QString>());
+        model->setData(model->index(row, 1), data[Field::Description].value<QString>());
+        model->setData(model->index(row, 2), data[Field::Date].value<QDateTime>().toString("dd.MM.yyyy HH:mm"));
+        break;
+    case HeaderTableItem::Type::Work:
+        model->setData(model->index(row, 0), data[Field::Task].value<QString>());
+        model->setData(model->index(row, 1), data[Field::Date].value<QDateTime>().toString("dd.MM.yyyy HH:mm"));
+        break;
+    case HeaderTableItem::Type::Personal:
+        model->setData(model->index(row, 0), data[Field::Task].value<QString>());
+        break;
+    case HeaderTableItem::Type::Places:
+        model->setData(model->index(row, 0), data[Field::Task].value<QString>());
+        break;
+    case HeaderTableItem::Type::VisitPlan:
+        model->setData(model->index(row, 0), data[Field::Task].value<QString>());
+        model->setData(model->index(row, 1), data[Field::Date].value<QDateTime>().toString("dd.MM.yyyy HH:mm"));
+        break;
+    case HeaderTableItem::Type::PersonalPlan:
+        model->setData(model->index(row, 0), data[Field::Task].value<QString>());
+        model->setData(model->index(row, 1), data[Field::Image].value<QString>());
+        break;
+    default:
+        break;
+    }
+
+    model->submit();
+}
+
+void HeaderTableItem::removeRow(int row) {
+    ui->tblData->model()->removeRow(row);
+}
+
+QFrame* HeaderTableItem::getTitleFrame() {
+    return ui->frameHeader;
+}
+
+QTableView* HeaderTableItem::getTableView() {
+    return ui->tblData;
 }
 
 void HeaderTableItem::updateModel() {
@@ -205,11 +390,12 @@ void HeaderTableItem::updateModel() {
 
 void HeaderTableItem::columnVisible(QString columnName, bool state) {
     QSqlTableModel* model = reinterpret_cast<QSqlTableModel*>(ui->tblData->model());
-    if (state) {
-        ui->tblData->showColumn(model->fieldIndex((columnName)));
+    int columnIndex = model->fieldIndex(columnName);
+    if (columnIndex != -1 && state) {
+        ui->tblData->showColumn(columnIndex);
     }
     else {
-        ui->tblData->hideColumn(model->fieldIndex((columnName)));
+        ui->tblData->hideColumn(columnIndex);
     }
 }
 
@@ -222,8 +408,71 @@ void HeaderTableItem::configureVisible(bool state) {
     ui->btnConfigure->setVisible(state);
 }
 
+QString HeaderTableItem::getHtmlLayout() {
+    QString htmlLayout;
+
+    if (type_ == Type::Day) {
+        htmlLayout.append(R"(<h1 align="center">)" + getDate().toString("dd MMMM yyyy") + "</h1>");
+    }
+
+    htmlLayout.append(R"(<h1 align="center">)" + ui->lblHeader->text() + "</h1>");
+
+    if (type_ == Type::Day) {
+        htmlLayout.append(R"(<h2 align="center">)" + tr("Day type:") + " " + getDayTypeStr() + "</h2>");
+    }
+
+    htmlLayout.append(R"(<div height="10px"></div>)");
+
+    QAbstractItemModel* model = ui->tblData->model();
+
+    QString tableHeader;
+    tableHeader.append(R"(<tr bgcolor="#ffffff">)");
+    for (int i = 0; i < model->columnCount(); i++) {
+        QString headerColumn = model->headerData(i, Qt::Horizontal).value<QString>();
+        if (type_ == Type::Day) {
+            if (headerColumn == "Год" || headerColumn == "Неделя") {
+                continue;
+            }
+        }
+        tableHeader.append("<th>" + headerColumn + "</th>");
+    }
+    tableHeader.append("</tr>");
+
+    QString tableBody;
+    for (int i = 0; i < model->rowCount(); i++) {
+        tableBody.append(R"(<tr bgcolor="#ffffff">)");
+        for (int j = 0; j < model->columnCount(); j++) {
+            QString headerColumn = model->headerData(j, Qt::Horizontal).value<QString>();
+            if (type_ == Type::Day) {
+                if (headerColumn == "Год" || headerColumn == "Неделя") {
+                    continue;
+                }
+            }
+            tableBody.append(R"(<td align="center">)");
+            if (headerColumn == "Изображение") {
+                tableBody.append(R"(<img height="200" src=")");
+            }
+            tableBody.append(model->index(i, j).data().value<QString>());
+            if (headerColumn == "Изображение") {
+                tableBody.append(R"(">)");
+            }
+            tableBody.append("</td>");
+        }
+        tableBody.append("</tr>");
+    }
+
+    QString table;
+    table.append(R"(<table width="100%" cellpadding="6" align="center" border="0" bgcolor="#000000">)");
+    table.append(tableHeader);
+    table.append(tableBody);
+    table.append("</table>");
+
+    htmlLayout.append(table);
+
+    return htmlLayout;
+}
+
 void HeaderTableItem::on_btnConfigure_clicked()
 {
     btnCofifguredClicked(this);
 }
-

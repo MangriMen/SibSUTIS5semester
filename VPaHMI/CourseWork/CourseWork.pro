@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++1z
@@ -34,7 +34,11 @@ SOURCES += \
     adddialog.cpp \
     headertableitem.cpp \
     widecombobox.cpp \
-    datepopup.cpp
+    calendarpopup.cpp \
+    pdfhelper.cpp \
+    messageboxfontwrapper.cpp \
+    imagebutton.cpp \
+    itemdelegate.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -42,13 +46,19 @@ HEADERS += \
     headertableitemeditpage.h \
     adddialog.h \
     widecombobox.h \
-    datepopup.h
+    calendarpopup.h \
+    pdfhelper.h \
+    messageboxfontwrapper.h \
+    adddialogenum.h \
+    imagebutton.h \
+    itemdelegate.h
 
 FORMS += \
         mainwindow.ui \
     headertableitem.ui \
     headertableitemeditpage.ui \
-    adddialog.ui
+    adddialog.ui \
+    calendarpopup.ui
 
 RESOURCES += \
     resources.qrc

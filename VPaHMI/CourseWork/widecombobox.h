@@ -11,10 +11,7 @@ public:
     explicit WideComboBox(QWidget *parent = nullptr) : QComboBox(parent) {}
     ~WideComboBox() {}
 public:
-    void showPopup() {
-        this->view()->setMinimumWidth(this->view()->sizeHintForColumn(0));
-        QComboBox::showPopup();
-    }
+    void showPopup();
 };
 
 #endif // WIDECOMBOBOX_H

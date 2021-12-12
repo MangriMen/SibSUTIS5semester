@@ -1,6 +1,8 @@
 #include "headertableitemeditpage.h"
 #include "ui_headertableitemeditpage.h"
 #include "adddialog.h"
+#include <QDialogButtonBox>
+#include "itemdelegate.h"
 
 HeaderTableItemEditPage::HeaderTableItemEditPage(QWidget *parent, HeaderTableItem* item) :
     QWidget(parent),
@@ -9,10 +11,26 @@ HeaderTableItemEditPage::HeaderTableItemEditPage(QWidget *parent, HeaderTableIte
     ui->setupUi(this);
 
     this->item_ = item;
+    ui->hitEditingItem->copySettings(item);
+    ui->hitEditingItem->configureVisible(false);
+    ui->hitEditingItem->updateModel();
+    ui->hitEditingItem->getTitleFrame()->setFrameShape(QFrame::Box);
 
-    int rowInsert = 0;
-    ui->layoutPage->addWidget(ui->btnBack, rowInsert++, 0);
-    ui->layoutPage->addWidget(ui->btnSave, rowInsert++, 0);
+    if (item_->getType() == HeaderTableItem::Type::Day) {
+        ui->hitEditingItem->columnVisible(QString("Описание"), true);
+    }
+
+    if (item_->getType() == HeaderTableItem::Type::PersonalPlan) {
+        ItemDelegate *itDelegate = new  ItemDelegate;
+        ui->hitEditingItem->getTableView()->setItemDelegateForColumn(1, itDelegate);
+        ui->hitEditingItem->getTableView()->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        ui->hitEditingItem->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+        ui->hitEditingItem->getTableView()->setColumnWidth(1, 200);
+    }
+
+    int colInsert = 0;
+    ui->layoutPage->addWidget(ui->btnBack, 0, colInsert++);
+    ui->layoutPage->addWidget(ui->btnSave, 1, 0);
     if (item_->getType() == HeaderTableItem::Type::Day) {
         if (item->getDayNum() != HeaderTableItem::WeekDay::Any) {
             cmbDayType = new WideComboBox(this);
@@ -20,24 +38,24 @@ HeaderTableItemEditPage::HeaderTableItemEditPage(QWidget *parent, HeaderTableIte
             cmbDayType->addItem(QString("Рабочий"), static_cast<int>(HeaderTableItem::DayType::Work));
             cmbDayType->addItem(QString("Смешанный"), static_cast<int>(HeaderTableItem::DayType::EducationAndWork));
             cmbDayType->addItem(QString("Выходной"), static_cast<int>(HeaderTableItem::DayType::DayOff));
-            cmbDayType->setMaximumSize(ui->btnBack->maximumSize());
             cmbDayType->setCurrentIndex(static_cast<int>(item_->getDayType()));
+
+            cmbDayType->setMaximumHeight(ui->btnBack->maximumHeight());
             cmbDayType->setFont(QFont("Roboto", 12));
-            cmbDayType->setStyleSheet("QComboBox {padding: 30px;} QComboBox::drop-down {background-color: transparent; width: 44%;} QComboBox::down-arrow {image: url(:/images/arrow_down.png);}");
+            cmbDayType->setToolTip(tr("Day type"));
+
             connect(cmbDayType, SIGNAL(currentIndexChanged(int)), this, SLOT(on_dayTypeSelected(int)));
-            ui->layoutPage->addWidget(cmbDayType, rowInsert++, 0);
+
+            ui->layoutPage->addWidget(cmbDayType, 0, colInsert++);
         }
     }
-    ui->layoutPage->addItem(ui->verticalSpacer, rowInsert++, 0);
-    ui->layoutPage->addWidget(ui->btnAdd, rowInsert++, 0);
-    ui->layoutPage->addWidget(ui->btnEdit, rowInsert++, 0);
-    ui->layoutPage->addWidget(ui->btnRemove, rowInsert++, 0);
-    ui->layoutPage->addWidget(ui->hitEditingItem, 0, 1, -1, -1);
-
-    ui->hitEditingItem->copySettings(item);
-    ui->hitEditingItem->configureVisible(false);
-    ui->hitEditingItem->updateModel();
-    ui->hitEditingItem->columnVisible(QString("Описание"), true);
+    ui->layoutPage->addItem(ui->upSpacer, 2, 0);
+    ui->layoutPage->addWidget(ui->btnAdd, 3, 0);
+    ui->layoutPage->addWidget(ui->btnEdit, 4, 0);
+    ui->layoutPage->addWidget(ui->btnRemove, 5, 0);
+    ui->layoutPage->addItem(ui->downSpacer, 6, 0);
+    ui->layoutPage->addWidget(ui->hitEditingItem->getTitleFrame(), 0, colInsert++, 1, -1);
+    ui->layoutPage->addWidget(ui->hitEditingItem, 1, 1, -1, -1);
 }
 
 HeaderTableItemEditPage::~HeaderTableItemEditPage()
@@ -47,116 +65,40 @@ HeaderTableItemEditPage::~HeaderTableItemEditPage()
     if (cmbDayType != nullptr) {
         ui->layoutPage->removeWidget(cmbDayType);
     }
-    ui->layoutPage->removeItem(ui->verticalSpacer);
+    ui->layoutPage->removeItem(ui->upSpacer);
     ui->layoutPage->removeWidget(ui->btnAdd);
     ui->layoutPage->removeWidget(ui->btnEdit);
     ui->layoutPage->removeWidget(ui->btnRemove);
+    ui->layoutPage->removeItem(ui->downSpacer);
+    ui->layoutPage->removeWidget(ui->hitEditingItem->getTitleFrame());
     ui->layoutPage->removeWidget(ui->hitEditingItem);
     delete ui;
 }
 
-void HeaderTableItemEditPage::on_btnAdd_clicked()
-{
-    AddDialog* dlg = new AddDialog(this, item_->getType());
-    dlg->setWindowTitle(tr("Add task"));
-    dlg->exec();
-
-    if (dlg->result() == QDialog::Accepted) {
-        QString tableName = reinterpret_cast<QSqlTableModel*>(item_->getTableModel())->tableName();
-
-        const QString insertQueryStr = QString("INSERT INTO ") + tableName + QString(" VALUES (");
-        const QString insertQueryStrEnd = QString(");");
-        const QString valueStr = QString("?, ");
-
-        QString values;
-        if (item_->getType() == HeaderTableItem::Type::Day) {
-            values.append(valueStr);
-            values.append(valueStr);
-        }
-        for (int i = 0; i < dlg->getFieldCount(); i++) {
-            values.append(valueStr);
-        }
-        values.remove(values.count()-2, 1);
-
-        QSqlQuery* addQuery = new QSqlQuery();
-        addQuery->prepare(insertQueryStr + values + insertQueryStrEnd);
-        switch (item_->getType()) {
-        case HeaderTableItem::Type::Day:
-            addQuery->bindValue(0, dlg->getTime().time().toString("hh:mm"));
-            addQuery->bindValue(1, dlg->getTask());
-            addQuery->bindValue(2, dlg->getDescription());
-            addQuery->bindValue(3, item_->getYearNum());
-            addQuery->bindValue(4, item_->getWeekNum());
-            break;
-        case HeaderTableItem::Type::Education:
-            addQuery->bindValue(0, dlg->getTask());
-            addQuery->bindValue(1, dlg->getDescription());
-            addQuery->bindValue(2, dlg->getTime().toString("dd.MM.yyyy HH:mm"));
-            break;
-        case HeaderTableItem::Type::Work:
-            addQuery->bindValue(0, dlg->getTask());
-            addQuery->bindValue(1, dlg->getTime().toString("dd.MM.yyyy HH:mm"));
-            break;
-        case HeaderTableItem::Type::Personal:
-            addQuery->bindValue(0, dlg->getTask());
-            break;
-        case HeaderTableItem::Type::Places:
-            addQuery->bindValue(0, dlg->getTask());
-            break;
-        default:
-            break;
-        }
-        addQuery->exec();
-        addQuery->clear();
-        delete addQuery;
-
-        item_->updateModel();
-    }
-}
-
 void HeaderTableItemEditPage::on_btnBack_clicked()
 {
+    if (item_->getType() == HeaderTableItem::Type::VisitPlan
+            || item_->getType() == HeaderTableItem::Type::PersonalPlan) {
+        if (item_->getTableModel()->rowCount() > 0) {
+            QMessageBox *dlg = MessageBoxFontWrapper::SetStandardFont(
+                        new QMessageBox(
+                            QMessageBox::Warning,
+                            tr("Cleanup page?"),
+                            tr("Do you want to clear the plan page before exiting?"),
+                            QMessageBox::Ok | QMessageBox::No,
+                            this)
+                        );
+            if (dlg->exec() == QMessageBox::Ok) {
+                item_->getTableModel()->removeRows(0, item_->getTableModel()->rowCount());
+            }
+        }
+    }
     btnBackClicked();
 }
 
-void HeaderTableItemEditPage::on_btnEdit_clicked()
+void HeaderTableItemEditPage::on_btnSave_clicked()
 {
-    QSqlTableModel* model = reinterpret_cast<QSqlTableModel*>(item_->getTableModel());
-
-    AddDialog* dlg = new AddDialog(this, item_->getType());
-    dlg->setWindowTitle(tr("Edit task"));
-    dlg->exec();
-    switch (item_->getType()) {
-    case HeaderTableItem::Type::Day:
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 0), dlg->getTime().time().toString("hh:mm"));
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 1), dlg->getTask());
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 2), dlg->getDescription());
-        break;
-    case HeaderTableItem::Type::Education:
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 0), dlg->getTask());
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 1), dlg->getDescription());
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 2), dlg->getTime().toString("dd.MM.yyyy HH:mm"));
-        break;
-    case HeaderTableItem::Type::Work:
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 0), dlg->getTask());
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 1), dlg->getTime().toString("dd.MM.yyyy HH:mm"));
-        break;
-    case HeaderTableItem::Type::Personal:
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 0), dlg->getTask());
-        break;
-    case HeaderTableItem::Type::Places:
-        model->setData(model->index(ui->hitEditingItem->getSelectedRow(), 0), dlg->getTask());
-        break;
-    default:
-        break;
-    }
-    item_->updateModel();
-}
-
-void HeaderTableItemEditPage::on_btnRemove_clicked()
-{
-    ui->hitEditingItem->removeSelectedRow();
-    item_->updateModel();
+    PdfHelper::SaveToPdfDialog(this, tr("Saving the day plan"), ui->hitEditingItem->getHtmlLayout());
 }
 
 void HeaderTableItemEditPage::on_dayTypeSelected(int index) {
@@ -164,4 +106,55 @@ void HeaderTableItemEditPage::on_dayTypeSelected(int index) {
     ui->hitEditingItem->setDayType(newType);
     item_->setDayType(newType);
     item_->updateDayTypeInBase();
+}
+
+void HeaderTableItemEditPage::on_btnAdd_clicked()
+{
+    AddDialog* dlg = new AddDialog(this, tr("Add task"), item_->getType());
+    dlg->open();
+
+    connect(dlg, &AddDialog::finished, [=](int result) {
+        if (result == QDialog::Accepted) {
+            item_->addRow(dlg->getFields());
+            item_->updateModel();
+
+            QAbstractItemModel* model;
+            if((model = ui->hitEditingItem->getTableModel()) != nullptr) {
+                ui->hitEditingItem->setSelectedRow(model->rowCount());
+            }
+        }
+
+        dlg->deleteLater();
+    });
+}
+
+void HeaderTableItemEditPage::on_btnEdit_clicked()
+{
+    int selectedRow = ui->hitEditingItem->getSelectedRowIndex();
+    if (selectedRow == -1) {
+        return;
+    }
+
+    AddDialog* dlg = new AddDialog(this, tr("Edit task"), item_->getType());
+    dlg->setFields(ui->hitEditingItem->getRow(ui->hitEditingItem->getSelectedRowIndex()));
+    dlg->open();
+
+    connect(dlg, &AddDialog::finished, [=](int result) {
+        if (result == QDialog::Accepted) {
+            item_->editRow(dlg->getFields(), selectedRow);
+            item_->updateModel();
+
+            ui->hitEditingItem->setSelectedRow(selectedRow);
+        }
+
+        dlg->deleteLater();
+    });
+}
+
+void HeaderTableItemEditPage::on_btnRemove_clicked()
+{
+    int selectedRow = ui->hitEditingItem->getSelectedRowIndex();
+    item_->removeRow(ui->hitEditingItem->getSelectedRowIndex());
+    item_->updateModel();
+    ui->hitEditingItem->setSelectedRow(selectedRow);
 }
