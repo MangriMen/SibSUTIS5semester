@@ -14,6 +14,7 @@ class accountCreation : public QDialog
 public:
     explicit accountCreation(QWidget *parent = 0);
     ~accountCreation();
+    QString getName();
 
 private:
     Ui::accountCreation *ui;

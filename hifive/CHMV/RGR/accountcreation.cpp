@@ -8,6 +8,10 @@ accountCreation::accountCreation(QWidget *parent) :
     ui->setupUi(this);
 }
 
+QString accountCreation::getName() {
+    return ui->lnEditAccountName->text().trimmed();
+}
+
 accountCreation::~accountCreation()
 {
     delete ui;

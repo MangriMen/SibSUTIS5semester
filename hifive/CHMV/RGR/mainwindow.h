@@ -2,7 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QDebug>
+#include <QSqlDataBase>
+#include <QSqlTableModel>
+#include <QSqlQuery>
 
 namespace Ui {
 class MainWindow;
@@ -16,10 +18,20 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+signals:
+    void guiUpdate();
+
 private:
     Ui::MainWindow *ui;
+    QSqlTableModel *modelUsers;
+    QSqlTableModel *modelFunds;
+    QSqlTableModel *modelGoals;
+    QString currentUserName;
+    QString latinize(QString str);
 
 private slots:
+    void onGuiUpdate();
+
     void openGoalsDialog();
     void openFundsDialog();
     void openIncomesDialog();
