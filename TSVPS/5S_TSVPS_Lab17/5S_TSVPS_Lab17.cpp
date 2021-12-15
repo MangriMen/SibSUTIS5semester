@@ -7,6 +7,7 @@
 #include <vector>
 #include <array>
 #include <iomanip>
+#include <stack>
 
 #define MAX_ELEM 16777216
 
