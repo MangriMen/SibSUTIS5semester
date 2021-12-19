@@ -15,6 +15,7 @@ public:
     explicit accountCreation(QWidget *parent = 0);
     ~accountCreation();
     QString getName();
+    void checkAccept();
 
 private:
     Ui::accountCreation *ui;

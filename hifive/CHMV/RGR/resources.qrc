@@ -9,5 +9,8 @@
         <file>images/maximize_black_24dp.svg</file>
         <file>images/monetization_on_black_24dp.svg</file>
         <file>style/style.css</file>
+        <file>images/add_black_24dp.svg</file>
+        <file>images/death_24dp.svg</file>
+        <file>images/remove_black_24dp.svg</file>
     </qresource>
 </RCC>

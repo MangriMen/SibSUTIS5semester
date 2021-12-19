@@ -19,18 +19,25 @@ public:
     ~MainWindow();
 
 signals:
-    void guiUpdate();
+    void incomesExpensesGuiUpdate();
 
 private:
     Ui::MainWindow *ui;
-    QSqlTableModel *modelUsers;
-    QSqlTableModel *modelFunds;
-    QSqlTableModel *modelGoals;
-    QString currentUserName;
+    QSqlTableModel *modelUsers = nullptr;
+    QSqlTableModel *modelFunds = nullptr;
+    QSqlTableModel *modelGoals = nullptr;
+    QSqlTableModel *modelIncomes = nullptr;
+    QSqlTableModel *modelExpenses = nullptr;
     QString latinize(QString str);
+    bool loadUsers();
+    bool onUserDeleteRequested();
+    void closeDatabase();
+    const QString currentUserName();
+    void setCurrentUserName(QString userName);
 
 private slots:
     void onGuiUpdate();
+    void onUserChanged(QAction* selectedUser);
 
     void openGoalsDialog();
     void openFundsDialog();
@@ -39,9 +46,12 @@ private slots:
 
     void onGoalBalanceModified();
 
-    void onAddToBankAccepted();
-    void onWithdrawFromBankAccepted();
-    void onRecurringPaymentAccepted();
+    void onAddToWalletAccepted(int number);
+    void onAddToBankAccepted(int number);
+    void onWithdrawFromBankAccepted(int number);
+    void onRecurringPaymentAccepted(int number);
+
+    bool onNewUserRequested();
 };
 
 #endif // MAINWINDOW_H

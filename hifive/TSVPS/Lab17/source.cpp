@@ -1,12 +1,12 @@
-#include <iostream>
-#include <cmath>
-#include <string>
 #include <algorithm>
+#include <iostream>
 #include <sstream>
 #include <fstream>
+#include <iomanip>
+#include <string>
 #include <vector>
 #include <array>
-#include <iomanip>
+#include <cmath> 
 
 #define MAX_ELEM 16777216
 

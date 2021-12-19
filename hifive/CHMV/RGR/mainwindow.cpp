@@ -4,13 +4,17 @@
 #include "editfunds.h"
 #include "incomesexpenses.h"
 #include "accountcreation.h"
+#include <cstdio>
 #include <QDebug>
 #include <QDialog>
 #include <QSqlDataBase>
 #include <QSqlTableModel>
 #include <QSqlQuery>
 #include <QMap>
+#include <QVariant>
 #include <QTimer>
+#include <QSettings>
+#include <fstream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
                                           ui(new Ui::MainWindow)
@@ -19,77 +23,90 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     setWindowTitle(QString("Домашняя бухгалтерия"));
 
+    QCoreApplication::setOrganizationName("HI5.INC");
+    QCoreApplication::setApplicationName("RGR");
+
     QSqlDatabase usersDatabase = QSqlDatabase::addDatabase("QSQLITE", QLatin1String("users"));
     usersDatabase.setDatabaseName("./usersDatabase.db");
     usersDatabase.open();
 
     QSqlQuery usersQuery(usersDatabase);
-    usersQuery.exec("CREATE TABLE Пользователи('Имя' TEXT, 'Последний' INT);");
+    usersQuery.exec("CREATE TABLE Пользователи('Имя' TEXT UNIQUE);");
+    usersQuery.clear();
 
     modelUsers = new QSqlTableModel(this, usersDatabase);
     modelUsers->setTable("Пользователи");
     modelUsers->select();
 
-    QSqlQuery query = modelUsers->query();
-    query.exec();
-    if (query.first())
+    if (!loadUsers() && !onNewUserRequested())
     {
-        while (query.next())
-        {
-            if (query.value(1).value<int>() == true)
-            {
-                currentUserName = query.value(0).value<QString>().replace(" ", "");
-            }
-        }
-    }
-    else
-    {
-        accountCreation *newAcc = new accountCreation();
-        if (newAcc->exec() == QDialog::Accepted)
-        {
-            modelUsers->insertRow(0);
-            modelUsers->setData(modelUsers->index(0, 0), newAcc->getName());
-            modelUsers->setData(modelUsers->index(0, 1), true);
-            modelUsers->submitAll();
-            currentUserName = newAcc->getName();
-        }
-        else
-        {
+        QTimer* tmr = new QTimer(this);
+        tmr->setInterval(0);
+        connect(tmr, &QTimer::timeout, [this](){
             this->close();
-            QTimer* tmr = new QTimer(this);
-            tmr->setInterval(0);
-            connect(tmr, &QTimer::timeout, [this](){
-                this->close();
-            });
-            tmr->start();
-        }
+        });
+        tmr->start();
     }
-    query.clear();
 
-    currentUserName = latinize(currentUserName);
-
-    QSqlDatabase accountingDatabase = QSqlDatabase::addDatabase("QSQLITE", QLatin1String("accounting"));
-    accountingDatabase.setDatabaseName("./accounting" + currentUserName + ".db");
-    accountingDatabase.open();
-
-    QSqlQuery accountingQuery(accountingDatabase);
-    accountingQuery.exec("CREATE TABLE Средства('Сумма в копилке' INT, 'Сумма в кошельке' INT, 'Автоматический перевод' INT, 'Дата последнего перевода' DATE);");
-    accountingQuery.exec("CREATE TABLE Доходы('Доход' TEXT, 'Сумма' INT, 'Повторяющийся платёж' INT, 'Дата последнего платежа' DATE);");
-    accountingQuery.exec("CREATE TABLE Расходы('Расход' TEXT, 'Сумма' INT, 'Повторяющийся платёж' INT, 'Дата последнего платежа' DATE);");
-    accountingQuery.exec("CREATE TABLE Цели('Цель' TEXT, 'Стоимость' INT, 'Внесённая сумма' INT, 'Текущая' INT, 'Отменена' INT, 'Изображение' TEXT);");
-
-    modelFunds = new QSqlTableModel(this, accountingDatabase);
-    modelFunds->setTable("Средства");
-    modelFunds->select();
-
-    modelGoals = new QSqlTableModel(this, accountingDatabase);
-    modelGoals->setTable("Цели");
-    modelGoals->select();
+    onGuiUpdate();
 
     connect(ui->widFunds, &WidgetButton::clicked, this, &MainWindow::openFundsDialog);
     connect(ui->widGoals, &WidgetButton::clicked, this, &MainWindow::openGoalsDialog);
     connect(ui->grBoxIncomes, &WidgetButton::clicked, this, &MainWindow::openIncomesDialog);
     connect(ui->grBoxExpenses, &WidgetButton::clicked, this, &MainWindow::openExpencesDialog);
+    connect(ui->btnAccountDelete, &QPushButton::clicked, this, &MainWindow::onUserDeleteRequested);
+}
+
+bool MainWindow::loadUsers() {
+    ui->menuBtnUser->clear();
+
+    modelUsers->select();
+    QSqlQuery query = modelUsers->query();
+    query.exec();
+
+    QActionGroup* usersMenu = new QActionGroup(this);
+    connect(usersMenu, &QActionGroup::triggered, this, &MainWindow::onUserChanged);
+
+    const bool isUsersTableEmpty = modelUsers->rowCount() == 0;
+    if (!isUsersTableEmpty)
+    {
+        while (query.next())
+        {
+            QAction* addedUser = usersMenu->addAction(query.value(0).value<QString>());
+            addedUser->setCheckable(true);
+        }
+
+        QAction* selectedUser = nullptr;
+        if (currentUserName() == "") {
+            selectedUser = usersMenu->actions().first();
+        } else {
+            foreach (QAction* action, usersMenu->actions()) {
+                if (action->text() == currentUserName()) {
+                    selectedUser = action;
+                    break;
+                }
+            }
+        }
+        ui->menuBtnUser->addActions(usersMenu->actions());
+        ui->menuBtnUser->addSeparator();
+        QAction* addUserButton = ui->menuBtnUser->addAction("Новый пользователь");
+        connect(addUserButton, &QAction::triggered, this, &MainWindow::onNewUserRequested);
+
+        selectedUser->setChecked(true);
+        selectedUser->trigger();
+
+        onGuiUpdate();
+    }
+
+    return !isUsersTableEmpty;
+}
+
+const QString MainWindow::currentUserName() {
+    return QSettings(this).value("lastUser", "").toString();
+}
+
+void MainWindow::setCurrentUserName(QString userName) {
+    QSettings(this).setValue("lastUser", userName);
 }
 
 QString MainWindow::latinize(QString str)
@@ -174,27 +191,142 @@ QString MainWindow::latinize(QString str)
     return result;
 }
 
+void MainWindow::closeDatabase() {
+    QSqlDatabase accountingDatabase = QSqlDatabase::database("accounting", false);
+    accountingDatabase.close();
+}
+
+bool MainWindow::onNewUserRequested() {
+    accountCreation *newAcc = new accountCreation();
+
+    const bool isUserCreated = newAcc->exec() == QDialog::Accepted;
+
+    if (isUserCreated)
+    {
+        modelUsers->insertRow(0);
+        modelUsers->setData(modelUsers->index(0, 0), newAcc->getName());
+        modelUsers->submitAll();
+        setCurrentUserName(newAcc->getName());
+
+        loadUsers();
+    }
+
+    newAcc->deleteLater();
+    return isUserCreated;
+}
+
+bool MainWindow::onUserDeleteRequested() {
+    const bool result = modelUsers->removeRow(
+                    modelUsers->match(modelUsers->index(0,0), Qt::DisplayRole, QVariant::fromValue(currentUserName())).first().row()
+                );
+
+    closeDatabase();
+    QFile::remove("./accounting" +  latinize(currentUserName()).replace(" ","") + ".db");
+    setCurrentUserName("");
+
+    if (!loadUsers()) {
+        if (!onNewUserRequested()) {
+            close();
+        }
+    }
+
+    return result;
+}
+
+void MainWindow::onUserChanged(QAction* selectedUser) {
+    setCurrentUserName(selectedUser->text());
+
+    closeDatabase();
+    QSqlDatabase accountingDatabase = QSqlDatabase::database("accounting", false);
+    if (!accountingDatabase.isValid()) {
+        accountingDatabase = QSqlDatabase::addDatabase("QSQLITE", QLatin1String("accounting"));
+    }
+    accountingDatabase.setDatabaseName("./accounting" +  latinize(currentUserName()).replace(" ","") + ".db");
+    accountingDatabase.open();
+
+    QSqlQuery accountingQuery(accountingDatabase);
+    accountingQuery.exec("CREATE TABLE Средства('Сумма в копилке' INT, 'Сумма в кошельке' INT, 'Автоматический перевод' INT, 'Дата последнего перевода' DATE);");
+    accountingQuery.exec("CREATE TABLE Доходы('Доход' TEXT, 'Сумма' INT, 'Повторяющийся платёж' INT, 'Дата последнего платежа' DATE);");
+    accountingQuery.exec("CREATE TABLE Расходы('Расход' TEXT, 'Сумма' INT, 'Повторяющийся платёж' INT, 'Дата последнего платежа' DATE);");
+    accountingQuery.exec("CREATE TABLE Цели('Цель' TEXT, 'Стоимость' INT, 'Внесённая сумма' INT, 'Текущая сумма' INT, 'Отменена' INT, 'Изображение' TEXT);");
+
+    modelFunds = new QSqlTableModel(this, accountingDatabase);
+    modelFunds->setTable("Средства");
+    modelFunds->select();
+    if (modelFunds->rowCount() == 0) {
+        modelFunds->insertRow(0);
+        modelFunds->setData(modelFunds->index(0, 0), 0);
+        modelFunds->setData(modelFunds->index(0, 1), 0);
+        modelFunds->setData(modelFunds->index(0, 2), 0);
+        modelFunds->setData(modelFunds->index(0, 3), "01.01.1970");
+        modelFunds->submitAll();
+    }
+
+    modelGoals = new QSqlTableModel(this, accountingDatabase);
+    modelGoals->setTable("Цели");
+    modelGoals->select();
+
+    modelIncomes = new QSqlTableModel(this, accountingDatabase);
+    modelIncomes->setTable("Доходы");
+    modelIncomes->select();
+
+    modelExpenses = new QSqlTableModel(this, accountingDatabase);
+    modelExpenses->setTable("Расходы");
+    modelExpenses->select();
+
+    ui->listWidIncomes->setModel(modelIncomes);
+    ui->listWidIncomes->setColumnHidden(2, true);
+    ui->listWidIncomes->setColumnHidden(3, true);
+    ui->listWidIncomes->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->listWidIncomes->setCursor(Qt::ArrowCursor);
+
+    ui->listWidExpenses->setModel(modelExpenses);
+    ui->listWidExpenses->setColumnHidden(2, true);
+    ui->listWidExpenses->setColumnHidden(3, true);
+    ui->listWidExpenses->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->listWidExpenses->setCursor(Qt::ArrowCursor);
+
+    ui->lblAccountName->setText(currentUserName());
+
+    onGuiUpdate();
+}
+
 void MainWindow::onGuiUpdate()
 {
     modelFunds->select();
     modelGoals->select();
-    ui->listWidIncomes->clear();
-    ui->listWidExpenses->clear();
 
-    QSqlQuery query = modelFunds->query();
-    query.exec();
+    QSqlQuery fundsQuery = modelFunds->query();
+    fundsQuery.exec();
+    QSqlQuery incomesQuery = modelIncomes->query();
+    incomesQuery.exec();
+    QSqlQuery expensesQuery = modelExpenses->query();
+    expensesQuery.exec();
 
-    while (query.next())
+    while (fundsQuery.next())
     {
-        int bank = query.value(0).value<int>();
+        int wallet = fundsQuery.value(1).value<int>();
+        ui->lblWalletBalance->setText(QString::number(wallet));
+
+        int bank = fundsQuery.value(0).value<int>();
         ui->lblBankBalance->setText(QString::number(bank));
-
-        QString incomes = query.value(1).value<QString>();
-        ui->listWidIncomes->addItems(incomes.split(';'));
-
-        QString expenses = query.value(2).value<QString>();
-        ui->listWidExpenses->addItems(expenses.split(';'));
     }
+
+    ui->lblIncomesTotal->setText(QString::number(0));
+    int incomesTotal = 0;
+    while (incomesQuery.next())
+    {
+        incomesTotal += incomesQuery.value(1).toInt();
+    }
+    ui->lblIncomesTotal->setText("+" + QString::number(incomesTotal) + "р");
+
+    ui->lblExpensesTotal->setText(QString::number(0));
+    int expensesTotal = 0;
+    while (expensesQuery.next())
+    {
+        expensesTotal += expensesQuery.value(1).toInt();
+    }
+    ui->lblExpensesTotal->setText("-" + QString::number(expensesTotal) + "р");
 }
 
 void MainWindow::onGoalBalanceModified()
@@ -202,19 +334,38 @@ void MainWindow::onGoalBalanceModified()
     qDebug() << "goal balance modded";
 }
 
-void MainWindow::onAddToBankAccepted()
+void MainWindow::onAddToWalletAccepted(int number)
 {
-    qDebug() << "Add To Bank";
+    modelFunds->select();
+    modelFunds->setData(modelFunds->index(0, 1), modelFunds->data(modelFunds->index(0, 1)).toInt() + number);
+    modelFunds->submitAll();
+
+    onGuiUpdate();
 }
 
-void MainWindow::onWithdrawFromBankAccepted()
+void MainWindow::onAddToBankAccepted(int number)
 {
-    qDebug() << "Withdraw From Bank";
+    modelFunds->select();
+    modelFunds->setData(modelFunds->index(0, 0), modelFunds->data(modelFunds->index(0, 0)).toInt() + number);
+    modelFunds->setData(modelFunds->index(0, 1), modelFunds->data(modelFunds->index(0, 1)).toInt() - number);
+    modelFunds->submitAll();
+
+    onGuiUpdate();
 }
 
-void MainWindow::onRecurringPaymentAccepted()
+void MainWindow::onWithdrawFromBankAccepted(int number)
+{
+    modelFunds->select();
+    modelFunds->setData(modelFunds->index(0, 0), modelFunds->data(modelFunds->index(0, 0)).toInt() - number);
+    modelFunds->submitAll();
+
+    onGuiUpdate();
+}
+
+void MainWindow::onRecurringPaymentAccepted(int number)
 {
     qDebug() << "Recurring Payment Accepted";
+    onGuiUpdate();
 }
 
 void MainWindow::openGoalsDialog()
@@ -232,6 +383,7 @@ void MainWindow::openFundsDialog()
 {
     EditFunds *fundsDialog = new EditFunds(this);
 
+    connect(fundsDialog, &EditFunds::AddToWalletAccepted, this, &MainWindow::onAddToWalletAccepted);
     connect(fundsDialog, &EditFunds::AddToBankAccepted, this, &MainWindow::onAddToBankAccepted);
     connect(fundsDialog, &EditFunds::WithdrawFromBankAccepted, this, &MainWindow::onWithdrawFromBankAccepted);
     connect(fundsDialog, &EditFunds::RecurringPaymentAccepted, this, &MainWindow::onRecurringPaymentAccepted);
@@ -243,20 +395,25 @@ void MainWindow::openFundsDialog()
 
 void MainWindow::openIncomesDialog()
 {
-    IncomesExpenses *incomesDialog = new IncomesExpenses(this);
+    IncomesExpenses *incomesDialog = new IncomesExpenses(modelIncomes, "Доходы", this);
 
-    connect(incomesDialog, &IncomesExpenses::finished, [=](int result)
-            { incomesDialog->deleteLater(); });
+    connect(this, &MainWindow::incomesExpensesGuiUpdate, incomesDialog, &IncomesExpenses::onGuiUpdate);
+    connect(incomesDialog, &IncomesExpenses::finished, [=](int result) {
+        onGuiUpdate();
+        incomesDialog->deleteLater();
+    });
 
     incomesDialog->open();
 }
 
 void MainWindow::openExpencesDialog()
 {
-    IncomesExpenses *expencesDialog = new IncomesExpenses(this);
+    IncomesExpenses *expencesDialog = new IncomesExpenses(modelExpenses, "Расходы", this);
 
-    connect(expencesDialog, &IncomesExpenses::finished, [=](int result)
-            { expencesDialog->deleteLater(); });
+    connect(expencesDialog, &IncomesExpenses::finished, [=](int result) {
+        onGuiUpdate();
+        expencesDialog->deleteLater();
+    });
 
     expencesDialog->open();
 }

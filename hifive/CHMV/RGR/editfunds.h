@@ -16,16 +16,19 @@ public:
     ~EditFunds();
 
 signals:
-    void AddToBankAccepted();
-    void WithdrawFromBankAccepted();
-    void RecurringPaymentAccepted();
+    void AddToWalletAccepted(int number);
+    void AddToBankAccepted(int number);
+    void WithdrawFromBankAccepted(int number);
+    void RecurringPaymentAccepted(int number);
+    void GuiUpdated(int walletBalance, int bankBalance, int withdrawBalance, int recurringBalance);
 
 private slots:
     void on_btnAddToBank_clicked();
-
     void on_btnWithdraw_clicked();
-
     void on_btnRecurringPayment_clicked();
+    void on_btnAddToWallet_clicked();
+
+    void onGuiUpdate(int walletBalance, int bankBalance, int withdrawBalance, int recurringBalance);
 
 private:
     Ui::EditFunds *ui;

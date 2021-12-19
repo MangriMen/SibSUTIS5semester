@@ -373,7 +373,7 @@
            </property>
            <property name="icon">
             <iconset resource="resources.qrc">
-             <normaloff>:/images/done_black_24dp.svg</normaloff>:/images/done_black_24dp.svg</iconset>
+             <normaloff>:/images/add_black_24dp.svg</normaloff>:/images/add_black_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -413,7 +413,7 @@
            </property>
            <property name="icon">
             <iconset resource="resources.qrc">
-             <normaloff>:/images/done_black_24dp.svg</normaloff>:/images/done_black_24dp.svg</iconset>
+             <normaloff>:/images/remove_black_24dp.svg</normaloff>:/images/remove_black_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>

@@ -1,11 +1,23 @@
 #include "accountcreation.h"
 #include "ui_accountcreation.h"
+#include <QMessageBox>
 
 accountCreation::accountCreation(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::accountCreation)
 {
     ui->setupUi(this);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &accountCreation::checkAccept);
+}
+
+void accountCreation::checkAccept() {
+    if (this->getName().isEmpty()) {
+        QMessageBox::information(this, "Внимание", "Имя пользователя не должно быть пустым", QMessageBox::Ok);
+
+        return;
+    }
+
+    this->accept();
 }
 
 QString accountCreation::getName() {
