@@ -1,11 +1,16 @@
 #include "editfunds.h"
 #include "ui_editfunds.h"
+#include <qDebug>
 
-EditFunds::EditFunds(QWidget *parent) :
+EditFunds::EditFunds(QSqlTableModel *model, QWidget *parent) :
     QDialog(parent),
+    modelFunds(model),
     ui(new Ui::EditFunds)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags().setFlag(Qt::WindowContextHelpButtonHint, false));
+
+    onGuiUpdate();
 
     connect(this, &EditFunds::GuiUpdated, this, &EditFunds::onGuiUpdate);
 }
@@ -32,13 +37,20 @@ void EditFunds::on_btnWithdraw_clicked()
 
 void EditFunds::on_btnRecurringPayment_clicked()
 {
-    RecurringPaymentAccepted(ui->lnEditRecurringPayment->text().toInt());
+    modelFunds->select();
+    modelFunds->setData(modelFunds->index(0, 2), ui->lnEditRecurringPayment->text().toInt());
+    modelFunds->setData(modelFunds->index(0, 3), QDate::currentDate());
+    modelFunds->submitAll();
+
+    onGuiUpdate();
 }
 
-void EditFunds::onGuiUpdate(int walletBalance, int bankBalance, int withdrawBalance, int recurringBalance) {
-    ui->lnEditAddToBank->setPlaceholderText(QString::number(walletBalance));
-    ui->lnEditAddToBank->setPlaceholderText(QString::number(bankBalance));
-    ui->lnEditAddToBank->setPlaceholderText(QString::number(withdrawBalance));
-    ui->lnEditAddToBank->setPlaceholderText(QString::number(recurringBalance));
-}
+void EditFunds::onGuiUpdate() {
+    modelFunds->select();
+    QSqlQuery query = modelFunds->query();
+    query.exec();
 
+    if (query.next()) {
+        ui->lnEditRecurringPayment->setText(query.value(2).value<QString>());
+    }
+}

@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/monetization_on_black_24dp.svg</normaloff>:/images/monetization_on_black_24dp.svg</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="1">
@@ -459,12 +463,21 @@
    </widget>
    <widget class="QMenu" name="menuBtnInfo">
     <property name="title">
-     <string>Справка</string>
+     <string>Помощь</string>
     </property>
+    <addaction name="actionInfo"/>
    </widget>
    <addaction name="menuBtnUser"/>
    <addaction name="menuBtnInfo"/>
   </widget>
+  <action name="actionInfo">
+   <property name="text">
+    <string>Справка</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

@@ -40,7 +40,7 @@
      <item>
       <layout class="QGridLayout" name="widMainGrid">
        <item row="5" column="1" rowspan="2">
-        <widget class="QLabel" name="lblAddEditImage">
+        <widget class="LabelButton" name="lblAddEditImage">
          <property name="maximumSize">
           <size>
            <width>100</width>
@@ -51,6 +51,9 @@
           <font>
            <pointsize>12</pointsize>
           </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
          </property>
          <property name="frameShape">
           <enum>QFrame::Box</enum>
@@ -65,7 +68,7 @@
           <pixmap resource="resources.qrc">:/images/image_black_24dp.svg</pixmap>
          </property>
          <property name="scaledContents">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -181,7 +184,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Покупка бас гитары</string>
+            <string>Текущая цель не выбрана</string>
            </property>
           </widget>
          </item>
@@ -242,7 +245,7 @@
           <number>0</number>
          </property>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="lnEditTransfer">
+          <widget class="ELineEdit" name="lnEditTransfer">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -293,7 +296,7 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QLineEdit" name="lnEditWithdraw">
+          <widget class="ELineEdit" name="lnEditWithdraw">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
              <horstretch>0</horstretch>
@@ -453,7 +456,7 @@
        <item row="6" column="0">
         <layout class="QGridLayout" name="widAddEdit">
          <item row="0" column="0" colspan="3">
-          <widget class="QComboBox" name="cmbAddIncomesexpences">
+          <widget class="EComboBox" name="cmbAddGoal">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -502,7 +505,7 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLineEdit" name="lnEditAddEdit">
+          <widget class="ELineEdit" name="lnEditGoalPrice">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -589,7 +592,7 @@
         </widget>
        </item>
        <item row="2" column="1" rowspan="2">
-        <widget class="QLabel" name="lblCurrentGoalImage">
+        <widget class="LabelButton" name="lblCurrentGoalImage">
          <property name="maximumSize">
           <size>
            <width>100</width>
@@ -614,7 +617,7 @@
           <pixmap resource="resources.qrc">:/images/image_black_24dp.svg</pixmap>
          </property>
          <property name="scaledContents">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -668,6 +671,23 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>EComboBox</class>
+   <extends>QComboBox</extends>
+   <header>ecombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ELineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>elineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LabelButton</class>
+   <extends>QLabel</extends>
+   <header>labelbutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

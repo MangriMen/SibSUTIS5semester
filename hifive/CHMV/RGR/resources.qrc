@@ -12,5 +12,6 @@
         <file>images/add_black_24dp.svg</file>
         <file>images/death_24dp.svg</file>
         <file>images/remove_black_24dp.svg</file>
+        <file>collection.qhcp</file>
     </qresource>
 </RCC>

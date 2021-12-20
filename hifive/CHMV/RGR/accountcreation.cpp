@@ -7,6 +7,7 @@ accountCreation::accountCreation(QWidget *parent) :
     ui(new Ui::accountCreation)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags().setFlag(Qt::WindowContextHelpButtonHint, false));
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &accountCreation::checkAccept);
 }
 

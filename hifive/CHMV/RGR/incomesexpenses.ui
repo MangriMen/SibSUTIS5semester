@@ -61,7 +61,7 @@
     </widget>
    </item>
    <item row="5" column="1">
-    <widget class="QLineEdit" name="lnEditRecurringPayment">
+    <widget class="ELineEdit" name="lnEditRecurringPayment">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -133,7 +133,7 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QLineEdit" name="lnEditAddEdit">
+    <widget class="ELineEdit" name="lnEditAddEdit">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -163,7 +163,7 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QComboBox" name="cmbAddIncomesexpences">
+    <widget class="EComboBox" name="cmbAddIncomesexpences">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -188,7 +188,7 @@
       </font>
      </property>
      <property name="editable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -215,7 +215,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
+      <set>QDialogButtonBox::Ok</set>
      </property>
      <property name="centerButtons">
       <bool>true</bool>
@@ -224,6 +224,18 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>EComboBox</class>
+   <extends>QComboBox</extends>
+   <header>ecombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ELineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>elineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

@@ -5,6 +5,8 @@
 #include <QSqlDataBase>
 #include <QSqlTableModel>
 #include <QSqlQuery>
+#include <QLineEdit>
+#include <QProcess>
 
 namespace Ui {
 class MainWindow;
@@ -44,14 +46,15 @@ private slots:
     void openIncomesDialog();
     void openExpencesDialog();
 
-    void onGoalBalanceModified();
+    void onGoalBalanceModified(int diff, int index);
 
     void onAddToWalletAccepted(int number);
     void onAddToBankAccepted(int number);
     void onWithdrawFromBankAccepted(int number);
-    void onRecurringPaymentAccepted(int number);
+    void onRecurringPaymentAccepted();
 
     bool onNewUserRequested();
+    void on_actionInfo_triggered();
 };
 
 #endif // MAINWINDOW_H

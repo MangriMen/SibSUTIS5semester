@@ -32,7 +32,10 @@ SOURCES += \
     incomesexpenses.cpp \
     accountcreation.cpp \
     error.cpp \
-    widgetbutton.cpp
+    widgetbutton.cpp \
+    ecombobox.cpp \
+    elineedit.cpp \
+    labelbutton.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,7 +44,10 @@ HEADERS += \
     incomesexpenses.h \
     accountcreation.h \
     error.h \
-    widgetbutton.h
+    widgetbutton.h \
+    ecombobox.h \
+    elineedit.h \
+    labelbutton.h
 
 FORMS += \
         mainwindow.ui \

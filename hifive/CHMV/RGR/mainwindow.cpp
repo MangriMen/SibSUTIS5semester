@@ -248,7 +248,7 @@ void MainWindow::onUserChanged(QAction* selectedUser) {
     accountingQuery.exec("CREATE TABLE Средства('Сумма в копилке' INT, 'Сумма в кошельке' INT, 'Автоматический перевод' INT, 'Дата последнего перевода' DATE);");
     accountingQuery.exec("CREATE TABLE Доходы('Доход' TEXT, 'Сумма' INT, 'Повторяющийся платёж' INT, 'Дата последнего платежа' DATE);");
     accountingQuery.exec("CREATE TABLE Расходы('Расход' TEXT, 'Сумма' INT, 'Повторяющийся платёж' INT, 'Дата последнего платежа' DATE);");
-    accountingQuery.exec("CREATE TABLE Цели('Цель' TEXT, 'Стоимость' INT, 'Внесённая сумма' INT, 'Текущая сумма' INT, 'Отменена' INT, 'Изображение' TEXT);");
+    accountingQuery.exec("CREATE TABLE Цели('Цель' TEXT, 'Стоимость' INT, 'Внесённая сумма' INT, 'Текущая' INT, 'Отменена' INT, 'Изображение' TEXT);");
 
     modelFunds = new QSqlTableModel(this, accountingDatabase);
     modelFunds->setTable("Средства");
@@ -294,6 +294,8 @@ void MainWindow::onUserChanged(QAction* selectedUser) {
 void MainWindow::onGuiUpdate()
 {
     modelFunds->select();
+    modelExpenses->select();
+    modelIncomes->select();
     modelGoals->select();
 
     QSqlQuery fundsQuery = modelFunds->query();
@@ -327,11 +329,56 @@ void MainWindow::onGuiUpdate()
         expensesTotal += expensesQuery.value(1).toInt();
     }
     ui->lblExpensesTotal->setText("-" + QString::number(expensesTotal) + "р");
+
+    QSqlQuery goalsQuery = modelGoals->query();
+    goalsQuery.exec();
+
+    bool atLeastOneGoalChoosed = false;
+    while (goalsQuery.next()) {
+        if (goalsQuery.value(3).toBool()) {
+            ui->lblCurrentGoalText->setText(goalsQuery.value(0).toString());
+            if (goalsQuery.value(4).toBool()) {
+                QFont font = QFont(ui->lblCurrentGoalText->font());
+                font.setStrikeOut(true);
+                ui->lblCurrentGoalText->setFont(font);
+            } else {
+                QFont font = QFont(ui->lblCurrentGoalText->font());
+                font.setStrikeOut(false);
+                ui->lblCurrentGoalText->setFont(font);
+            }
+            if (!goalsQuery.value(5).toString().isEmpty()) {
+                ui->lblCurrentGoalImg->setPixmap(QPixmap(goalsQuery.value(5).toString()).scaled(100, 100));
+            }
+            else {
+                ui->lblCurrentGoalImg->setPixmap(QPixmap(":/images/image_black_24dp.svg"));
+            }
+            ui->lblCurrentGoalMoneySpent->setText(goalsQuery.value(2).toString() + "р");
+            ui->lblCurrentGoalPrice->setText(goalsQuery.value(1).toString() + "р");
+            atLeastOneGoalChoosed = true;
+            break;
+        }
+    }
+    if (!atLeastOneGoalChoosed) {
+        ui->lblCurrentGoalText->setText("Нет цели");
+        ui->lblCurrentGoalMoneySpent->setText("0р");
+        ui->lblCurrentGoalPrice->setText("0р");
+        ui->lblCurrentGoalImg->setPixmap(QPixmap(":/images/image_black_24dp.svg"));
+    }
 }
 
-void MainWindow::onGoalBalanceModified()
+void MainWindow::onGoalBalanceModified(int diff, int index)
 {
-    qDebug() << "goal balance modded";
+    modelFunds->select();
+    modelGoals->select();
+    int newPrice = modelGoals->index(index, 2).data().toInt() + diff;
+    int newBank = modelFunds->index(0, 0).data().toInt() - diff;
+    if (newPrice >= 0 && newBank >= 0) {
+        modelGoals->setData(modelGoals->index(index, 2), newPrice);
+        modelFunds->setData(modelFunds->index(0, 0), newBank);
+    }
+    modelGoals->submitAll();
+    modelFunds->submitAll();
+    onGuiUpdate();
 }
 
 void MainWindow::onAddToWalletAccepted(int number)
@@ -362,26 +409,28 @@ void MainWindow::onWithdrawFromBankAccepted(int number)
     onGuiUpdate();
 }
 
-void MainWindow::onRecurringPaymentAccepted(int number)
+void MainWindow::onRecurringPaymentAccepted()
 {
-    qDebug() << "Recurring Payment Accepted";
+//    modelFunds->setData(modelFunds->index(0, 2), ln.text().toInt());
     onGuiUpdate();
 }
 
 void MainWindow::openGoalsDialog()
 {
-    Goals *goalsDialog = new Goals(this);
+    Goals *goalsDialog = new Goals(modelGoals, modelFunds, this);
 
     connect(goalsDialog, &Goals::GoalBalanceModified, this, &MainWindow::onGoalBalanceModified);
-    connect(goalsDialog, &Goals::finished, [=](int result)
-            { goalsDialog->deleteLater(); });
+    connect(goalsDialog, &Goals::finished, [=]() {
+        onGuiUpdate();
+        goalsDialog->deleteLater();
+    });
 
     goalsDialog->open();
 }
 
 void MainWindow::openFundsDialog()
 {
-    EditFunds *fundsDialog = new EditFunds(this);
+    EditFunds *fundsDialog = new EditFunds(modelFunds, this);
 
     connect(fundsDialog, &EditFunds::AddToWalletAccepted, this, &MainWindow::onAddToWalletAccepted);
     connect(fundsDialog, &EditFunds::AddToBankAccepted, this, &MainWindow::onAddToBankAccepted);
@@ -421,4 +470,16 @@ void MainWindow::openExpencesDialog()
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::on_actionInfo_triggered()
+{
+    QProcess *process = new QProcess;
+    QStringList args;
+    args << QLatin1String("-collectionFile")
+        << QLatin1String("collection.qhc")
+        << QLatin1String("-enableRemoteControl");
+    process->start(QLatin1String("assistant"), args);
+
+    if (!process->waitForStarted()) { return;}
 }

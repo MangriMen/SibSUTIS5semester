@@ -6,6 +6,7 @@ error::error(QWidget *parent) :
     ui(new Ui::error)
 {
     ui->setupUi(this);
+    this->setWindowFlags(this->windowFlags().setFlag(Qt::WindowContextHelpButtonHint, false));
 }
 
 error::~error()
