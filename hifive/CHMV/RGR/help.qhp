@@ -1,21 +1,19 @@
 <QtHelpProject version="1.0">
      <namespace>panin.rgr</namespace>
      <virtualFolder>doc</virtualFolder>
-     <customFilter name="Строительство дачного домика">
-         <filterAttribute>home</filterAttribute>
+     <customFilter name="Управление домашней бухгалтерией">
+         <filterAttribute>bookkeeping</filterAttribute>
          <filterAttribute>1.0</filterAttribute>
      </customFilter>
      <filterSection>
-         <filterAttribute>home</filterAttribute>
+         <filterAttribute>bookkeeping</filterAttribute>
          <filterAttribute>1.0</filterAttribute>
          <toc>
             <section title="Руководство по приложению" ref="index.html">
-                <section title="Выбор планировки" ref="doc.html">
-            </section>
-            <section title="Просмотр этапов планировки " ref="steps.html" />
-            <section title="Выбор материала" ref="material.html" />
-            <section title="Завершение плана строительства " ref="finish.html">
-            </section>
+                <section title="Главное меню" ref="mainWindow.html" />
+                <section title="Средства" ref="funds.html" />
+                <section title="Цели" ref="goals.html" />
+                <section title="Доходы и расходы" ref="incomesExpenses.html"/>
             </section>
          </toc>      
          <files>

@@ -104,10 +104,12 @@ void Goals::onAddGoalIndexChanged(QString item) {
         ui->cmbAddGoal->setEditable(false);
         ui->lnEditGoalPrice->clear();
         ui->lblAddEditImage->setPixmap(QPixmap(":/images/image_black_24dp.svg"));
+        ui->lblAddEditImage->setCursor(Qt::ArrowCursor);
         return;
     }
     ui->cmbAddGoal->setEditable(true);
     ui->cmbAddGoal->lineEdit()->setFont(ui->cmbAddGoal->font());
+    ui->lblAddEditImage->setCursor(Qt::PointingHandCursor);
 
     if (item == "Добавить") {
         ui->cmbAddGoal->lineEdit()->clear();
@@ -163,6 +165,12 @@ void Goals::onGoalPriceChanged(QString item) {
 }
 
 void Goals::onGoalImageChanged() {
+    if (ui->cmbAddGoal->currentText() == "Выберете вариант" || ui->cmbAddGoal->currentText() == "") {
+        ui->lblAddEditImage->setCursor(Qt::ArrowCursor);
+        return;
+    }
+    ui->lblAddEditImage->setCursor(Qt::PointingHandCursor);
+
     QString filename = QFileDialog::getOpenFileName(this, "Загрузка картинки", "");
 
     goalsModel->select();
