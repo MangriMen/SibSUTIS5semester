@@ -265,7 +265,7 @@ void BranchAndBound::handleMatrix(const Matrix<double>& m, const arclist& path, 
     bottomLimit += subtractFromMatrix(matrix);
 
     if (bottomLimit > _bestCost) {
-        //cout << bottomLimit << endl;
+        cout << bottomLimit << endl;
         logPath(path);
         return;
     }

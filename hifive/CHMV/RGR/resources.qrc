@@ -13,5 +13,11 @@
         <file>images/death_24dp.svg</file>
         <file>images/remove_black_24dp.svg</file>
         <file>collection.qhcp</file>
+        <file>images/screenshots/img1.png</file>
+        <file>images/screenshots/img2.png</file>
+        <file>images/screenshots/img3.png</file>
+        <file>../Debug/img1.png</file>
+        <file>../Debug/img2.png</file>
+        <file>../Debug/img3.png</file>
     </qresource>
 </RCC>
