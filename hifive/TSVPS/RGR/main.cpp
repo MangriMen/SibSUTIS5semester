@@ -218,7 +218,7 @@ void BranchAndBound::handleMatrix(const Matrix<double>& m, const arclist& path, 
     temp.emplace_back(m.rowIndex(0), m.columnIndex(i));
     temp.emplace_back(m.rowIndex(1), m.columnIndex(1 - i));
 
-  /*  list<size_t> tempPath;
+    list<size_t> tempPath;
     tempPath.push_back(0);
 
     while (!temp.empty()) {
@@ -240,12 +240,18 @@ void BranchAndBound::handleMatrix(const Matrix<double>& m, const arclist& path, 
             tempPath.push_back(temp.front().second);
             temp.erase(temp.begin());
         }
-    }*/
+    }
 
-    for (const auto& i : temp) {
+    for (const auto& i : path) {
         cout << "(" << i.first << " " << i.second << ")" << " ";
     }
     cout << endl;
+
+    for (const auto& i : tempPath) {
+        cout << "(" << i << ")" << " ";
+    }
+    cout << endl;
+
 
     if (m.size() == 2) {
         logPath(path);
